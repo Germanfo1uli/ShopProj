@@ -1,0 +1,37 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+
+namespace ShopBack.Models
+{
+    public class Payments
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
+        [Required]
+        [ForeignKey("Order")]
+        public int OrderId { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Amount { get; set; }
+
+        [Required]
+        public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
+
+        [Required]
+        [MaxLength(50)]
+        public string PaymentMethod { get; set; } 
+
+        [Required]
+        [MaxLength(50)]
+        public string Status { get; set; } 
+
+        [MaxLength(100)]
+        public string? TransactionId { get; set; }
+
+        [ForeignKey("OrderId")]
+        public virtual Orders? Order { get; set; }
+    }
+}
