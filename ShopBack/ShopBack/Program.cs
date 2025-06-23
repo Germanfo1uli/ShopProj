@@ -1,4 +1,11 @@
+using ShopBack.Data;
+using ShopBack.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<ShopDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
 
 // Add services to the container.
 
