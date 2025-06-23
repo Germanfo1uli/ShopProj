@@ -25,8 +25,8 @@ const NavBar = () => {
                 </div>
 
                 <div className={st.navigation}>
-                    <Link to="/" className={st.logo}><h2>TempName</h2></Link>
-                    <Link to="/" className={st.navLink}>Каталог</Link>
+                    <Link to="/home" className={st.logo}><h2>TempName</h2></Link>
+                    <Link to="/catalog" className={st.navLink}>Каталог</Link>
                     <Link to="/cart" className={st.navLink}>Корзина</Link>
                     <Link to="/favorited" className={st.navLink}>Избранное</Link>
                     <Link to="/new" className={st.navLink}>Новинки</Link>

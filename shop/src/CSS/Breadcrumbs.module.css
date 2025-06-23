@@ -1,0 +1,15 @@
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.item {
+    padding: 0 5px;
+}
+
+.separator {
+    color: #999;
+}
