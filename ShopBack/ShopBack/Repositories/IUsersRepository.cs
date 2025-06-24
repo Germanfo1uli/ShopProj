@@ -10,7 +10,7 @@ namespace ShopBack.Repositories
 
         Task<bool> CheckPasswordAsync(int userId, string password); // Проверяет, совпадает ли пароль с хешем в БД
 
-        Task<IEnumerable<UserRoles>> GetUserRolesAsync(int userId); // Получает роли пользователя (например, ["Admin", "User"])
+        Task<UserRoles> GetUserRolesAsync(int userId); // Получает роли пользователя (например, ["Admin", "User"])
 
         Task AddRefreshTokenAsync(RefreshTokens token); // Добавляет refresh-токен для "запомнить меня"
 
