@@ -18,6 +18,11 @@
     to { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes slideRight {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
 .navPage {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -61,30 +66,39 @@
 .logo:hover {
     color: #3c53b3;
 }
-/*СО ШРИФТОМ ПОРАБОТАЙ  И ЧТОБЫ ПОСЛЕ ВЫДЕЛЕНИЯ ЧЁТ БЫЛО*/
+
 .navLink {
     position: relative;
-    color: #000000;
+    color: #4a4a4a;
     text-decoration: none;
     font-size: 1.3rem;
-    transition: color 0.3s;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     animation: fadeIn 0.8s ease-out forwards;
     animation-delay: 0.3s;
     opacity: 0;
+    padding: 5px 0;
+    letter-spacing: 0.3px;
 }
 
 .navLink:hover {
-    color: #000000;
+    color: #6a41b6;
+    transform: translateY(-2px);
 }
-.navLink:hover::after {
+
+.navLink::after {
     content: '';
     position: absolute;
-    bottom: -2px;
+    bottom: 0;
     left: 0;
-    width: 100%;
+    width: 0;
     height: 2px;
-    background: #6a41b6;
-    animation: fadeIn 0.3s ease-out;
+    background: linear-gradient(90deg, #6a41b6, #4a6bff);
+    transition: width 0.3s ease;
+}
+
+.navLink:hover::after {
+    width: 100%;
 }
 
 .searchContainer {
@@ -129,7 +143,7 @@
     padding: 10px 24px;
     border-radius: 25px;
     background-color: transparent;
-    color: #6a41b6; /* Фиолетовый вместо серого */
+    color: #6a41b6;
     border: 2px solid #6a41b6;
     cursor: pointer;
     font-weight: 500;
@@ -164,8 +178,59 @@
 .loginButton:hover::before {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ffffff' viewBox='0 0 16 16'%3E%3Cpath d='M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z'/%3E%3C/svg%3E");
 }
-.loginButton:hover::before {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ffffff' viewBox='0 0 16 16'%3E%3Cpath d='M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z'/%3E%3C/svg%3E");
+
+/* User Avatar Styles */
+.userAvatarContainer {
+    position: relative;
+    cursor: pointer;
+}
+
+.userAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #6572FF;
+    transition: transform 0.3s ease;
+}
+
+.userAvatar:hover {
+    transform: scale(1.1);
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 120px;
+    z-index: 100;
+}
+
+.userAvatarContainer:hover .dropdownMenu {
+    display: flex;
+}
+
+.dropdownMenu button {
+    background: none;
+    border: none;
+    padding: 8px 12px;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 4px;
+    color: #333;
+    font-size: 14px;
+}
+
+.dropdownMenu button:hover {
+    background: #f5f5f5;
+    color: #6572FF;
 }
 
 /* Бургер меню и мобильная адаптация */
@@ -184,22 +249,24 @@
     transition: all 0.3s ease;
 }
 
+/* Мобильное меню */
 .mobileMenu {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100vh;
-    background: linear-gradient(135deg, #1e1e2a 0%, #2e1e3a 50%, #1e2a3a 100%);
+    background: #1a1a2e;
     z-index: 1000;
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 30px;
     transform: translateY(-100%);
     opacity: 0;
     transition: all 0.5s ease;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .mobileMenu.active {
@@ -207,86 +274,147 @@
     opacity: 1;
 }
 
-.mobileNavLink {
-    color: #e0e0e0;
-    text-decoration: none;
-    font-size: 1.5rem;
-    transition: color 0.3s;
-    animation: slideDown 0.5s ease-out forwards;
+.mobileNavList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    max-width: 300px;
+}
+
+.mobileNavItem {
+    margin-bottom: 15px;
     opacity: 0;
+    transform: translateX(-20px);
+    animation: slideRight 0.4s ease-out forwards;
+}
+
+.mobileNavItem:nth-child(1) { animation-delay: 0.1s; }
+.mobileNavItem:nth-child(2) { animation-delay: 0.2s; }
+.mobileNavItem:nth-child(3) { animation-delay: 0.3s; }
+.mobileNavItem:nth-child(4) { animation-delay: 0.4s; }
+
+.mobileNavLink {
+    display: block;
+    color: #f8f8f8;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: 6px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    background: rgba(255, 255, 255, 0.05);
+    letter-spacing: 0.5px;
+    margin: 5px 0;
 }
 
 .mobileNavLink:hover {
-    color: #3c53b3;
-}
-
-.mobileSearchContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    width: 80%;
-    max-width: 300px;
-    margin-top: 20px;
-}
-
-.mobileInput {
-    width: 100%;
-    padding: 12px 15px 12px 45px;
-    border-radius: 25px;
-    border: 2px solid #3a3a3a;
-    background-color: #2d2d2d;
-    color: #e0e0e0;
-    outline: none;
-    font-size: 1rem;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23a0a0a0' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: 15px center;
-    background-size: 16px;
-}
-
-.mobileLoginButton {
-    padding: 12px 30px;
-    border-radius: 25px;
-    background-color: transparent;
-    color: #e0e0e0;
-    border: 2px solid #6a41b6;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    width: 100%;
-    max-width: 200px;
-    text-align: center;
-}
-
-.mobileLoginButton:hover {
-    background-color: #6a41b6;
-    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    color: #a3b8ff;
+    transform: translateX(5px);
+    box-shadow: 2px 0 10px rgba(74, 107, 255, 0.2);
 }
 
 .closeButton {
     position: absolute;
-    top: 30px;
-    right: 30px;
-    color: #e0e0e0;
-    font-size: 2rem;
+    top: 25px;
+    right: 25px;
+    color: #f8f8f8;
+    font-size: 1.8rem;
     cursor: pointer;
     transition: color 0.3s;
+    background: none;
+    border: none;
+    padding: 5px;
 }
 
 .closeButton:hover {
-    color: #3c53b3;
+    color: #4a6bff;
 }
 
+.mobileSearchContainer {
+    width: 100%;
+    max-width: 300px;
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
 
-.mobileNavLink:nth-child(1) { animation-delay: 0.1s; }
-.mobileNavLink:nth-child(2) { animation-delay: 0.2s; }
-.mobileNavLink:nth-child(3) { animation-delay: 0.3s; }
-.mobileNavLink:nth-child(4) { animation-delay: 0.4s; }
+.mobileInput {
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 25px;
+    border: 1px solid #3a3a4e;
+    background: #2d2d42;
+    color: #f8f8f8;
+    font-size: 1rem;
+    outline: none;
+}
+
+.mobileLoginButton,
+.mobileLogoutButton {
+    width: 100%;
+    padding: 12px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mobileLoginButton {
+    background: #4a6bff;
+    color: white;
+    border: none;
+}
+
+.mobileLoginButton:hover {
+    background: #3a5bef;
+}
+
+.mobileLogoutButton {
+    background: transparent;
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+}
+
+.mobileLogoutButton:hover {
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.mobileUserInfo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.mobileUserAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #4a6bff;
+}
+
+/* Анимации для мобильного меню */
 .mobileInput { animation: slideDown 0.5s ease-out 0.5s forwards; opacity: 0; }
 .mobileLoginButton { animation: slideDown 0.5s ease-out 0.6s forwards; opacity: 0; }
 
+/* Анимации бургер-меню */
+.burger.active .burgerLine:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.burger.active .burgerLine:nth-child(2) {
+    opacity: 0;
+}
+
+.burger.active .burgerLine:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+}
 
 @media (max-width: 1200px) {
     .navigation {
@@ -354,17 +482,4 @@
     .mobileMenu {
         display: flex;
     }
-}
-
-/*Нежно семпай нежнее*/
-.burger.active .burgerLine:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-}
-
-.burger.active .burgerLine:nth-child(2) {
-    opacity: 0;
-}
-
-.burger.active .burgerLine:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -5px);
 }
