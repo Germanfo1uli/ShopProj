@@ -46,5 +46,19 @@ namespace ShopBack.Repositories
                 .Where(uf => uf.ProductId == productId)
                 .CountAsync();
         }
+
+        public async Task<double> GetAverageProductRatingAsync(int productId)
+        {
+            return await _context.ProductReviews
+                .Where(r => r.ProductId == productId && r.Rating >= 1 && r.Rating <= 5)
+                .AverageAsync(r => (double?)r.Rating) ?? 0.0;
+        }
+
+        public async Task<int> GetProductReviewCountAsync(int productId)
+        {
+            return await _context.ProductReviews
+                .Where(r => r.ProductId == productId)
+                .CountAsync();
+        }
     }
 }
