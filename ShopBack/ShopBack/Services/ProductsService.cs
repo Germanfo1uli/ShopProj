@@ -3,9 +3,9 @@ using ShopBack.Repositories;
 
 namespace ShopBack.Services
 {
-    public class ProductsService(ProductsRepository repository) : Service<Products>((IRepository<Products>)repository)
+    public class ProductsService(IProductsRepository repository) : Service<Products>((IRepository<Products>)repository)
     {
-        private readonly ProductsRepository _productsRepository = repository;
+        private readonly IProductsRepository _productsRepository = repository;
 
         public async Task<IEnumerable<Products>> GetByCategoryAsync(int categoryId)
         {
