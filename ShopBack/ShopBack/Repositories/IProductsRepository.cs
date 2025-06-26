@@ -2,7 +2,7 @@
 
 namespace ShopBack.Repositories
 {
-    public interface IProductsRepository
+    public interface IProductsRepository 
     {
         Task<IEnumerable<Products>> GetByCategoryAsync(int categoryId); // Получает товары по ID категории
         Task<IEnumerable<Products>> SearchAsync(string searchTerm); // Поиск товаров по названию/описанию
