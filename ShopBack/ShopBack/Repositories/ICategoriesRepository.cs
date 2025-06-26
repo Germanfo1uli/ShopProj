@@ -2,9 +2,9 @@
 
 namespace ShopBack.Repositories
 {
-    public interface ICategoriesRepository : IRepository<Models.Categories> //Наследование методов IRepository + расширение 
+    public interface ICategoriesRepository : IRepository<Categories> //Наследование методов IRepository + расширение 
     {
-        Task<IEnumerable<Models.Categories>> GetParentCategoriesAsync();
-        Task<IEnumerable<Models.Categories>> GetChildCategoriesAsync(int parentId);
+        Task<IEnumerable<Categories>> GetParentCategoriesAsync();
+        Task<IEnumerable<Categories>> GetChildCategoriesAsync(int parentId);
     }
 }

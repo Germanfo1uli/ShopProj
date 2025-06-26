@@ -4,13 +4,9 @@ using ShopBack.Models;
 
 namespace ShopBack.Repositories
 {
-    public class AnalyticsRepository : IAnalyticsRepository
+    public class AnalyticsRepository(ShopDbContext context) : IAnalyticsRepository
     {
-        protected readonly ShopDbContext _context;
-        public AnalyticsRepository(ShopDbContext context)
-        {
-            _context = context;
-        }
+        private readonly ShopDbContext _context = context;
 
         public async Task<IEnumerable<ProductViewsHistory>> GetProductViewHistoryAsync(int productId, DateTime? fromDate = null, DateTime? toDate = null)
         {

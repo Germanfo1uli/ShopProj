@@ -4,11 +4,9 @@ using ShopBack.Models;
 
 namespace ShopBack.Repositories
 {
-    public class ReviewsRepository : Repository<ProductReviews>, IReviewsRepository
+    public class ReviewsRepository(ShopDbContext context) : IReviewsRepository
     {
-        public ReviewsRepository(ShopDbContext context) : base(context)
-        {
-        }
+        private readonly ShopDbContext _context = context;
 
         public async Task<IEnumerable<ProductReviews>> GetProductReviewsAsync(int productId, bool onlyApproved = true)
         {
@@ -27,7 +25,7 @@ namespace ShopBack.Repositories
 
         public async Task ApproveReviewAsync(int reviewId, int moderatorId, string? comment = null)
         {
-            var review = await _dbSet.FindAsync(reviewId);
+            var review = await _context.ProductReviews.FindAsync(reviewId);
             if (review == null)
             {
                 throw new ArgumentException("Review not found", nameof(reviewId));
@@ -38,13 +36,13 @@ namespace ShopBack.Repositories
             review.Comment = comment;
             review.ModeratedAt = DateTime.UtcNow;
 
-            _dbSet.Update(review);
+            _context.ProductReviews.Update(review);
             await _context.SaveChangesAsync();
         }
 
         public async Task RejectReviewAsync(int reviewId, int moderatorId, string? comment = null)
         {
-            var review = await _dbSet.FindAsync(reviewId);
+            var review = await _context.ProductReviews.FindAsync(reviewId);
             if (review == null)
             {
                 throw new ArgumentException("Review not found", nameof(reviewId));
@@ -55,7 +53,7 @@ namespace ShopBack.Repositories
             review.Comment = comment;
             review.ModeratedAt = DateTime.UtcNow;
 
-            _dbSet.Update(review);
+            _context.ProductReviews.Update(review);
             await _context.SaveChangesAsync();
         }
     }

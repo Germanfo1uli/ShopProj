@@ -4,11 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ShopBack.Repositories
 {
-    public class UserRepository : Repository<Users>, IUsersRepository
+    public class UserRepository(ShopDbContext context) : IUsersRepository
     {
-        public UserRepository(ShopDbContext context) : base(context)
-        {
-        }
+        private readonly ShopDbContext _context = context;
 
         public async Task<Users> GetByEmailAsync(string email)
         {
@@ -23,7 +21,7 @@ namespace ShopBack.Repositories
 
         public async Task<bool> CheckPasswordAsync(int userId, string password)
         {
-            var user = await GetByIdAsync(userId);
+            var user = await _context.Users.FindAsync(userId);
             return user != null;
         }
 

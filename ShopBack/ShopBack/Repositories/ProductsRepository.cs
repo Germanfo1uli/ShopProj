@@ -8,7 +8,6 @@ namespace ShopBack.Repositories
     {
         private readonly ShopDbContext _context = context;
 
-        //override для методов IRepository
         public async Task<IEnumerable<Products>> GetByCategoryAsync(int categoryId)
         {
             return await _context.Products
@@ -34,7 +33,6 @@ namespace ShopBack.Repositories
                 .ToListAsync();
         }
 
-        //Новые методы(расширяемые)
         public async Task<IEnumerable<ProductSpecifications>> GetProductSpecificationsAsync(int productId)
         {
             return await _context.ProductSpecifications

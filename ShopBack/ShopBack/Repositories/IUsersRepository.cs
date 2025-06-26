@@ -2,7 +2,7 @@
 
 namespace ShopBack.Repositories 
 {
-    public interface IUsersRepository : IRepository<Users>
+    public interface IUsersRepository
     {
         Task<Users> GetByEmailAsync(string email); // Находит пользователя по email (для аутентификации)
 

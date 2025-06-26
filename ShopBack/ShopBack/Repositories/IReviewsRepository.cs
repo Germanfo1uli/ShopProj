@@ -2,7 +2,7 @@
 
 namespace ShopBack.Repositories
 {
-    public interface IReviewsRepository : IRepository<ProductReviews>
+    public interface IReviewsRepository
 
     {
         Task<IEnumerable<ProductReviews>> GetProductReviewsAsync(int productId, bool onlyApproved = true); // Получает отзывы для товара (с фильтром модерации - только доступные)
