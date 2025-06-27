@@ -47,9 +47,7 @@ namespace ShopBack.Services
 
         public async Task<AuthResult> LoginAsync(string email, string password)
         {
-            var user = await _usersRepository.GetByEmailAsync(email);
-            if (user == null)
-                throw new UnauthorizedAccessException("Неверный email");
+            var user = await _usersRepository.GetByEmailAsync(email) ?? throw new UnauthorizedAccessException("Неверный email");
             if (!VerifyPassword(password, user.PasswordHash, user.Salt))
                 throw new UnauthorizedAccessException("Неверный email или пароль");
 
@@ -68,7 +66,26 @@ namespace ShopBack.Services
             };
         }
 
-        public async Task ChangePasswordAsync(int userId, string oldPassword, string newPassword, bool revoking, string token)
+        public async Task<TokenPair> GetNewTokensAsync(string token)
+        {
+            var refreshToken = await _tokenService.GetRefreshTokenAsync(token) ?? throw new UnauthorizedAccessException("Вы не авторизованы");
+
+            if (refreshToken.Revoked != null)
+                throw new UnauthorizedAccessException("Попытка зайти по отозванному токену");
+
+            var user = await _tokenService.GetUserByTokenAsync(token) ?? throw new KeyNotFoundException("Пользователь не существует");
+
+            var tokens = await _tokenService.GenerateTokensAsync(user);
+
+            refreshToken.Revoked = DateTime.UtcNow;
+            refreshToken.ReplacedByToken = tokens.RefreshToken;
+
+            await _tokenService.UpdateAsync(refreshToken);
+
+            return tokens;
+        }
+
+        public async Task ChangePasswordAsync(int userId, string oldPassword, string newPassword, string token)
         {
             var user = await _usersRepository.GetByIdAsync(userId);
             if (!VerifyPassword(oldPassword, user.PasswordHash, user.Salt))
@@ -79,10 +96,7 @@ namespace ShopBack.Services
             user.Salt = salt;
 
             await _usersRepository.UpdateAsync(user);
-            if (revoking == true)
-            {
-                await _tokenService.RevokeRefreshTokensUserAsync(userId, token);
-            }
+            await _tokenService.RevokeRefreshTokensUserAsync(userId, token);
         }
 
         private static string GenerateSalt()

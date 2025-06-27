@@ -80,6 +80,14 @@ namespace ShopBack.Repositories
             }
         }
 
+        public async Task<Users> GetUserByTokenAsync(string token)
+        {
+            var refreshToken = await _context.RefreshTokens
+                .FirstOrDefaultAsync(rt => rt.Token == token);
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == refreshToken.UserId);
+        }
+
         public async Task RevokeRefreshTokensUserAsync(int userId, string token)
         {
             var refreshTokens = await GetRefreshTokensUserAsync(userId);

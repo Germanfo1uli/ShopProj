@@ -1,14 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
 
 namespace ShopBack.Controllers
 {
-    public class UsersController(UserService userService) : ControllerBase, IController<Users, UserRegisterData, UserUpdateData>
+    public class UsersController(UserService userService, TokenService tokenService) : ControllerBase, IController<Users, UserRegisterData, UserUpdateData>
     {
         private readonly UserService _userService = userService;
+        private readonly TokenService _tokenService = tokenService;
 
         [HttpPost("register")]
         public async Task<ActionResult<Users>> Register([FromBody] UserRegisterData createDto)
@@ -16,7 +15,7 @@ namespace ShopBack.Controllers
             try
             {
                 var result = await _userService.RegisterAsync(createDto.Email, createDto.Password, createDto.FirstName, createDto.MiddleName, createDto.LastName);
-                return Ok(new { message = result });
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {
@@ -41,7 +40,7 @@ namespace ShopBack.Controllers
         [HttpPost]
         public async Task<ActionResult<Users>> Create([FromBody] UserRegisterData createDto)
         {
-            return null;
+            return BadRequest(new { Error = "памагити я так не умею"});
         }
 
         [HttpDelete("{userId}")]
@@ -49,7 +48,7 @@ namespace ShopBack.Controllers
         {
             try
             {
-                _userService.DeleteAsync(userId);
+                await _userService.DeleteAsync(userId);
                 return NoContent();
             }
             catch (Exception ex)
@@ -58,19 +57,80 @@ namespace ShopBack.Controllers
             }
         }
 
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<Users>>> GetAll()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _userService.GetAllAsync();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        public async Task<ActionResult<Users>> GetById(int id)
+        [HttpGet("{userId}")]
+        public async Task<ActionResult<Users>> GetById(int userId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _userService.GetByIdAsync(userId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        public async Task<ActionResult<Users>> Update(int id, [FromBody] UserUpdateData updateDto)
+        [HttpPut("{userId}")]
+        public async Task<ActionResult<Users>> Update(int userId, [FromBody] UserUpdateData updateDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = await _userService.GetByIdAsync(userId);
+                user.Email = updateDto.Email;
+                user.FirstName = updateDto.FirstName;
+                user.MiddleName = updateDto.MiddleName;
+                user.LastName = updateDto.LastName;
+                user.PhoneNumber = updateDto.PhoneNumber;
+                await _userService.UpdateAsync(user);
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("{userId}/changepassword")]
+        public async Task<ActionResult<Users>> UpdatePassword(int userId, [FromBody] UserUpdatePassword updateDto)
+        {
+            try
+            {
+                await _userService.ChangePasswordAsync(userId, updateDto.OldPassword, updateDto.NewPassword, updateDto.Token);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("{generatetokens}")]
+        public async Task<ActionResult<Users>> GenerateTokens([FromBody] RefreshToken token)
+        {
+            try
+            {
+                var result = await _userService.GetNewTokensAsync(token.Token);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 
@@ -92,6 +152,22 @@ namespace ShopBack.Controllers
 
     public class UserUpdateData
     {
+        public string Email { get; set; }
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+        public string LastName { get; set; }
+        public string PhoneNumber { get; set; }
+    }
 
+    public class UserUpdatePassword
+    {
+        public string OldPassword { get; set; }
+        public string NewPassword { get; set; }
+        public string Token { get; set; }
+    }
+
+    public class RefreshToken
+    {
+        public string Token { get; set; }
     }
 }

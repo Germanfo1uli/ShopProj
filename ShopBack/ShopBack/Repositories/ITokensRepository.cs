@@ -17,6 +17,8 @@ namespace ShopBack.Repositories
 
         Task RevokeRefreshTokensUserAsync(int userId, string token); // Отозвать все токены, кроме текущего у пользователя
 
+        Task<Users> GetUserByTokenAsync(string token); // Получает id пользователя по токену
+
         Task<bool> IsRefreshTokenValidAsync(string token); // Валидует рефреш - токен
 
         string GenerateJwtToken(Users user);

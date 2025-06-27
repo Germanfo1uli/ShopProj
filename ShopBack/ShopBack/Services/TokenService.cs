@@ -33,6 +33,11 @@ namespace ShopBack.Services
             await _tokensRepository.RevokeRefreshTokensUserAsync(userId, token);
         }
 
+        public async Task<Users> GetUserByTokenAsync(string token)
+        {
+            return await _tokensRepository.GetUserByTokenAsync(token);
+        }
+
         public async Task<RefreshTokens?> GetRefreshTokenAsync(string token)
         {
             return await _tokensRepository.GetRefreshTokenAsync(token);
