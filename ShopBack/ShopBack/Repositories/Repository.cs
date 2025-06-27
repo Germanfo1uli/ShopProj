@@ -36,8 +36,15 @@ namespace ShopBack.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(T entity)
+        public async Task DeleteAsync(int id)
         {
+            var entity = await _dbSet.FindAsync(id);
+
+            if (entity == null)
+            {
+                throw new KeyNotFoundException($"Сущность с ID {id} не найдена");
+            }
+
             _dbSet.Remove(entity);
             await _context.SaveChangesAsync();
         }

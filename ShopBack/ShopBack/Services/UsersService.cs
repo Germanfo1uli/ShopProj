@@ -79,8 +79,10 @@ namespace ShopBack.Services
             user.Salt = salt;
 
             await _usersRepository.UpdateAsync(user);
-
-            await _tokenService.RevokeRefreshTokensUserAsync(userId, token);
+            if (revoking == true)
+            {
+                await _tokenService.RevokeRefreshTokensUserAsync(userId, token);
+            }
         }
 
         private static string GenerateSalt()
