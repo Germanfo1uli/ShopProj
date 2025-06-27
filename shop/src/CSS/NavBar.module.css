@@ -483,3 +483,168 @@
         display: flex;
     }
 }
+
+/* Theme Variables */
+:root {
+    /* Light Theme (оставляем без изменений) */
+    --nav-bg: #f8fafc;
+    --nav-border: #dbdbdd;
+    --nav-shadow: rgba(0, 0, 0, 0.05);
+    --nav-text: #4a4a4a;
+    --nav-text-hover: #6a41b6;
+    --nav-link-underline: linear-gradient(90deg, #6a41b6, #4a6bff);
+    --input-bg: #ffffff;
+    --input-border: #d0d0d0;
+    --input-text: #3a3a3a;
+    --input-placeholder: #909090;
+    --mobile-menu-bg: #1a1a2e;
+    --mobile-link-bg: rgba(255, 255, 255, 0.05);
+    --mobile-link-text: #f8f8f8;
+    --dropdown-bg: #ffffff;
+    --dropdown-text: #333333;
+    --dropdown-hover: #f5f5f5;
+}
+
+[data-theme="dark"] {
+    /* Чёрная тема */
+    --nav-bg: #121212;
+    --nav-border: #242424;
+    --nav-shadow: rgba(0, 0, 0, 0.3);
+    --nav-text: #e0e0e0;
+    --nav-text-hover: #ffffff;
+    --nav-link-underline: linear-gradient(90deg, #ffffff, #aaaaaa);
+    --input-bg: #1e1e1e;
+    --input-border: #333333;
+    --input-text: #f0f0f0;
+    --input-placeholder: #a0a0a0;
+    --mobile-menu-bg: #0a0a0a;
+    --dropdown-bg: #1e1e1e;
+    --dropdown-text: #f0f0f0;
+    --dropdown-hover: rgba(255, 255, 255, 0.08);
+}
+
+/* Navigation Styles */
+.navPage {
+    background-color: var(--nav-bg);
+    border-bottom: 2px solid var(--nav-border);
+    box-shadow: 0 2px 10px var(--nav-shadow);
+}
+
+.navLink {
+    color: var(--nav-text);
+}
+
+.navLink:hover {
+    color: var(--nav-text-hover);
+}
+
+.navLink::after {
+    background: var(--nav-link-underline);
+}
+
+.Input {
+    background-color: var(--input-bg);
+    border: 2px solid var(--input-border);
+    color: var(--input-text);
+}
+
+.Input::placeholder {
+    color: var(--input-placeholder);
+}
+
+.mobileMenu {
+    background: var(--mobile-menu-bg);
+}
+
+.mobileNavLink {
+    color: var(--mobile-link-text);
+    background: var(--mobile-link-bg);
+}
+
+/* Burger icon in dark theme */
+[data-theme="dark"] .burgerLine {
+    background-color: var(--nav-text);
+}
+
+/* Dropdown menu */
+.dropdownMenu {
+    background: var(--dropdown-bg);
+    color: var(--dropdown-text);
+}
+
+.dropdownMenu button {
+    color: var(--dropdown-text);
+}
+
+.dropdownMenu button:hover {
+    background: var(--dropdown-hover);
+    color: var(--nav-text-hover);
+}
+
+/* Profile Card in Settings */
+.profileCard {
+    background: var(--input-bg);
+    color: var(--input-text);
+}
+
+.settingsTitle {
+    color: var(--nav-text-hover);
+}
+
+/* Toggle Switch in Settings */
+.toggleSwitch {
+    --toggle-bg: #d0d0d0;
+    --toggle-slider: #ffffff;
+}
+
+[data-theme="dark"] .toggleSwitch {
+    --toggle-bg: #333333;
+    --toggle-slider: #1e1e1e;
+}
+
+.toggleSwitch input:checked + .slider {
+    background: #555555;
+}
+
+.slider {
+    background: var(--toggle-bg);
+}
+
+.slider:before {
+    background: var(--toggle-slider);
+}
+
+/* Buttons in Settings */
+.saveButton {
+    background: #333333;
+    color: white;
+    border: 1px solid #444444;
+}
+
+.saveButton:hover {
+    background: #444444;
+}
+
+.cancelButton {
+    background: var(--input-bg);
+    color: var(--input-text);
+    border: 1px solid var(--input-border);
+}
+
+.cancelButton:hover {
+    background: #2a2a2a;
+}
+
+/* Логотип в тёмной теме */
+[data-theme="dark"] .logo {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .logo:hover {
+    color: #e0e0e0;
+}
+
+/* Аватар пользователя */
+[data-theme="dark"] .userAvatar {
+    border-color: #555555;
+}

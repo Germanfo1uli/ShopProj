@@ -1,6 +1,66 @@
-.body {
-    background-color: #f8fafc;
+/* Base Styles */
+:root {
+    --bg-color: #f8fafc;
+    --text-color: #1e293b;
+    --container-bg: #ffffff;
+    --border-color: #f1f5f9;
+    --accent-color: #4d88ff;
+    --accent-hover: #3b75e5;
+    --secondary-text: #64748b;
+    --card-bg: #ffffff;
+    --card-border: #f1f5f9;
+    --card-hover-border: #b3d1ff;
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --price-color: #4d88ff;
+    --old-price-color: #94a3b8;
+    --remove-color: #94a3b8;
+    --remove-hover: #ff6b6b;
+    --quantity-border: #e2e8f0;
+    --quantity-hover: #f0f7ff;
+    --input-border: #cbd5e1;
+    --input-focus: #b3d1ff;
+    --input-shadow: rgba(77, 136, 255, 0.1);
+    --discount-color: #00cc99;
+    --promo-border: #cbd5e1;
+    --promo-bg: rgba(230, 242, 255, 0.3);
+    --promo-text: #334155;
+    --payment-border: #e2e8f0;
+    --payment-hover: #f0f7ff;
+}
+
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --container-bg: #1e1e1e;
+    --border-color: #2d2d2d;
+    --accent-color: #5a9cff;
+    --accent-hover: #4a8bef;
+    --secondary-text: #aaaaaa;
+    --card-bg: #242424;
+    --card-border: #333333;
+    --card-hover-border: #5a9cff;
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --price-color: #5a9cff;
+    --old-price-color: #888888;
+    --remove-color: #888888;
+    --remove-hover: #ff6b6b;
+    --quantity-border: #333333;
+    --quantity-hover: #2a2a2a;
+    --input-border: #444444;
+    --input-focus: #5a9cff;
+    --input-shadow: rgba(90, 156, 255, 0.1);
+    --discount-color: #00cc99;
+    --promo-border: #444444;
+    --promo-bg: rgba(42, 67, 101, 0.3);
+    --promo-text: #cccccc;
+    --payment-border: #333333;
+    --payment-hover: #2a2a2a;
+}
+
+body {
+    background-color: var(--bg-color);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-color);
 }
 
 .main {
@@ -12,17 +72,17 @@
 .breadcrumbs {
     display: flex;
     font-size: 0.875rem;
-    color: #64748b;
+    color: var(--secondary-text);
     margin-bottom: 1.5rem;
 }
 
 .breadcrumbLink {
-    color: #64748b;
+    color: var(--secondary-text);
     transition: color 0.2s;
 }
 
 .breadcrumbLink:hover {
-    color: #4d88ff;
+    color: var(--accent-color);
 }
 
 .breadcrumbSeparator {
@@ -30,14 +90,14 @@
 }
 
 .breadcrumbActive {
-    color: #4d88ff;
+    color: var(--accent-color);
     font-weight: 500;
 }
 
 .pageTitle {
     font-size: 1.75rem;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--text-color);
     margin-bottom: 1.5rem;
     display: flex;
     align-items: center;
@@ -45,7 +105,7 @@
 }
 
 .cartTitleIcon {
-    color: #4d88ff;
+    color: var(--accent-color);
 }
 
 .contentWrapper {
@@ -60,7 +120,6 @@
     }
 }
 
-
 .productsColumn {
     width: 100%;
 }
@@ -72,9 +131,9 @@
 }
 
 .productsContainer {
-    background-color: white;
+    background-color: var(--container-bg);
     border-radius: 0.75rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--card-shadow);
     padding: 1.5rem;
 }
 
@@ -84,18 +143,18 @@
     align-items: center;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .productsTitle {
     font-size: 1.125rem;
     font-weight: 500;
-    color: #475569;
+    color: var(--secondary-text);
 }
 
 .clearCartButton {
     font-size: 0.875rem;
-    color: #64748b;
+    color: var(--secondary-text);
     background-color: transparent;
     border: none;
     display: flex;
@@ -105,7 +164,7 @@
 }
 
 .clearCartButton:hover {
-    color: #4d88ff;
+    color: var(--accent-color);
 }
 
 .trashIcon {
@@ -119,16 +178,16 @@
 }
 
 .productCard {
-    background-color: white;
+    background-color: var(--card-bg);
     padding: 1rem;
     border-radius: 0.5rem;
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--card-border);
     transition: all 0.2s;
 }
 
 .productCard:hover {
-    border-color: #b3d1ff;
-    box-shadow: 0 4px 15px rgba(77, 136, 255, 0.1);
+    border-color: var(--card-hover-border);
+    box-shadow: 0 4px 15px var(--input-shadow);
 }
 
 .productContent {
@@ -145,7 +204,7 @@
 .productImageContainer {
     width: 100%;
     height: 8rem;
-    background-color: #e6f2ff;
+    background-color: rgba(90, 156, 255, 0.1);
     border-radius: 0.5rem;
     overflow: hidden;
     flex-shrink: 0;
@@ -185,23 +244,23 @@
 
 .productName {
     font-weight: 500;
-    color: #1e293b;
+    color: var(--text-color);
     transition: color 0.2s;
 }
 
 .productName:hover {
-    color: #4d88ff;
+    color: var(--accent-color);
     cursor: pointer;
 }
 
 .productDescription {
     font-size: 0.875rem;
-    color: #64748b;
+    color: var(--secondary-text);
     margin-top: 0.25rem;
 }
 
 .removeButton {
-    color: #94a3b8;
+    color: var(--remove-color);
     font-size: 1.2rem;
     background-color: transparent;
     border: none;
@@ -210,7 +269,7 @@
 }
 
 .removeButton:hover {
-    color: #ff6b6b;
+    color: var(--remove-hover);
 }
 
 .productControls {
@@ -230,7 +289,7 @@
 .quantityControl {
     display: flex;
     align-items: center;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--quantity-border);
     border-radius: 0.5rem;
     width: fit-content;
 }
@@ -241,15 +300,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #64748b;
+    color: var(--secondary-text);
     border: none;
-    background-color: white;
+    background-color: var(--card-bg);
     transition: all 0.2s;
 }
 
 .quantityButton:hover {
-    background-color: #f0f7ff;
-    color: #4d88ff;
+    background-color: var(--quantity-hover);
+    color: var(--accent-color);
 }
 
 .quantityIcon {
@@ -259,6 +318,8 @@
 .quantityValue {
     width: 2.5rem;
     text-align: center;
+    color: var(--text-color);
+    background-color: var(--card-bg);
 }
 
 .priceContainer {
@@ -274,26 +335,25 @@
 
 .originalPrice {
     font-size: 0.875rem;
-    color: #94a3b8;
+    color: var(--old-price-color);
     text-decoration: line-through;
 }
 
 .price {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #4d88ff;
+    color: var(--price-color);
 }
 
 .couponContainer {
     margin-top: 1.5rem;
     padding-top: 1.5rem;
-    border-top: 1px solid #f1f5f9;
-
+    border-top: 1px solid var(--border-color);
 }
 
 .couponTitle {
     font-weight: 500;
-    color: #475569;
+    color: var(--secondary-text);
     margin-bottom: 0.75rem;
 }
 
@@ -304,18 +364,20 @@
 .couponInput {
     flex-grow: 1;
     padding: 0.5rem 1rem;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--input-border);
     border-radius: 0.5rem 0 0 0.5rem;
     outline: none;
+    background-color: var(--card-bg);
+    color: var(--text-color);
 }
 
 .couponInput:focus {
-    border-color: #b3d1ff;
-    box-shadow: 0 0 0 2px rgba(77, 136, 255, 0.1);
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 2px var(--input-shadow);
 }
 
 .couponButton {
-    background-color: #4d88ff;
+    background-color: var(--accent-color);
     border: none;
     color: white;
     padding: 0.5rem 1rem;
@@ -324,7 +386,7 @@
 }
 
 .couponButton:hover {
-    background-color: #3b75e5;
+    background-color: var(--accent-hover);
 }
 
 /* Итоги */
@@ -339,9 +401,9 @@
 }
 
 .summaryContainer {
-    background-color: white;
+    background-color: var(--container-bg);
     border-radius: 0.75rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--card-shadow);
     padding: 1.5rem;
     position: sticky;
     top: 1rem;
@@ -350,10 +412,10 @@
 .summaryTitle {
     font-size: 1.125rem;
     font-weight: 500;
-    color: #475569;
+    color: var(--secondary-text);
     margin-bottom: 1rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .summaryDetails {
@@ -367,27 +429,28 @@
     display: flex;
     justify-content: space-between;
     font-size: 0.875rem;
-    color: #64748b;
+    color: var(--secondary-text);
 }
 
 .summaryValue {
     font-weight: 500;
+    color: var(--text-color);
 }
 
 .discountValue {
     font-weight: 500;
-    color: #00cc99;
+    color: var(--discount-color);
 }
 
 .freeValue {
     font-weight: 500;
-    color: #00cc99;
+    color: var(--discount-color);
 }
 
 .totalContainer {
     padding: 1rem 0;
-    border-top: 1px solid #f1f5f9;
-    border-bottom: 1px solid #f1f5f9;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .totalRow {
@@ -399,19 +462,20 @@
 .totalLabel {
     font-size: 1.125rem;
     font-weight: 600;
+    color: var(--text-color);
 }
 
 .totalValue {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #4d88ff;
+    color: var(--price-color);
 }
 
 .checkoutButton {
     width: 100%;
     border: none;
     margin-top: 1.5rem;
-    background-color: #4d88ff;
+    background-color: var(--accent-color);
     color: white;
     padding: 0.75rem;
     border-radius: 0.5rem;
@@ -426,7 +490,7 @@
 }
 
 .checkoutButton:hover {
-    background-color: #3b75e5;
+    background-color: var(--accent-hover);
 }
 
 .checkoutIcon {
@@ -440,11 +504,11 @@
 
 .termsText {
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--secondary-text);
 }
 
 .termsLink {
-    color: #4d88ff;
+    color: var(--accent-color);
     text-decoration: underline;
 }
 
@@ -456,13 +520,13 @@
 .paymentMethods {
     margin-top: 1.5rem;
     padding-top: 1.5rem;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--border-color);
 }
 
 .paymentMethodsTitle {
     font-size: 0.875rem;
     font-weight: 500;
-    color: #64748b;
+    color: var(--secondary-text);
     margin-bottom: 0.75rem;
     text-align: center;
 }
@@ -478,43 +542,43 @@
     align-items: center;
     justify-content: center;
     padding: 0.1rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--payment-border);
     border-radius: 0.5rem;
-    color: #64748b;
+    color: var(--secondary-text);
     transition: background-color 0.2s;
+    background-color: var(--card-bg);
 }
 
 .paymentButton:hover {
-    background-color: #f0f7ff;
+    background-color: var(--payment-hover);
 }
 
 .paymentIcon {
     font-size: 2rem;
 }
 
-
 .promoContainer {
     margin-top: 1.5rem;
     border-radius: 1rem;
-    border: 2px dashed #cbd5e1;
+    border: 2px dashed var(--promo-border);
 }
 
 .promoContent {
-    background-color: rgba(230, 242, 255, 0.3);
+    background-color: var(--promo-bg);
     border-radius: 0.5rem;
     padding: 1rem;
     text-align: center;
 }
 
 .promoIcon {
-    color: #4d88ff;
+    color: var(--accent-color);
     font-size: 1.25rem;
     margin-bottom: 0.5rem;
 }
 
 .promoText {
     font-size: 0.875rem;
-    color: #334155;
+    color: var(--promo-text);
 }
 
 /* Анимации */

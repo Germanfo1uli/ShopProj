@@ -1,11 +1,63 @@
 /* Base Styles */
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 10px;
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --container-bg: #ffffff;
+    --section-bg: #ffffff;
+    --border-color: #eeeeee;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --accent-color: #005bff;
+    --accent-hover: #003d99;
+    --hot-color: #ff3b30;
+    --hot-hover: #cc0000;
+    --price-color: #005bff;
+    --old-price-color: #999999;
+    --card-bg: #ffffff;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --card-hover-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    --rating-color: #666666;
+    --specs-color: #666666;
+    --dot-color: rgba(255, 255, 255, 0.5);
+    --dot-active: rgba(255, 255, 255, 0.9);
+    --slider-btn-bg: rgba(255, 255, 255, 0.9);
+    --slider-btn-color: #333333;
+    --slider-btn-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Animations */
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --container-bg: #1e1e1e;
+    --section-bg: #242424;
+    --border-color: #2d2d2d;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --accent-color: #4d90fe;
+    --accent-hover: #357ae8;
+    --hot-color: #ff5e50;
+    --hot-hover: #ff3b30;
+    --price-color: #4d90fe;
+    --old-price-color: #888888;
+    --card-bg: #2d2d2d;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --card-hover-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    --rating-color: #aaaaaa;
+    --specs-color: #aaaaaa;
+    --dot-color: rgba(0, 0, 0, 0.5);
+    --dot-active: rgba(0, 0, 0, 0.9);
+    --slider-btn-bg: rgba(30, 30, 30, 0.9);
+    --slider-btn-color: #e0e0e0;
+    --slider-btn-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 10px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* Animations (same as before) */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -41,7 +93,7 @@
     margin: 20px auto;
     overflow: hidden;
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 30px var(--shadow-color);
     height: 220px;
     animation: fadeIn 0.8s ease-out;
 }
@@ -68,9 +120,9 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--slider-btn-bg);
     border: none;
-    color: #333;
+    color: var(--slider-btn-color);
     font-size: 1.8rem;
     width: 50px;
     height: 50px;
@@ -81,13 +133,13 @@
     justify-content: center;
     transition: all 0.3s ease;
     z-index: 10;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--slider-btn-shadow);
     opacity: 0.8;
 }
 
 .btn:hover {
     opacity: 1;
-    background: white;
+    background: var(--slider-btn-bg);
     transform: translateY(-50%) scale(1.05);
 }
 
@@ -114,27 +166,28 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--dot-color);
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .dot.active {
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--dot-active);
     transform: scale(1.2);
 }
 
 .dot:hover {
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--dot-active);
 }
 
 /* Product Sections */
 .productSection {
-    background: white;
+    background: var(--section-bg);
     padding: 30px 20px;
     margin-top: 30px;
     border-radius: 12px;
     animation: slideUp 0.6s ease-out;
+    border: 1px solid var(--border-color);
 }
 
 .sectionHeader {
@@ -148,7 +201,7 @@
 .sectionTitle {
     font-size: 24px;
     margin: 0;
-    color: #333;
+    color: var(--text-color);
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -161,7 +214,7 @@
 }
 
 .showAllLink {
-    color: #005bff;
+    color: var(--accent-color);
     font-size: 14px;
     text-decoration: none;
     font-weight: 500;
@@ -171,7 +224,7 @@
 }
 
 .showAllLinkHot {
-    color: #ff3b30;
+    color: var(--hot-color);
     font-size: 14px;
     text-decoration: none;
     font-weight: 600;
@@ -192,12 +245,12 @@
 }
 
 .showAllLink:hover {
-    color: #003d99;
+    color: var(--accent-hover);
     text-decoration: underline;
 }
 
 .showAllLinkHot:hover {
-    color: #cc0000;
+    color: var(--hot-hover);
     text-decoration: underline;
 }
 
@@ -208,15 +261,16 @@
 }
 
 .productCard {
-    background: white;
+    background: var(--card-bg);
     border-radius: 8px;
     overflow: hidden;
     transition: all 0.3s ease;
     position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--card-shadow);
     height: 300px;
     animation: fadeIn 0.5s ease-out;
     animation-fill-mode: both;
+    border: 1px solid var(--border-color);
 }
 
 .productCard:nth-child(1) { animation-delay: 0.1s; }
@@ -227,18 +281,19 @@
 
 .productCard:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--card-hover-shadow);
 }
 
 .productCardHot {
     position: relative;
-    border-top: 3px solid #ff3b30;
+    border-top: 3px solid var(--hot-color);
     animation: borderGlow 3s infinite alternate, fadeIn 0.5s ease-out;
-    background: white;
+    background: var(--card-bg);
     border-radius: 6px;
     overflow: hidden;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
 }
 
 .productCardHot:hover {
@@ -251,7 +306,7 @@
     height: 160px;
     object-fit: contain;
     padding: 15px;
-    background: #fafafa;
+    background: var(--bg-color);
 }
 
 .productInfo {
@@ -261,7 +316,7 @@
 .productName {
     font-size: 14px;
     margin: 0 0 6px 0;
-    color: #333;
+    color: var(--text-color);
     font-weight: 500;
     line-height: 1.3;
     height: 36px;
@@ -273,7 +328,7 @@
 
 .productSpecs {
     font-size: 12px;
-    color: #666;
+    color: var(--specs-color);
     margin: 0 0 8px 0;
     line-height: 1.3;
     height: 32px;
@@ -290,18 +345,18 @@
 .productPrice {
     font-size: 16px;
     font-weight: 700;
-    color: #005bff;
+    color: var(--price-color);
 }
 
 .productPriceHot {
     font-size: 16px;
     font-weight: 700;
-    color: #ff3b30;
+    color: var(--hot-color);
 }
 
 .oldPrice {
     font-size: 13px;
-    color: #999;
+    color: var(--old-price-color);
     text-decoration: line-through;
     position: relative;
 }
@@ -313,7 +368,7 @@
     top: 50%;
     width: 100%;
     height: 1px;
-    background: #ff3b30;
+    background: var(--hot-color);
     transform: rotate(-5deg);
 }
 
@@ -327,7 +382,7 @@
 .discountBadge {
     display: inline-block;
     padding: 4px 8px;
-    background: linear-gradient(135deg, #ff3b30, #ff5e55);
+    background: linear-gradient(135deg, var(--hot-color), #ff5e55);
     color: white;
     border-radius: 12px;
     font-size: 12px;
@@ -339,7 +394,7 @@
     position: absolute;
     top: 12px;
     left: 0;
-    background: linear-gradient(90deg, #ff3b30, #ff6b60);
+    background: linear-gradient(90deg, var(--hot-color), #ff6b60);
     color: white;
     padding: 4px 12px;
     border-radius: 0 4px 4px 0;
@@ -365,18 +420,18 @@
 }
 
 .starEmpty {
-    color: #e0e0e0;
+    color: #5a5a5a;
 }
 
 .ratingValue {
     font-size: 12px;
     font-weight: 600;
-    color: #666;
+    color: var(--rating-color);
 }
 
 .reviews {
     font-size: 11px;
-    color: #999;
+    color: var(--old-price-color);
 }
 
 /* Responsive Styles */

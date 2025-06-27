@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react';
 import styles from '../CSS/Profile.module.css';
 import Footer from "./Components/Footer";
-
+import History from './ProfileComponents/History';
+import Addresses from './ProfileComponents/Addresses';
+import Payments from './ProfileComponents/Payments';
+import Settings from './ProfileComponents/Settings';
+import OrdersTab from './ProfileComponents/OrdersTab';
+import ReturnsTab from './ProfileComponents/ReturnsTab';
+import SubscriptionsTab from './ProfileComponents/SubscriptionsTab';
 
 const Profile = () => {
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('orders');
+    const [activeMenu, setActiveMenu] = useState('profile');
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -13,69 +21,30 @@ const Profile = () => {
         return () => clearTimeout(timer);
     }, []);
 
-    return (
-        <div className={styles.profileContainer}>
-            <main className={styles.mainContent}>
-                <div className={styles.profileLayout}>
-                    <aside className={styles.sidebar}>
-                        <div className={styles.sidebarCard}>
-                            <div className={styles.userInfo}>
-                                <div className={styles.avatarEdit}>
-                                    <img
-                                        src="https://randomuser.me/api/portraits/men/32.jpg"
-                                        alt="User avatar"
-                                        className={styles.avatar}
-                                    />
-                                    <div className={styles.avatarOverlay}>
-                                        <i className="fas fa-camera"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h2 className={styles.userName}>Никита Ш</h2>
-                                    <p className={styles.userLevel}>Адский покупатель</p>
-                                </div>
-                            </div>
+    const renderTabContent = () => {
+        switch (activeTab) {
+            case 'returns':
+                return <ReturnsTab />;
+            case 'subscriptions':
+                return <SubscriptionsTab />;
+            default:
+                return <OrdersTab />;
+        }
+    };
 
-                            <nav className={styles.sidebarNav}>
-                                <a href="#" className={`${styles.navLink} ${styles.activeLink}`}>
-                                    <i className="fas fa-user"></i>
-                                    <span>Профиль</span>
-                                </a>
-                                <a href="#" className={styles.navLink}>
-                                    <i className="fas fa-shopping-bag"></i>
-                                    <span>Мои заказы</span>
-                                </a>
-                                <a href="#" className={styles.navLink}>
-                                    <i className="fas fa-heart"></i>
-                                    <span>Избранное</span>
-                                </a>
-                                <a href="#" className={styles.navLink}>
-                                    <i className="fas fa-clock"></i>
-                                    <span>История просмотров</span>
-                                </a>
-                                <a href="#" className={styles.navLink}>
-                                    <i className="fas fa-map-marked-alt"></i>
-                                    <span>Адреса доставки</span>
-                                </a>
-                                <a href="#" className={styles.navLink}>
-                                    <i className="fas fa-credit-card"></i>
-                                    <span>Платежные методы</span>
-                                </a>
-                                <a href="#" className={styles.navLink}>
-                                    <i className="fas fa-cog"></i>
-                                    <span>Настройки</span>
-                                </a>
-                                <a href="#" className={styles.navLink}>
-                                    <i className="fas fa-sign-out-alt"></i>
-                                    <span>Выход</span>
-                                </a>
-                            </nav>
-                        </div>
-                    </aside>
-
-
-                    <div className={styles.profileContent}>
-
+    const renderMenuContent = () => {
+        switch (activeMenu) {
+            case 'history':
+                return <History />;
+            case 'addresses':
+                return <Addresses />;
+            case 'payments':
+                return <Payments />;
+            case 'settings':
+                return <Settings />;
+            default:
+                return (
+                    <>
                         <div className={styles.profileCard}>
                             <div className={styles.cardHeader}>
                                 <h1 className={styles.cardTitle}>Мой профиль</h1>
@@ -170,92 +139,30 @@ const Profile = () => {
                         <div className={styles.ordersCard}>
                             <div className={styles.tabsContainer}>
                                 <div className={styles.tabs}>
-                                    <button className={`${styles.tab} ${styles.activeTab}`}>Заказы</button>
-                                    <button className={styles.tab}>Возвраты</button>
-                                    <button className={styles.tab}>Подписки</button>
+                                    <button
+                                        className={`${styles.tab} ${activeTab === 'orders' ? styles.activeTab : ''}`}
+                                        onClick={() => setActiveTab('orders')}
+                                    >
+                                        Заказы
+                                    </button>
+                                    <button
+                                        className={`${styles.tab} ${activeTab === 'returns' ? styles.activeTab : ''}`}
+                                        onClick={() => setActiveTab('returns')}
+                                    >
+                                        Возвраты
+                                    </button>
+                                    <button
+                                        className={`${styles.tab} ${activeTab === 'subscriptions' ? styles.activeTab : ''}`}
+                                        onClick={() => setActiveTab('subscriptions')}
+                                    >
+                                        Подписки
+                                    </button>
                                 </div>
                             </div>
 
-                            <div className={styles.ordersContent}>
-                                <div className={styles.ordersHeader}>
-                                    <h2 className={styles.ordersTitle}>Последние заказы</h2>
-                                    <a href="#" className={styles.allOrdersLink}>Все заказы →</a>
-                                </div>
-
-                                <div className={styles.ordersList}>
-                                    <div className={styles.orderItem}>
-                                        <div className={styles.orderHeader}>
-                                            <div>
-                                                <p className={styles.orderNumber}>Заказ #32456</p>
-                                                <p className={styles.orderDate}>15 февраля 2023 • 3 товара</p>
-                                            </div>
-                                            <span className={`${styles.statusBadge} ${styles.delivered}`}>Доставлен</span>
-                                        </div>
-
-                                        <div className={styles.orderProducts}>
-                                            <div className={styles.productImage}>
-                                                <img
-                                                    src="https://m.media-amazon.com/images/I/71h6PpGaz9L._AC_UL320_.jpg"
-                                                    alt="Product"
-                                                />
-                                            </div>
-                                            <div className={styles.productImage}>
-                                                <img
-                                                    src="https://m.media-amazon.com/images/I/71Kc2oLYRFL._AC_UL320_.jpg"
-                                                    alt="Product"
-                                                />
-                                            </div>
-                                            <div className={styles.productImage}>
-                                                <img
-                                                    src="https://m.media-amazon.com/images/I/71xBS8kJ0jL._AC_UL320_.jpg"
-                                                    alt="Product"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className={styles.orderFooter}>
-                                            <p className={styles.orderTotal}>12,490 ₽</p>
-                                            <div className={styles.orderActions}>
-                                                <button className={styles.actionButton}>Повторить заказ</button>
-                                                <button className={styles.actionButton}>Оставить отзыв</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className={styles.orderItem}>
-                                        <div className={styles.orderHeader}>
-                                            <div>
-                                                <p className={styles.orderNumber}>Заказ #32189</p>
-                                                <p className={styles.orderDate}>10 февраля 2023 • 2 товара</p>
-                                            </div>
-                                            <span className={`${styles.statusBadge} ${styles.inDelivery}`}>В пути</span>
-                                        </div>
-
-                                        <div className={styles.orderProducts}>
-                                            <div className={styles.productImage}>
-                                                <img
-                                                    src="https://m.media-amazon.com/images/I/61L1ItFgFHL._AC_UL320_.jpg"
-                                                    alt="Product"
-                                                />
-                                            </div>
-                                            <div className={styles.productImage}>
-                                                <img
-                                                    src="https://m.media-amazon.com/images/I/71Q8gm97H6L._AC_UL320_.jpg"
-                                                    alt="Product"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className={styles.orderFooter}>
-                                            <p className={styles.orderTotal}>8,750 ₽</p>
-                                            <div className={styles.orderActions}>
-                                                <button className={styles.actionButton}>Отследить</button>
-                                                <button className={styles.actionButton}>Подробнее</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            {renderTabContent()}
                         </div>
+
                         <div className={styles.recommendationsCard}>
                             <h2 className={styles.recommendationsTitle}>Рекомендуем вам</h2>
                             <p className={styles.recommendationsSubtitle}>На основе ваших покупок и просмотров</p>
@@ -409,6 +316,77 @@ const Profile = () => {
                                 Все рекомендации
                             </button>
                         </div>
+                    </>
+                );
+        }
+    };
+
+    return (
+        <div className={styles.profileContainer}>
+            <main className={styles.mainContent}>
+                <div className={styles.profileLayout}>
+                    <aside className={styles.sidebar}>
+                        <div className={styles.sidebarCard}>
+                            <div className={styles.userInfo}>
+                                <div className={styles.avatarEdit}>
+                                    <img
+                                        src="https://randomuser.me/api/portraits/men/32.jpg"
+                                        alt="User avatar"
+                                        className={styles.avatar}
+                                    />
+                                </div>
+                                <div>
+                                    <h2 className={styles.userName}>Никита Ш</h2>
+                                    <p className={styles.userLevel}>Адский покупатель</p>
+                                </div>
+                            </div>
+
+                            <nav className={styles.sidebarNav}>
+                                <button
+                                    className={`${styles.navLink} ${activeMenu === 'profile' ? styles.activeLink : ''}`}
+                                    onClick={() => setActiveMenu('profile')}
+                                >
+                                    <i className="fas fa-user"></i>
+                                    <span>Профиль</span>
+                                </button>
+                                <button
+                                    className={`${styles.navLink} ${activeMenu === 'history' ? styles.activeLink : ''}`}
+                                    onClick={() => setActiveMenu('history')}
+                                >
+                                    <i className="fas fa-clock"></i>
+                                    <span>История просмотров</span>
+                                </button>
+                                <button
+                                    className={`${styles.navLink} ${activeMenu === 'addresses' ? styles.activeLink : ''}`}
+                                    onClick={() => setActiveMenu('addresses')}
+                                >
+                                    <i className="fas fa-map-marked-alt"></i>
+                                    <span>Адреса доставки</span>
+                                </button>
+                                <button
+                                    className={`${styles.navLink} ${activeMenu === 'payments' ? styles.activeLink : ''}`}
+                                    onClick={() => setActiveMenu('payments')}
+                                >
+                                    <i className="fas fa-credit-card"></i>
+                                    <span>Платежные методы</span>
+                                </button>
+                                <button
+                                    className={`${styles.navLink} ${activeMenu === 'settings' ? styles.activeLink : ''}`}
+                                    onClick={() => setActiveMenu('settings')}
+                                >
+                                    <i className="fas fa-cog"></i>
+                                    <span>Настройки</span>
+                                </button>
+                                <button className={styles.navLink}>
+                                    <i className="fas fa-sign-out-alt"></i>
+                                    <span>Выход</span>
+                                </button>
+                            </nav>
+                        </div>
+                    </aside>
+
+                    <div className={styles.profileContent}>
+                        {renderMenuContent()}
                     </div>
                 </div>
             </main>

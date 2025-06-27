@@ -1,3 +1,4 @@
+/* Base styles */
 .profileContainer {
     background-color: #f9fafb;
     font-family: system-ui, -apple-system, sans-serif;
@@ -15,22 +16,19 @@
     gap: 1.5rem;
 }
 
-@media (min-width: 768px) {
-    .profileLayout {
-        flex-direction: row;
-    }
+/* Dark theme base */
+[data-theme="dark"] .profileContainer {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .mainContent {
+    color: #e0e0e0;
 }
 
 /* Sidebar styles */
 .sidebar {
     width: 100%;
-}
-
-@media (min-width: 768px) {
-    .sidebar {
-        width: 16rem;
-        flex-shrink: 0;
-    }
 }
 
 .sidebarCard {
@@ -49,28 +47,12 @@
     margin-bottom: 1.5rem;
 }
 
-.avatarEdit {
-    position: relative;
-}
-
 .avatar {
     width: 3rem;
     height: 3rem;
     border-radius: 9999px;
 }
 
-.avatarOverlay {
-    position: absolute;
-    inset: 0;
-    border-radius: 9999px;
-    background-color: rgba(0, 0, 0, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s;
-    color: white;
-}
 
 .avatarEdit:hover .avatarOverlay {
     opacity: 1;
@@ -97,7 +79,8 @@
     gap: 0.75rem;
     padding: 0.5rem 0.75rem;
     color: #4b5563;
-    border-radius: 0.5rem;
+    border: none;
+    background-color: transparent;
     font-size: 0.875rem;
     text-decoration: none;
 }
@@ -116,7 +99,30 @@
     color: #2563eb;
 }
 
-/* Profile content styles */
+/* Dark theme sidebar */
+[data-theme="dark"] .sidebarCard {
+    background-color: #1e1e1e;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .userLevel {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .navLink {
+    color: #b0b0b0;
+}
+
+[data-theme="dark"] .navLink:hover {
+    background-color: #2a2a2a;
+}
+
+[data-theme="dark"] .activeLink {
+    background-color: #2a3a5e;
+    color: #4d90fe;
+}
+
+/* Profile content */
 .profileContent {
     flex: 1;
 }
@@ -165,12 +171,6 @@
     display: grid;
     gap: 1.5rem;
     margin-bottom: 1.5rem;
-}
-
-@media (min-width: 768px) {
-    .profileGrid {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 
 .sectionTitle {
@@ -232,17 +232,60 @@
     background-color: #f3f4f6;
 }
 
+/* Dark theme profile content */
+[data-theme="dark"] .profileCard {
+    background-color: #1e1e1e;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .cardTitle {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .editButton {
+    color: #4d90fe;
+}
+
+[data-theme="dark"] .editButton:hover {
+    color: #6ba6ff;
+}
+
+[data-theme="dark"] .sectionTitle {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .infoLabel {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .infoValue {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .preferencesSection {
+    border-top-color: #3a3a3a;
+}
+
+[data-theme="dark"] .tag {
+    background-color: #2a3a5e;
+    color: #4d90fe;
+}
+
+[data-theme="dark"] .addTagButton {
+    border-color: #3a3a3a;
+    color: #b0b0b0;
+    background-color: #2a2a2a;
+}
+
+[data-theme="dark"] .addTagButton:hover {
+    background-color: #3a3a3a;
+}
+
 /* Stats cards */
 .statsGrid {
     display: grid;
     gap: 1rem;
     margin-bottom: 1.5rem;
-}
-
-@media (min-width: 768px) {
-    .statsGrid {
-        grid-template-columns: repeat(3, 1fr);
-    }
 }
 
 .statCard {
@@ -277,6 +320,24 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Dark theme stats */
+[data-theme="dark"] .statCard {
+    background-color: #252525;
+}
+
+[data-theme="dark"] .statLabel {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .statValue {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .statIcon {
+    background-color: #2a3a5e;
+    color: #4d90fe;
 }
 
 /* Orders section */
@@ -452,6 +513,84 @@
     color: #1e40af;
 }
 
+/* Dark theme orders */
+[data-theme="dark"] .ordersCard {
+    background-color: #1e1e1e;
+}
+
+[data-theme="dark"] .tabsContainer {
+    border-bottom-color: #3a3a3a;
+}
+
+[data-theme="dark"] .tab {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .tab:hover {
+    color: #4d90fe;
+}
+
+[data-theme="dark"] .activeTab {
+    color: #4d90fe;
+}
+
+[data-theme="dark"] .activeTab::after {
+    background-color: #4d90fe;
+}
+
+[data-theme="dark"] .ordersTitle {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .allOrdersLink {
+    color: #4d90fe;
+}
+
+[data-theme="dark"] .allOrdersLink:hover {
+    color: #6ba6ff;
+}
+
+[data-theme="dark"] .orderItem {
+    border-color: #3a3a3a;
+    background-color: #252525;
+}
+
+[data-theme="dark"] .orderItem:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .orderNumber {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .orderDate {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .orderProducts {
+    background-color: #2a2a2a;
+}
+
+[data-theme="dark"] .productImage {
+    background-color: #3a3a3a;
+}
+
+[data-theme="dark"] .orderFooter {
+    border-top-color: #3a3a3a;
+}
+
+[data-theme="dark"] .orderTotal {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .actionButton {
+    color: #4d90fe;
+}
+
+[data-theme="dark"] .actionButton:hover {
+    color: #6ba6ff;
+}
+
 /* Recommendations */
 .recommendationsCard {
     background-color: white;
@@ -477,18 +616,6 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
-}
-
-@media (min-width: 640px) {
-    .productsGrid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (min-width: 1024px) {
-    .productsGrid {
-        grid-template-columns: repeat(5, 1fr);
-    }
 }
 
 .productCard {
@@ -593,6 +720,471 @@
     background-color: #eff6ff;
 }
 
+/* Dark theme recommendations */
+[data-theme="dark"] .recommendationsCard {
+    background-color: #1e1e1e;
+}
+
+[data-theme="dark"] .recommendationsTitle {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .recommendationsSubtitle {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .productImageWrapper {
+    background-color: #3a3a3a;
+}
+
+[data-theme="dark"] .favoriteButton {
+    background-color: #2a2a2a;
+}
+
+[data-theme="dark"] .productTitle {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .ratingValue {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .productPrice {
+    color: #4d90fe;
+}
+
+[data-theme="dark"] .allRecommendationsButton {
+    border-color: #4d90fe;
+    color: #4d90fe;
+    background-color: transparent;
+}
+
+[data-theme="dark"] .allRecommendationsButton:hover {
+    background-color: #2a3a5e;
+}
+
+/* Empty state */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 0;
+    color: #6b7280;
+    text-align: center;
+}
+
+.emptyState i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #d1d5db;
+}
+
+.emptyState p {
+    font-size: 1rem;
+    max-width: 20rem;
+}
+
+/* Dark theme empty state */
+[data-theme="dark"] .emptyState {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .emptyState i {
+    color: #3a3a3a;
+}
+
+/* Settings */
+.settingsContainer {
+    padding: 20px;
+}
+
+.settingsSection {
+    margin-bottom: 30px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+}
+
+.settingsSection:last-child {
+    border-bottom: none;
+}
+
+.settingsTitle {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.settingItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.settingInfo {
+    flex: 1;
+}
+
+.settingName {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.settingDescription {
+    display: block;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Toggle switch */
+.toggleSwitch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggleSwitch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Language select */
+.languageSelect {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: white;
+    font-size: 14px;
+}
+
+/* Buttons */
+.privacyButton {
+    background: none;
+    border: none;
+    color: #2196F3;
+    padding: 8px 0;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: left;
+    width: 100%;
+}
+
+.privacyButton:hover {
+    text-decoration: underline;
+}
+
+.settingsActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.saveButton {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.cancelButton {
+    background-color: #f5f5f5;
+    color: #333;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* Dark theme settings */
+[data-theme="dark"] .settingsSection {
+    border-bottom-color: #444;
+}
+
+[data-theme="dark"] .settingsTitle {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .settingName {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .settingDescription {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .languageSelect {
+    background-color: #333;
+    color: white;
+    border-color: #555;
+}
+
+[data-theme="dark"] .privacyButton {
+    color: #4d90fe;
+}
+
+[data-theme="dark"] .cancelButton {
+    background-color: #444;
+    color: #e0e0e0;
+}
+
+/* Payments */
+.addCardForm {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.formTitle {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: #333;
+}
+
+.formGroup {
+    margin-bottom: 15px;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #555;
+}
+
+.formInput {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.formRow {
+    display: flex;
+    gap: 15px;
+}
+
+.formRow .formGroup {
+    flex: 1;
+}
+
+.errorMessage {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.checkboxInput {
+    margin-right: 8px;
+}
+
+.formActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.submitButton {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.cancelButton {
+    background-color: #f5f5f5;
+    color: #333;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* Cards list */
+.cardsList {
+    margin-top: 20px;
+}
+
+.cardItem {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: white;
+}
+
+.cardItem.defaultCard {
+    border-color: #2196F3;
+    background-color: #f5f9ff;
+}
+
+.cardIcon {
+    font-size: 24px;
+    color: #666;
+    margin-right: 15px;
+    width: 40px;
+    text-align: center;
+}
+
+.cardInfo {
+    flex: 1;
+}
+
+.cardNumber {
+    font-weight: 500;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.defaultBadge {
+    background: #2196F3;
+    color: white;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.cardDetails {
+    display: flex;
+    gap: 15px;
+    font-size: 13px;
+    color: #666;
+}
+
+.cardActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.actionButton {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #2196F3;
+}
+
+.deleteButton {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* Dark theme payments */
+[data-theme="dark"] .addCardForm {
+    background: #252525;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+[data-theme="dark"] .formTitle {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .formGroup label {
+    color: #b0b0b0;
+}
+
+[data-theme="dark"] .formInput {
+    background-color: #3a3a3a;
+    border-color: #555;
+    color: white;
+}
+
+[data-theme="dark"] .cardItem {
+    background: #252525;
+    border-color: #3a3a3a;
+}
+
+[data-theme="dark"] .cardItem.defaultCard {
+    background-color: #1a3a6e;
+    border-color: #4d90fe;
+}
+
+[data-theme="dark"] .cardIcon {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .cardNumber {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .cardDetails {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .actionButton {
+    border-color: #555;
+    color: #4d90fe;
+}
+
+[data-theme="dark"] .cancelButton {
+    background-color: #3a3a3a;
+    color: #e0e0e0;
+}
+
 /* Skeleton loading */
 .skeletonLoading {
     background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
@@ -612,7 +1204,44 @@
     border-radius: 0.25rem;
 }
 
+/* Dark theme skeleton */
+[data-theme="dark"] .skeletonLoading {
+    background: linear-gradient(90deg, #3a3a3a 25%, #4a4a4a 50%, #3a3a3a 75%);
+}
+
 @keyframes shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+    .profileLayout {
+        flex-direction: row;
+    }
+
+    .sidebar {
+        width: 16rem;
+        flex-shrink: 0;
+    }
+
+    .profileGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .statsGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 640px) {
+    .productsGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .productsGrid {
+        grid-template-columns: repeat(5, 1fr);
+    }
 }

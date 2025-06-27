@@ -1,11 +1,25 @@
 /* Footer Styles */
 .footer {
-    background-color: white;
-    color: #333;
+    background-color: var(--footer-bg, white);
+    color: var(--footer-text, #333);
     padding: 40px 0 0;
     margin-top: 40px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--footer-border, #eee);
     animation: fadeIn 0.8s ease-out;
+}
+
+[data-theme="dark"] .footer {
+    --footer-bg: #121212;
+    --footer-text: #e0e0e0;
+    --footer-border: #242424;
+    --footer-title: #ffffff;
+    --footer-link: #b0b0b0;
+    --footer-link-hover: #ffffff;
+    --footer-icon: #999999;
+    --footer-bottom-bg: #1a1a1a;
+    --footer-bottom-border: #2a2a2a;
+    --footer-legal: #888888;
+    --footer-copyright: #777777;
 }
 
 .footerTop {
@@ -35,7 +49,7 @@
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 20px;
-    color: #222;
+    color: var(--footer-title, #222);
 }
 
 .footerList {
@@ -49,14 +63,14 @@
 }
 
 .footerList a {
-    color: #666;
+    color: var(--footer-link, #666);
     text-decoration: none;
     transition: color 0.2s;
     font-size: 14px;
 }
 
 .footerList a:hover {
-    color: #0066cc;
+    color: var(--footer-link-hover, #0066cc);
 }
 
 .contactItem {
@@ -64,12 +78,12 @@
     align-items: center;
     margin-bottom: 15px;
     font-size: 14px;
-    color: #666;
+    color: var(--footer-link, #666);
 }
 
 .contactItem svg {
     margin-right: 10px;
-    color: #888;
+    color: var(--footer-icon, #888);
 }
 
 .socialLinks {
@@ -79,12 +93,12 @@
 }
 
 .socialLinks a {
-    color: #666;
+    color: var(--footer-link, #666);
     transition: color 0.2s;
 }
 
 .socialLinks a:hover {
-    color: #0066cc;
+    color: var(--footer-link-hover, #0066cc);
 }
 
 .appLinks {
@@ -109,9 +123,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--footer-bottom-border, #eee);
     padding: 20px;
-    background-color: #f9f9f9;
+    background-color: var(--footer-bottom-bg, #f9f9f9);
     text-align: center;
 }
 
@@ -124,9 +138,10 @@
     gap: 10px;
     padding: 0 20px;
 }
+
 .copyright {
     font-size: 13px;
-    color: #888;
+    color: var(--footer-copyright, #888);
     margin-bottom: 10px;
 }
 
@@ -138,16 +153,28 @@
 
 .legalLinks a {
     font-size: 13px;
-    color: #666;
+    color: var(--footer-legal, #666);
     text-decoration: none;
 }
 
 .legalLinks a:hover {
     text-decoration: underline;
+    color: var(--footer-link-hover, #0066cc);
 }
 
 .paymentMethods {
     display: flex;
     gap: 10px;
     margin-bottom: 10px;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }

@@ -1,10 +1,61 @@
+/* Modal Styles with Dark Theme */
+:root {
+    --modal-overlay-bg: linear-gradient(135deg, rgba(101,114,255,0.2) 0%, rgba(234,76,137,0.2) 100%);
+    --modal-bg: white;
+    --modal-border: rgba(255, 255, 255, 0.2);
+    --modal-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    --modal-accent-gradient: linear-gradient(90deg, #6572FF 0%, #EA4C89 100%);
+    --modal-close-bg: rgba(0, 0, 0, 0.04);
+    --modal-close-hover: rgba(0, 0, 0, 0.08);
+    --modal-title-color: #1A1A1A;
+    --modal-title-gradient: linear-gradient(90deg, #6572FF 0%, #EA4C89 100%);
+    --modal-subtitle: #666;
+    --modal-label: #444;
+    --modal-input-bg: #FAFAFA;
+    --modal-input-border: #EEE;
+    --modal-input-hover: #F5F5F5;
+    --modal-input-focus-shadow: rgba(101, 114, 255, 0.15);
+    --modal-error: #FF4757;
+    --modal-button-shadow: rgba(101, 114, 255, 0.2);
+    --modal-button-hover-shadow: rgba(101, 114, 255, 0.3);
+    --modal-switch-text: #666;
+    --modal-switch-button: #6572FF;
+    --modal-switch-hover: #EA4C89;
+    --modal-floating-circle: radial-gradient(circle, rgba(101,114,255,0.1) 0%, rgba(101,114,255,0) 70%);
+}
+
+[data-theme="dark"] {
+    --modal-overlay-bg: linear-gradient(135deg, rgba(101,114,255,0.3) 0%, rgba(234,76,137,0.3) 100%);
+    --modal-bg: #242424;
+    --modal-border: rgba(0, 0, 0, 0.3);
+    --modal-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    --modal-accent-gradient: linear-gradient(90deg, #7a85ff 0%, #f05d8a 100%);
+    --modal-close-bg: rgba(255, 255, 255, 0.08);
+    --modal-close-hover: rgba(255, 255, 255, 0.16);
+    --modal-title-color: #f0f0f0;
+    --modal-title-gradient: linear-gradient(90deg, #7a85ff 0%, #f05d8a 100%);
+    --modal-subtitle: #aaaaaa;
+    --modal-label: #cccccc;
+    --modal-input-bg: #2d2d2d;
+    --modal-input-border: #444;
+    --modal-input-hover: #333;
+    --modal-input-focus-shadow: rgba(122, 133, 255, 0.2);
+    --modal-error: #ff6b6b;
+    --modal-button-shadow: rgba(122, 133, 255, 0.3);
+    --modal-button-hover-shadow: rgba(122, 133, 255, 0.4);
+    --modal-switch-text: #aaaaaa;
+    --modal-switch-button: #7a85ff;
+    --modal-switch-hover: #f05d8a;
+    --modal-floating-circle: radial-gradient(circle, rgba(122,133,255,0.2) 0%, rgba(122,133,255,0) 70%);
+}
+
 .overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(101,114,255,0.2) 0%, rgba(234,76,137,0.2) 100%);
+    background: var(--modal-overlay-bg);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -14,14 +65,14 @@
 }
 
 .modal {
-    background: white;
+    background: var(--modal-bg);
     padding: 2rem 2.5rem;
     border-radius: 20px;
     width: 100%;
     max-width: 420px;
     position: relative;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: var(--modal-shadow);
+    border: 1px solid var(--modal-border);
     overflow: hidden;
     animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -33,14 +84,14 @@
     left: 0;
     right: 0;
     height: 6px;
-    background: linear-gradient(90deg, #6572FF 0%, #EA4C89 100%);
+    background: var(--modal-accent-gradient);
 }
 
 .closeButton {
     position: absolute;
     top: 1.25rem;
     right: 1.25rem;
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--modal-close-bg);
     border: none;
     width: 36px;
     height: 36px;
@@ -54,13 +105,14 @@
 }
 
 .closeButton:hover {
-    background: rgba(0, 0, 0, 0.08);
+    background: var(--modal-close-hover);
     transform: rotate(90deg);
 }
 
 .closeButton svg {
     width: 18px;
     height: 18px;
+    color: var(--modal-label);
 }
 
 .header {
@@ -72,9 +124,9 @@
 .title {
     font-size: 1.75rem;
     font-weight: 800;
-    color: #1A1A1A;
+    color: var(--modal-title-color);
     margin-bottom: 0.5rem;
-    background: linear-gradient(90deg, #6572FF 0%, #EA4C89 100%);
+    background: var(--modal-title-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -83,7 +135,7 @@
 
 .subtitle {
     font-size: 0.9375rem;
-    color: #666;
+    color: var(--modal-subtitle);
     margin: 0;
     font-weight: 400;
     letter-spacing: 0.2px;
@@ -106,35 +158,36 @@
 .label {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #444;
+    color: var(--modal-label);
     margin-left: 0.5rem;
 }
 
 .input {
     padding: 0.875rem 1.125rem;
-    border: 2px solid #EEE;
+    border: 2px solid var(--modal-input-border);
     border-radius: 10px;
     font-size: 0.9375rem;
     transition: all 0.3s ease;
-    background-color: #FAFAFA;
+    background-color: var(--modal-input-bg);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    color: var(--modal-title-color);
 }
 
 .input:hover {
-    border-color: #DDD;
-    background-color: #F5F5F5;
+    border-color: var(--modal-input-hover);
+    background-color: var(--modal-input-hover);
 }
 
 .input:focus {
     outline: none;
     border-color: #6572FF;
-    background-color: white;
-    box-shadow: 0 0 0 4px rgba(101, 114, 255, 0.15);
+    background-color: var(--modal-bg);
+    box-shadow: 0 0 0 4px var(--modal-input-focus-shadow);
     transform: translateY(-1px);
 }
 
 .error {
-    color: #FF4757;
+    color: var(--modal-error);
     font-size: 0.8125rem;
     margin-top: 0.25rem;
     margin-left: 0.5rem;
@@ -144,7 +197,7 @@
 
 .button {
     padding: 1rem;
-    background: linear-gradient(90deg, #6572FF 0%, #EA4C89 100%);
+    background: var(--modal-accent-gradient);
     color: white;
     border: none;
     border-radius: 10px;
@@ -156,14 +209,14 @@
     justify-content: center;
     align-items: center;
     height: 48px;
-    box-shadow: 0 4px 12px rgba(101, 114, 255, 0.2);
+    box-shadow: var(--modal-button-shadow);
     position: relative;
     overflow: hidden;
 }
 
 .button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(101, 114, 255, 0.3);
+    box-shadow: var(--modal-button-hover-shadow);
 }
 
 .button:active {
@@ -171,7 +224,7 @@
 }
 
 .button:disabled {
-    background: #DDD;
+    background: #555;
     cursor: not-allowed;
     transform: none !important;
     box-shadow: none !important;
@@ -193,7 +246,7 @@
 }
 
 .buttonLoading {
-    background: linear-gradient(90deg, #6572FF 0%, #EA4C89 100%);
+    background: var(--modal-accent-gradient);
 }
 
 .spinner {
@@ -207,7 +260,7 @@
 
 .switchText {
     text-align: center;
-    color: #666;
+    color: var(--modal-switch-text);
     font-size: 0.875rem;
     margin-top: 1.25rem;
     font-weight: 500;
@@ -216,7 +269,7 @@
 .switchButton {
     background: none;
     border: none;
-    color: #6572FF;
+    color: var(--modal-switch-button);
     cursor: pointer;
     font-weight: 700;
     padding: 0;
@@ -226,7 +279,7 @@
 }
 
 .switchButton:hover {
-    color: #EA4C89;
+    color: var(--modal-switch-hover);
 }
 
 .switchButton::after {
@@ -236,7 +289,7 @@
     left: 0;
     width: 100%;
     height: 2px;
-    background: linear-gradient(90deg, #6572FF 0%, #EA4C89 100%);
+    background: var(--modal-accent-gradient);
     transform: scaleX(0);
     transform-origin: right;
     transition: transform 0.3s ease;
@@ -251,7 +304,7 @@
     position: absolute;
     width: 120px;
     height: 120px;
-    background: radial-gradient(circle, rgba(101,114,255,0.1) 0%, rgba(101,114,255,0) 70%);
+    background: var(--modal-floating-circle);
     bottom: -20px;
     left: -20px;
     z-index: -1;
