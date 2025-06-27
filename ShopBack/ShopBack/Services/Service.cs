@@ -26,9 +26,9 @@ namespace ShopBack.Services
             await _repository.UpdateAsync(entity);
         }
 
-        public async Task DeleteAsync(T entity)
+        public async Task DeleteAsync(int id)
         {
-            await _repository.DeleteAsync(entity);
+            await _repository.DeleteAsync(id);
         }
     }
 }
