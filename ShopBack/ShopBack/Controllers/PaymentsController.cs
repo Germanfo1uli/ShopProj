@@ -17,11 +17,11 @@ namespace ShopBack.Controllers
             try
             {
                 var payments = await _paymentsService.GetAllAsync();
-                return Ok(payments); // 200
+                return Ok(payments);
             }
             catch (Exception)
             {
-                return StatusCode(500, "Internal server error"); // 500
+                return StatusCode(500, "Внутренняя ошибка сервера при получении списка платежей");
             }
         }
 
@@ -30,20 +30,20 @@ namespace ShopBack.Controllers
         {
             try
             {
-                var payment = await _paymentsService.GetByIdAsync(id); 
-                if (payment == null) return NotFound(); // 404
-                return Ok(payment); // 200
+                var payment = await _paymentsService.GetByIdAsync(id);
+                if (payment == null) return NotFound("Платеж не найден");
+                return Ok(payment);
             }
             catch (Exception)
             {
-                return StatusCode(500, "Internal server error"); // 500
+                return StatusCode(500, "Внутренняя ошибка сервера при получении платежа");
             }
         }
 
         [HttpPost]
         public async Task<ActionResult<Payments>> Create([FromBody] PaymentsCreate createDto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState); // 400
+            if (!ModelState.IsValid) return BadRequest("Некорректные данные платежа");
 
             try
             {
@@ -54,27 +54,27 @@ namespace ShopBack.Controllers
                     PaymentMethod = createDto.PaymentMethod,
                     Status = createDto.Status,
                     TransactionId = createDto.TransactionId,
-                    PaymentDate = DateTime.UtcNow 
+                    PaymentDate = DateTime.UtcNow
                 };
 
                 await _paymentsService.AddAsync(payment);
-                return CreatedAtAction(nameof(GetById), new { id = payment.Id }, payment); // 201
+                return CreatedAtAction(nameof(GetById), new { id = payment.Id }, payment);
             }
             catch (Exception)
             {
-                return StatusCode(500, "Internal server error"); // 500
+                return StatusCode(500, "Внутренняя ошибка сервера при создании платежа");
             }
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<Payments>> Update(int id, [FromBody] PaymentsUpdate updateDto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState); // 400
+            if (!ModelState.IsValid) return BadRequest("Некорректные данные для обновления платежа");
 
             try
             {
                 var payment = await _paymentsService.GetByIdAsync(id);
-                if (payment == null) return NotFound(); // 404
+                if (payment == null) return NotFound("Платеж не найден");
 
                 if (updateDto.Status != null)
                     payment.Status = updateDto.Status;
@@ -83,34 +83,33 @@ namespace ShopBack.Controllers
                     payment.TransactionId = updateDto.TransactionId;
 
                 await _paymentsService.UpdateAsync(payment);
-                return Ok(payment); // 200
+                return Ok(payment);
             }
             catch (Exception)
             {
-                return StatusCode(500, "Internal server error"); // 500
+                return StatusCode(500, "Внутренняя ошибка сервера при обновлении платежа");
             }
         }
 
-        
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
                 var payment = await _paymentsService.GetByIdAsync(id);
-                if (payment == null) return NotFound(); // 404
+                if (payment == null) return NotFound("Платеж не найден");
 
-                await _paymentsService.DeleteAsync(payment);
-                return NoContent(); // 204
+                await _paymentsService.DeleteAsync(id);
+                return NoContent();
             }
             catch (Exception)
             {
-                return StatusCode(500, "Internal server error"); // 500
+                return StatusCode(500, "Внутренняя ошибка сервера при удалении платежа");
             }
         }
-
     }
-     public class PaymentsCreate
+
+    public class PaymentsCreate
     {
         public int OrderId { get; set; }
         public decimal Amount { get; set; }
