@@ -16,7 +16,7 @@ const Settings = () => {
             setDarkMode(isDark);
             document.documentElement.setAttribute('data-theme', savedTheme);
         } else {
-            // Проверка системных предпочтений
+            // Тут по желанию системы типа
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             if (prefersDark) {
                 setDarkMode(true);

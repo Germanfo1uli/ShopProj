@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from '../CSS/Cart.module.css';
 import Footer from "./Components/Footer";
+import sb from "../CSS/Breadcrumbs.module.css";
 
 import { FaShoppingCart, FaTrashAlt, FaTimes, FaMinus, FaPlus, FaCreditCard, FaGift } from 'react-icons/fa';
 import { FaApplePay, FaGooglePay, FaCcPaypal } from 'react-icons/fa';
@@ -56,13 +57,12 @@ const CartPage = () => {
 
     return (
         <div className={styles.body}>
-            {/* Основное содержимое */}
             <main className={styles.main}>
                 {/* Хлебные крошки */}
-                <nav className={styles.breadcrumbs}>
-                    <a href="#" className={styles.breadcrumbLink}>Главная</a>
-                    <span className={styles.breadcrumbSeparator}>/</span>
-                    <span className={styles.breadcrumbActive}>Корзина</span>
+                <nav className={sb.breadcrumbs}>
+                    <a href="/home" className={sb.breadcrumbLink}>Главная</a>
+                    <span className={sb.breadcrumbSeparator}>/</span>
+                    <span className={sb.breadcrumbActive}>Корзина</span>
                 </nav>
 
                 <h1 className={styles.pageTitle}>

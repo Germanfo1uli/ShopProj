@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import styles from '../CSS/Home.module.css';
 import Footer from "./Components/Footer";
-/*Енто пизда*/
+
 const Home = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const sliderRef = useRef(null);
@@ -102,46 +102,6 @@ const Home = () => {
             rating: 5.0,
             reviews: 203,
             image: 'https://sonycenter.ru/upload/resize_cache/iblock/7e3/520_520_1/7e3b0b9c8c5d5f5a5c5b5d5f5a5c5b5d.jpg'
-        },
-        {
-            id: 9,
-            name: 'Фотоаппарат Canon EOS R50',
-            price: '65 990 ₽',
-            oldPrice: '69 990 ₽',
-            discount: '6',
-            specs: '24.2MP, 4K видео',
-            rating: 4.7,
-            reviews: 28,
-            image: 'https://canonstore.ru/upload/iblock/7e3/7e3b0b9c8c5d5f5a5c5b5d5f5a5c5b5d.jpg'
-        },
-        {
-            id: 10,
-            name: 'Электронная книга PocketBook 740',
-            price: '19 990 ₽',
-            specs: '7.8", 32GB, подсветка',
-            rating: 4.9,
-            reviews: 47,
-            image: 'https://pocketbook.ru/upload/iblock/7e3/7e3b0b9c8c5d5f5a5c5b5d5f5a5c5b5d.jpg'
-        },
-        {
-            id: 11,
-            name: 'Монитор LG UltraFine 27UP850',
-            price: '48 990 ₽',
-            oldPrice: '52 990 ₽',
-            discount: '8',
-            specs: '27", 4K, USB-C',
-            rating: 4.8,
-            reviews: 39,
-            image: 'https://lgstore.ru/upload/iblock/7e3/7e3b0b9c8c5d5f5a5c5b5d5f5a5c5b5d.jpg'
-        },
-        {
-            id: 12,
-            name: 'Внешний аккумулятор Anker 737',
-            price: '7 990 ₽',
-            specs: '24000mAh, 140W',
-            rating: 4.6,
-            reviews: 83,
-            image: 'https://ankerstore.ru/upload/iblock/7e3/7e3b0b9c8c5d5f5a5c5b5d5f5a5c5b5d.jpg'
         }
     ];
 
@@ -175,7 +135,6 @@ const Home = () => {
 
     return (
         <div className={styles.container}>
-
             {/* Слайдер */}
             <div className={styles.slider} ref={sliderRef}>
                 <div
@@ -246,12 +205,7 @@ const Home = () => {
                                                 key={i}
                                                 className={i < Math.floor(product.rating) ? styles.starFilled : styles.starEmpty}
                                             >
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                                                          fill={i < product.rating ? "currentColor" : "none"}
-                                                          stroke="currentColor"
-                                                          strokeWidth="1.5"/>
-                                                </svg>
+                                                ★
                                             </span>
                                         ))}
                                     </div>
@@ -299,12 +253,7 @@ const Home = () => {
                                                 key={i}
                                                 className={i < Math.floor(product.rating) ? styles.starFilled : styles.starEmpty}
                                             >
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                                                          fill={i < product.rating ? "currentColor" : "none"}
-                                                          stroke="currentColor"
-                                                          strokeWidth="1.5"/>
-                                                </svg>
+                                                ★
                                             </span>
                                         ))}
                                     </div>
@@ -317,6 +266,7 @@ const Home = () => {
                 </div>
             </div>
 
+            {/* Спецпредложения */}
             <div className={styles.productSection}>
                 <div className={styles.sectionHeader}>
                     <h2 className={styles.sectionTitle}>
@@ -329,7 +279,7 @@ const Home = () => {
                 <div className={styles.productGrid}>
                     {specialOffers.map(product => (
                         <div key={`spec-${product.id}`} className={styles.productCardHot}>
-                            <div className={styles.specialOfferBadge}>🔥 Горящее предложение</div>
+                            <div className={styles.specialOfferBadge}>Горящее предложение</div>
                             {product.discount && (
                                 <div className={styles.discountContainer}>
                                     <span className={styles.discountBadge}>-{product.discount}%</span>
@@ -352,12 +302,7 @@ const Home = () => {
                                                 key={i}
                                                 className={i < Math.floor(product.rating) ? styles.starFilled : styles.starEmpty}
                                             >
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                                                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                                                          fill={i < product.rating ? "currentColor" : "none"}
-                                                          stroke="currentColor"
-                                                          strokeWidth="1.5"/>
-                                                </svg>
+                                                ★
                                             </span>
                                         ))}
                                     </div>
