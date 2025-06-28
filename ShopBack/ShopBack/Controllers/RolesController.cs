@@ -4,6 +4,8 @@ using ShopBack.Services;
 
 namespace ShopBack.Controllers
 {
+    [Route("api/[controller]")] //api/roles
+    [ApiController]
     public class RolesController(Service<Roles> roleService) : ControllerBase, IController<Roles, RoleDate, RoleDate>
     {
         private readonly Service<Roles> _roleService = roleService;

@@ -4,7 +4,7 @@ namespace ShopBack.Repositories
 {
     public interface IAnalyticsRepository
     {
-        Task<IEnumerable<ProductViewsHistory>> GetProductViewHistoryAsync(int productId, DateTime? fromDate = null, DateTime? toDate = null); // История просмотров товара (с фильтром по дате)
+        Task<IEnumerable<ProductViewsHistory>> GetProductViewHistoryAsync(int userId); // История просмотров пользователя
         
         Task<IEnumerable<UserFavorites>> GetUserFavoritesAsync(int userId); // Список избранного пользователя
 

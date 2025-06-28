@@ -8,22 +8,11 @@ namespace ShopBack.Repositories
     {
         private readonly ShopDbContext _context = context;
 
-        public async Task<IEnumerable<ProductViewsHistory>> GetProductViewHistoryAsync(int productId, DateTime? fromDate = null, DateTime? toDate = null)
+        public async Task<IEnumerable<ProductViewsHistory>> GetProductViewHistoryAsync(int userId)
         {
-            var query = _context.ProductViewsHistory
-                .Where(p => p.ProductId == productId);
-
-            if (fromDate.HasValue)
-            {
-                query = query.Where(pvh => pvh.ViewedAt >= fromDate.Value);
-            }
-
-            if (toDate.HasValue)
-            {
-                query = query.Where(pvh => pvh.ViewedAt <= toDate.Value);
-            }
-
-            return await query.ToListAsync();
+            return await _context.ProductViewsHistory
+                .Where(p => p.UserId == userId)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<UserFavorites>> GetUserFavoritesAsync(int userId)

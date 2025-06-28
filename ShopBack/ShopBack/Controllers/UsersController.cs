@@ -4,6 +4,8 @@ using ShopBack.Services;
 
 namespace ShopBack.Controllers
 {
+    [Route("api/[controller]")] //api/users
+    [ApiController]
     public class UsersController(UserService userService, TokenService tokenService) : ControllerBase, IController<Users, UserRegisterData, UserUpdateData>
     {
         private readonly UserService _userService = userService;

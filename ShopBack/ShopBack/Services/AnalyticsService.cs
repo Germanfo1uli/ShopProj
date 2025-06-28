@@ -7,9 +7,9 @@ namespace ShopBack.Services
     {
         private readonly IAnalyticsRepository _analyticsRepository = analyticsRepository;
 
-        public async Task<IEnumerable<ProductViewsHistory>> GetProductViewHistoryAsync(int productId, DateTime? fromDate = null, DateTime? toDate = null)
+        public async Task<IEnumerable<ProductViewsHistory>> GetProductViewHistoryAsync(int userId)
         {
-            return await _analyticsRepository.GetProductViewHistoryAsync(productId, fromDate, toDate);
+            return await _analyticsRepository.GetProductViewHistoryAsync(userId);
         }
 
         public async Task<(int ViewCount, int FavoriteCount)> GetProductStatsAsync(int productId)
