@@ -5,7 +5,7 @@ namespace ShopBack.Repositories
 {
     public interface ITokensRepository : IRepository<RefreshTokens>
     {
-        Task<TokenPair> GenerateTokensAsync(Users user); // Генерирует 2 токена
+        Task<TokenPair> GenerateTokensAsync(Users user, string roleName); // Генерирует 2 токена
 
         Task<ClaimsPrincipal?> ValidateJwtTokenAsync(string token); // Валидует и извлекает данные из JWT
 
@@ -21,7 +21,7 @@ namespace ShopBack.Repositories
 
         Task<bool> IsRefreshTokenValidAsync(string token); // Валидует рефреш - токен
 
-        string GenerateJwtToken(Users user);
+        string GenerateJwtToken(Users user, string roleName);
 
         Task<RefreshTokens> GenerateRefreshTokenAsync(int userId);
     }

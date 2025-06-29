@@ -8,9 +8,10 @@ namespace ShopBack.Services
     {
         private readonly ITokensRepository _tokensRepository = tokensRepository;
 
-        public async Task<TokenPair> GenerateTokensAsync(Users user)
+        public async Task<TokenPair> GenerateTokensAsync(Users user, string roleName)
         {
-            return await _tokensRepository.GenerateTokensAsync(user);
+
+            return await _tokensRepository.GenerateTokensAsync(user, roleName);
         }
 
         public async Task<ClaimsPrincipal?> ValidateJwtTokenAsync(string token)

@@ -33,7 +33,7 @@ namespace ShopBack.Services
 
             await _usersRepository.AddAsync(user);
 
-            var tokens = await _tokenService.GenerateTokensAsync(user);
+            var tokens = await _tokenService.GenerateTokensAsync(user, roleName);
 
             return new AuthResult
             {
@@ -54,7 +54,7 @@ namespace ShopBack.Services
             if (!user.IsActive)
                 throw new UnauthorizedAccessException("Аккаунт деактивирован");
 
-            var tokens = await _tokenService.GenerateTokensAsync(user);
+            var tokens = await _tokenService.GenerateTokensAsync(user, roleName);
 
             return new AuthResult
             {
@@ -75,7 +75,7 @@ namespace ShopBack.Services
 
             var user = await _tokenService.GetUserByTokenAsync(token) ?? throw new KeyNotFoundException("Пользователь не существует");
 
-            var tokens = await _tokenService.GenerateTokensAsync(user);
+            var tokens = await _tokenService.GenerateTokensAsync(user, roleName);
 
             refreshToken.Revoked = DateTime.UtcNow;
             refreshToken.ReplacedByToken = tokens.RefreshToken;
