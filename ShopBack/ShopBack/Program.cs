@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ShopBack.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +47,20 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<ShopDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
 
+
+//подключение репозиториев
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IUsersRepository, UsersRepository>();
+builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
+builder.Services.AddScoped<ICategoriesRepository, CategoriesRepository>();
+builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
+builder.Services.AddScoped<IReviewsRepository, ReviewsRepository>();
+builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+builder.Services.AddScoped<ITokensRepository, TokensRepository>();
+
+
+//Подключение сервисов 
 builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
 builder.Services.AddScoped<AnalyticsService>();
 builder.Services.AddScoped<CategoriesService>();
@@ -61,11 +76,22 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Настройка конвейера запросов
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // Тестовые запросы для проверки работы API
+    app.MapGet("/api/test/products", async (ProductsService productsService) =>
+    {
+        return Results.Ok(await productsService.GetAllAsync());
+    }).RequireAuthorization();
+
+    app.MapGet("/api/test/users", async (UserService userService) =>
+    {
+        return Results.Ok(await userService.GetAllAsync());
+    }).RequireAuthorization();
 }
 
 app.UseHttpsRedirection();
