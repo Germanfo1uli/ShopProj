@@ -12,10 +12,6 @@ namespace ShopBack.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(50)]
-        public string Username { get; set; }
-
-        [Required]
         [MaxLength(100)]
         public string Email { get; set; }
 
@@ -29,6 +25,9 @@ namespace ShopBack.Models
 
         [MaxLength(50)]
         public string? FirstName { get; set; }
+
+        [MaxLength(50)]
+        public string? MiddleName { get; set; }
 
         [MaxLength(50)]
         public string? LastName { get; set; }

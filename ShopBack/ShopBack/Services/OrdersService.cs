@@ -4,9 +4,9 @@ using ShopBack.Repositories;
 
 namespace ShopBack.Services
 {
-    public class OrdersService(OrdersRepository repository) : Service<Orders>(repository)
+    public class OrdersService(IOrdersRepository repository) : Service<Orders>(repository)
     {
-        private readonly OrdersRepository _ordersRepository = repository;
+        private readonly IOrdersRepository _ordersRepository = repository;
       
 
         public async Task<IEnumerable<Orders>> GetUserOrdersAsync(int userId)

@@ -4,13 +4,16 @@ namespace ShopBack.Repositories
 {
     public interface IAnalyticsRepository
     {
-        // История просмотров товара (с фильтром по дате)
-        Task<IEnumerable<ProductViewsHistory>> GetProductViewHistoryAsync(int productId, DateTime? fromDate = null, DateTime? toDate = null);
-
+        Task<IEnumerable<ProductViewsHistory>> GetProductViewHistoryAsync(int userId); // История просмотров пользователя
+        
         Task<IEnumerable<UserFavorites>> GetUserFavoritesAsync(int userId); // Список избранного пользователя
 
         Task<int> GetProductViewCountAsync(int productId); // Количество просмотров товара
 
         Task<int> GetFavoriteCountAsync(int productId); // Количество добавлений в избранное
+
+        Task<double> GetAverageProductRatingAsync(int productId); // Среднее значение рейтинга
+
+        Task<int> GetProductReviewCountAsync(int productId); // Количество 
     }
 }

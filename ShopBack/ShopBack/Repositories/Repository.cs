@@ -16,7 +16,12 @@ namespace ShopBack.Repositories
 
         public async Task<T> GetByIdAsync(int id)
         {
-            return await _dbSet.FindAsync(id);
+            var entity = await _dbSet.FindAsync(id);
+            if (entity == null)
+            {
+                throw new KeyNotFoundException($"Сущность с ID {id} не найдена");
+            }
+            return entity;
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
@@ -36,8 +41,15 @@ namespace ShopBack.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(T entity)
+        public async Task DeleteAsync(int id)
         {
+            var entity = await _dbSet.FindAsync(id);
+
+            if (entity == null)
+            {
+                throw new KeyNotFoundException($"Сущность с ID {id} не найдена");
+            }
+
             _dbSet.Remove(entity);
             await _context.SaveChangesAsync();
         }
