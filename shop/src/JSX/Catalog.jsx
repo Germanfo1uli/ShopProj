@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import styles from '../CSS/Catalog.module.css';
-import { FaHeart, FaRegHeart, FaShoppingCart, FaStar, FaRegStar, FaStarHalfAlt, FaChevronLeft, FaChevronRight, FaStore } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaShoppingCart, FaStar, FaRegStar, FaStarHalfAlt, FaChevronLeft, FaChevronRight, FaStore,FaSearch  } from 'react-icons/fa';
 import Footer from "./Components/Footer";
 import sb from "../CSS/Breadcrumbs.module.css";
+import {Link} from "react-router-dom";
 
 const Catalog = () => {
     const [activeTab, setActiveTab] = useState('Все товары');
@@ -273,9 +274,12 @@ const Catalog = () => {
                                             <span className={styles.reviews}>({product.reviews})</span>
                                         </div>
                                         <button className={styles.addToCart}>
-                                            <FaShoppingCart className={styles.cartIcon} />
-                                            В корзину
+                                            <Link to="/productPage" className={styles.linkToCart}>
+                                                <FaSearch className={styles.cartIcon} />
+                                                Перейти к товару
+                                            </Link>
                                         </button>
+
                                     </div>
                                 </div>
                             ))}

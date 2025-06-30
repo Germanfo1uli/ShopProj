@@ -477,6 +477,13 @@
     gap: 0.5rem;
     transition: background-color 0.2s;
 }
+.linkToCart{
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    gap: 0.5rem;
+    display: flex;
+}
 
 .addToCart:hover {
     background-color: var(--button-hover, #1648c0);

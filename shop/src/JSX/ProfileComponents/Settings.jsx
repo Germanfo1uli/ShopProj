@@ -1,37 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import styles from '../../CSS/Profile.module.css';
+import { useTheme } from '../Context/ThemeContext';
 
 const Settings = () => {
-    const [darkMode, setDarkMode] = useState(false);
+    const { darkMode, toggleTheme } = useTheme();
     const [language, setLanguage] = useState('ru');
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [smsNotifications, setSmsNotifications] = useState(false);
-
-    // При загрузке компонента проверяем сохранённую тему
-    useEffect(() => {
-        const savedTheme = localStorage.getItem('darkMode');
-        if (savedTheme) {
-            const isDark = savedTheme === 'dark';
-            setDarkMode(isDark);
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        } else {
-            // Тут по желанию системы типа
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (prefersDark) {
-                setDarkMode(true);
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-        }
-    }, []);
-
-    const handleThemeChange = () => {
-        const newDarkMode = !darkMode;
-        setDarkMode(newDarkMode);
-        const theme = newDarkMode ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('darkMode', theme);
-    };
 
     const handleLanguageChange = (e) => {
         setLanguage(e.target.value);
@@ -58,7 +34,7 @@ const Settings = () => {
                             <input
                                 type="checkbox"
                                 checked={darkMode}
-                                onChange={handleThemeChange}
+                                onChange={toggleTheme}
                             />
                             <span className={styles.slider}></span>
                         </label>
