@@ -6,9 +6,9 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] //api/productspecifications
     [ApiController]
-    public class ProductSpecificationsController(Service<ProductSpecifications> service) : ControllerBase
+    public class ProductSpecificationsController(IService<ProductSpecifications> service) : ControllerBase
     {
-        private readonly Service<ProductSpecifications> _service = service;
+        private readonly IService<ProductSpecifications> _service = service;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductSpecifications>>> GetAll()

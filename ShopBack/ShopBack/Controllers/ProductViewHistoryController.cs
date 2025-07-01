@@ -7,9 +7,9 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] // api/productviewhistory
     [ApiController]
-    public class ProductViewsHistoryController(Service<ProductViewsHistory> service) : ControllerBase, IController<ProductViewsHistory, ProductViewCreate, ProductViewUpdate>
+    public class ProductViewsHistoryController(IService<ProductViewsHistory> service) : ControllerBase, IController<ProductViewsHistory, ProductViewCreate, ProductViewUpdate>
     {
-        private readonly Service<ProductViewsHistory> _service = service;
+        private readonly IService<ProductViewsHistory> _service = service;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductViewsHistory>>> GetAll()

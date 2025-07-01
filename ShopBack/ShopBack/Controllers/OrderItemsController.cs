@@ -6,9 +6,9 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] //api/orderitems
     [ApiController]
-    public class OrderItemsController(Service<OrderItems> orderItemsService) : ControllerBase, IController<OrderItems, OrderItemsCreate, OrderItemsUpdate>
+    public class OrderItemsController(IService<OrderItems> orderItemsService) : ControllerBase, IController<OrderItems, OrderItemsCreate, OrderItemsUpdate>
     {
-        private readonly Service<OrderItems> _orderItemsService = orderItemsService;
+        private readonly IService<OrderItems> _orderItemsService = orderItemsService;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderItems>>> GetAll()

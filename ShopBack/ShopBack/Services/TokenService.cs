@@ -4,14 +4,25 @@ using System.Security.Claims;
 
 namespace ShopBack.Services
 {
-    public class TokenService(ITokensRepository tokensRepository) : Service<RefreshTokens>(tokensRepository)
+    public class TokenService(ITokensRepository tokensRepository,
+                              IRepository<UserRoles> userRoleRepository,
+                              IRepository<Roles> roleRepository) : Service<RefreshTokens>(tokensRepository)
     {
         private readonly ITokensRepository _tokensRepository = tokensRepository;
+        private readonly IRepository<UserRoles> _userRoleRepository = userRoleRepository;
+        private readonly IRepository<Roles> _roleRepository = roleRepository;
 
-        public async Task<TokenPair> GenerateTokensAsync(Users user, string roleName)
+        public async Task<TokenPair> GenerateTokensAsync(Users user)
         {
+            var userRoles = await _userRoleRepository.GetAllAsync();
+    
+            var userRole = userRoles.FirstOrDefault(ur => ur.UserId == user.Id);
 
-            return await _tokensRepository.GenerateTokensAsync(user, roleName);
+            if (userRole == null)
+                throw new Exception("User role not found");
+
+            var roleName = await _roleRepository.GetByIdAsync(userRole.RoleId);
+            return await _tokensRepository.GenerateTokensAsync(user, roleName.Name);
         }
 
         public async Task<ClaimsPrincipal?> ValidateJwtTokenAsync(string token)

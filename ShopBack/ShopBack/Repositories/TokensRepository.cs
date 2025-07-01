@@ -109,7 +109,7 @@ namespace ShopBack.Repositories
                    refreshToken.Expires > DateTime.UtcNow;
         }
 
-        public string GenerateJwtToken(Users user, string userRole)
+        public string GenerateJwtToken(Users user, string roleName)
         {
 
             var jwtToken = new JwtSecurityToken(
@@ -117,12 +117,12 @@ namespace ShopBack.Repositories
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, userRole)
+                    new Claim(ClaimTypes.Role, roleName)
                 },
                 expires: DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("Jwt:ExpireMinutes")),
                 signingCredentials: new SigningCredentials(
                     new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"])),
-                    SecurityAlgorithms.HmacSha256Signature)
+                    SecurityAlgorithms.HmacSha256)
             );
 
             var tokenHandler = new JwtSecurityTokenHandler();
