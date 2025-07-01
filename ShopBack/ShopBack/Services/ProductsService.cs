@@ -3,7 +3,7 @@ using ShopBack.Repositories;
 
 namespace ShopBack.Services
 {
-    public class ProductsService(IProductsRepository repository) : Service<Products>((IRepository<Products>)repository)
+    public class ProductsService(IProductsRepository repository) : Service<Products>(repository)
     {
         private readonly IProductsRepository _productsRepository = repository;
 

@@ -4,9 +4,11 @@ using ShopBack.Models;
 
 namespace ShopBack.Repositories
 {
-    public class ProductsRepository(ShopDbContext context) : IProductsRepository
+    public class ProductsRepository : Repository<Products>, IProductsRepository
     {
-        private readonly ShopDbContext _context = context;
+        public ProductsRepository(ShopDbContext context) : base(context)
+        {
+        }
 
         public async Task<IEnumerable<Products>> GetByCategoryAsync(int categoryId)
         {
