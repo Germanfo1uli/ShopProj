@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import {useAuth} from './Hooks/UseToken.js';
+import { apiRequest } from './Api/ApiRequest.js'; 
 import styles from '../CSS/Profile.module.css';
 import Footer from "./Components/Footer";
 import History from './ProfileComponents/History';
@@ -14,13 +16,30 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('orders');
     const [activeMenu, setActiveMenu] = useState('profile');
+    const [userData, setUserData] = useState(null); 
+    const { isAuthenticated, userId } = useAuth(); 
 
     useEffect(() => {
-        const timer = setTimeout(() => {
+    const fetchUserData = async () => { // ПОКА ЧТО FETCH ТОЛЬКО ДЛЯ ИНФЫ О ПОЛЬЗОВАТЕЛЕ 
+        try {
+            
+                const data = await apiRequest(`/api/users/${1}`, {
+                    
+                });
+                setUserData(data);
+                console.log(data)
+            
             setLoading(false);
-        }, 1500);
-        return () => clearTimeout(timer);
-    }, []);
+            
+        } catch (error) {
+            console.error('Ошибка загрузки данных:', error);
+            setLoading(false);
+        }
+    };
+
+        fetchUserData();
+        
+    }, [isAuthenticated, userId]);
 
     const renderTabContent = () => {
         switch (activeTab) {
@@ -62,15 +81,27 @@ const Profile = () => {
                                     <div className={styles.infoSection}>
                                         <div>
                                             <p className={styles.infoLabel}>Имя</p>
-                                            <p className={styles.infoValue}>Никита</p>
+                                            <p className={styles.infoValue}>
+                                                {loading ? 'Загрузка...' : userData?.firstName || 'Не указано'}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className={styles.infoLabel}>Отчество</p>
+                                            <p className={styles.infoValue}>
+                                                {loading ? 'Загрузка...' : userData?.middleName || 'Не указано'}
+                                            </p>
                                         </div>
                                         <div>
                                             <p className={styles.infoLabel}>Фамилия</p>
-                                            <p className={styles.infoValue}>Шушаков</p>
+                                            <p className={styles.infoValue}>
+                                                {loading ? 'Загрузка...' : userData?.lastName || 'Не указано'}
+                                            </p>
                                         </div>
                                         <div>
                                             <p className={styles.infoLabel}>Дата рождения</p>
-                                            <p className={styles.infoValue}>15 января 2000</p>
+                                            <p className={styles.infoValue}>
+                                                {loading ? 'Загрузка...' : userData?.birthDate || 'Пока нет в БД'}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -80,11 +111,15 @@ const Profile = () => {
                                     <div className={styles.infoSection}>
                                         <div>
                                             <p className={styles.infoLabel}>Эл. почта</p>
-                                            <p className={styles.infoValue}>Zolodov@gmail.com</p>
+                                            <p className={styles.infoValue}>
+                                                {loading ? 'Загрузка...' : userData?.email || 'Не указано'}
+                                            </p>
                                         </div>
                                         <div>
                                             <p className={styles.infoLabel}>Телефон</p>
-                                            <p className={styles.infoValue}>+7 (912) 345-67-89</p>
+                                            <p className={styles.infoValue}>
+                                                {loading ? 'Загрузка...' : userData?.phoneNumber || 'Не указано'}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
