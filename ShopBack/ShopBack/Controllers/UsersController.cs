@@ -121,7 +121,7 @@ namespace ShopBack.Controllers
             }
         }
 
-        [HttpPost("{generatetokens}")]
+        [HttpPost("generatetokens")]
         public async Task<ActionResult<Users>> GenerateTokens([FromBody] RefreshToken token)
         {
             try

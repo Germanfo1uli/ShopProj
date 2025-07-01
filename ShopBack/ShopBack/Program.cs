@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ShopBack.Repositories;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,7 +71,36 @@ builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+
+    // Добавляем кнопку авторизации в Swagger UI
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
+        Name = "Authorization", // Название заголовка
+        In = ParameterLocation.Header, // Где передаётся токен
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    // Указывает, что токен требуется для всех эндпоинтов (с параметром [Authorize])
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 var app = builder.Build();
 
@@ -80,16 +110,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    // Тестовые запросы для проверки работы API
-    app.MapGet("/api/test/products", async (ProductsService productsService) =>
-    {
-        return Results.Ok(await productsService.GetAllAsync());
-    }).RequireAuthorization();
-
-    app.MapGet("/api/test/users", async (UserService userService) =>
-    {
-        return Results.Ok(await userService.GetAllAsync());
-    }).RequireAuthorization();
 }
 
 app.UseHttpsRedirection();

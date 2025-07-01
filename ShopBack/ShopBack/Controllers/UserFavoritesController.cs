@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
 using static System.Net.Mime.MediaTypeNames;
@@ -11,6 +12,7 @@ namespace ShopBack.Controllers
     {
         private readonly FavoriteService _favoritesService = favoritesService;
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<UserFavorites>> Create([FromBody] FavoriteData createDto)
         {
@@ -30,6 +32,7 @@ namespace ShopBack.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete]
         public async Task<IActionResult> Delete([FromBody] FavoriteData createDto)
         {
@@ -44,6 +47,7 @@ namespace ShopBack.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("{userId}")]
         public async Task<ActionResult<IEnumerable<UserFavorites>>> GetAllByUserId(int userId)
         {
