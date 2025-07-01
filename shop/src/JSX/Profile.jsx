@@ -8,6 +8,7 @@ import Settings from './ProfileComponents/Settings';
 import OrdersTab from './ProfileComponents/OrdersTab';
 import ReturnsTab from './ProfileComponents/ReturnsTab';
 import SubscriptionsTab from './ProfileComponents/SubscriptionsTab';
+import FavoritesTab from './ProfileComponents/FavoritesTab';
 
 const Profile = () => {
     const [loading, setLoading] = useState(true);
@@ -34,6 +35,8 @@ const Profile = () => {
 
     const renderMenuContent = () => {
         switch (activeMenu) {
+            case 'favorites':
+                return <FavoritesTab />;
             case 'history':
                 return <History />;
             case 'addresses':
@@ -348,6 +351,13 @@ const Profile = () => {
                                 >
                                     <i className="fas fa-user"></i>
                                     <span>Профиль</span>
+                                </button>
+                                <button
+                                    className={`${styles.navLink} ${activeMenu === 'favorites' ? styles.activeLink : ''}`}
+                                    onClick={() => setActiveMenu('favorites')}
+                                >
+                                    <i className="fas fa-heart"></i>
+                                    <span>Избранное</span>
                                 </button>
                                 <button
                                     className={`${styles.navLink} ${activeMenu === 'history' ? styles.activeLink : ''}`}

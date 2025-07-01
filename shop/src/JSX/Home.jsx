@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import styles from '../CSS/Home.module.css';
 import Footer from "./Components/Footer";
+import { FaGift, FaGem, FaFire } from 'react-icons/fa';
 
 const Home = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -174,7 +175,7 @@ const Home = () => {
             <div className={styles.productSection}>
                 <div className={styles.sectionHeader}>
                     <h2 className={styles.sectionTitle}>
-                        <span className={styles.titleAccent}>🔥</span> Популярные товары
+                        <span className={styles.titleAccent}><FaFire /></span> Популярные товары
                     </h2>
                     <a href="#" className={styles.showAllLink}>
                         Смотреть все <span className={styles.arrow}>→</span>
@@ -222,7 +223,7 @@ const Home = () => {
             <div className={styles.productSection}>
                 <div className={styles.sectionHeader}>
                     <h2 className={styles.sectionTitle}>
-                        <span className={styles.titleAccent}>💎</span> Рекомендации для вас
+                        <span className={styles.titleAccent}><FaGem /></span> Рекомендации для вас
                     </h2>
                     <a href="#" className={styles.showAllLink}>
                         Смотреть все <span className={styles.arrow}>→</span>
@@ -270,7 +271,7 @@ const Home = () => {
             <div className={styles.productSection}>
                 <div className={styles.sectionHeader}>
                     <h2 className={styles.sectionTitle}>
-                        <span className={styles.titleAccent}>🎁</span> Спецпредложения
+                        <span className={styles.titleAccent}><FaGift /></span> Спецпредложения
                     </h2>
                     <a href="#" className={styles.showAllLinkHot}>
                         Смотреть все <span className={styles.arrow}>→</span>
