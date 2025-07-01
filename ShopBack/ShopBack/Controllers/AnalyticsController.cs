@@ -6,7 +6,7 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] //api/analytics
     [ApiController]
-    public class AnalyticsControlles(AnalyticsService analyticsService) : ControllerBase
+    public class AnalyticsController(AnalyticsService analyticsService) : ControllerBase
     {
         private readonly AnalyticsService _analyticsService = analyticsService;
 

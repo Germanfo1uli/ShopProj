@@ -6,9 +6,9 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] //api/roles
     [ApiController]
-    public class RolesController(Service<Roles> roleService) : ControllerBase, IController<Roles, RoleDate, RoleDate>
+    public class RolesController(IService<Roles> roleService) : ControllerBase, IController<Roles, RoleDate, RoleDate>
     {
-        private readonly Service<Roles> _roleService = roleService;
+        private readonly IService<Roles> _roleService = roleService;
 
         [HttpPost]
         public async Task<ActionResult<Roles>> Create([FromBody] RoleDate createDto)

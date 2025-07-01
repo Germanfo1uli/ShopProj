@@ -6,9 +6,9 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] //api/productimages
     [ApiController]
-    public class ProductImagesController(Service<ProductImages> productImageService) : ControllerBase, IController<ProductImages, ImagesData, ImagesData>
+    public class ProductImagesController(IService<ProductImages> productImageService) : ControllerBase, IController<ProductImages, ImagesData, ImagesData>
     {
-        private readonly Service<ProductImages> _productImageService = productImageService;
+        private readonly IService<ProductImages> _productImageService = productImageService;
 
         [HttpPost]
         public async Task<ActionResult<ProductImages>> Create([FromBody] ImagesData createDto)

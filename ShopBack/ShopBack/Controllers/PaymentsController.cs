@@ -6,9 +6,9 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] //api/payments
     [ApiController]
-    public class PaymentsController(Service<Payments> paymentsService, OrdersService ordersService) : ControllerBase, IController<Payments, PaymentsCreate, PaymentsUpdate>
+    public class PaymentsController(IService<Payments> paymentsService, OrdersService ordersService) : ControllerBase, IController<Payments, PaymentsCreate, PaymentsUpdate>
     {
-        private readonly Service<Payments> _paymentsService = paymentsService;
+        private readonly IService<Payments> _paymentsService = paymentsService;
         private readonly OrdersService _ordersService = ordersService;
 
         [HttpGet]
