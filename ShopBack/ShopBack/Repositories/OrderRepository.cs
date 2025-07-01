@@ -48,9 +48,10 @@ namespace ShopBack.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Orders order)
+        public async Task DeleteAsync(int id)
         {
-            _context.Orders.Remove(order);
+            var entity = await _context.Orders.FindAsync(id);
+            _context.Orders.Remove(entity);
             await _context.SaveChangesAsync();
         }
 

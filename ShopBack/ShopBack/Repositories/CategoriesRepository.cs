@@ -36,10 +36,12 @@ namespace ShopBack.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Categories entity)
+        public async Task DeleteAsync(int id) // Измененная сигнатура
         {
+            var entity = await _context.Categories.FindAsync(id);
             _context.Categories.Remove(entity);
             await _context.SaveChangesAsync();
+           
         }
 
         public async Task<IEnumerable<Categories>> GetParentCategoriesAsync()

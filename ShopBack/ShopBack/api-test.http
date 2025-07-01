@@ -1,0 +1,138 @@
+@host = http://localhost:5000
+@contentType = application/json
+@adminToken = 
+@userToken = "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ1c2VyQG1haWwuY29tIiwiZXhwIjoxNzUxMjA2MzU3fQ.ogL7YejD1oMtyZpdScWV5YGbSHS8Mk5yyBF8ymVGly0",
+
+@refreshToken = "bOD8A0eWZRi7xU7oV2wwvxcpkuIdBA4zViFeLm3yhfIzHNNTdJJYReu78TEjAFc/vgA3Bgjkh4lLZCD1gBAPXA=="
+
+### 1. Аутентификация и пользователи ###
+
+### Регистрация нового пользователя
+POST {{host}}/api/users/register
+Content-Type: {{contentType}}
+
+{
+  "email": "user@mail.com",
+  "password": "Password123!",
+  "firstName": "Иван",
+  "middleName": "Иванович",
+  "lastName": "Иванов"
+}
+
+### Авторизация пользователя
+POST {{host}}/api/users/login
+Content-Type: {{contentType}}
+
+{
+  "email": "user@mail.com",
+  "password": "Password123!"
+}
+
+### Получить всех пользователей (требует авторизации)
+GET {{host}}/api/users
+Authorization: Bearer {{adminToken}}
+
+### Получить пользователя по ID
+GET {{host}}/api/users/1
+Authorization: Bearer {{adminToken}}
+
+### Обновить данные пользователя
+PUT {{host}}/api/users/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "email": "updated@mail.com",
+  "firstName": "НовоеИмя",
+  "middleName": "НовоеОтчество",
+  "lastName": "НоваяФамилия",
+  "phoneNumber": "+79991234567"
+}
+
+### Сменить пароль
+PUT {{host}}/api/users/1/changepassword
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "oldPassword": "Password123!",
+  "newPassword": "NewPassword123!",
+  "token": {{refreshToken}}
+}
+
+### Удалить пользователя
+DELETE {{host}}/api/users/1
+Authorization: Bearer {{adminToken}}
+
+### Обновить токены
+POST {{host}}/api/users/generatetokens
+Content-Type: {{contentType}}
+
+{
+  "token": "your_refresh_token_here"
+}
+
+### 2. Роли ###
+
+### Создать новую роль
+POST {{host}}/api/roles
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Moderator"
+}
+
+### Получить все роли
+GET {{host}}/api/roles
+Authorization: Bearer {{adminToken}}
+
+### Получить роль по ID
+GET {{host}}/api/roles/1
+Authorization: Bearer {{adminToken}}
+
+### Обновить роль
+PUT {{host}}/api/roles/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "UpdatedRoleName"
+}
+
+### Удалить роль
+DELETE {{host}}/api/roles/1
+Authorization: Bearer {{adminToken}}
+
+### 3. Назначение ролей пользователям ###
+
+### Назначить роль пользователю
+POST {{host}}/api/userroles
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "userId": 1,
+  "roleId": 2
+}
+
+### Получить все назначения ролей
+GET {{host}}/api/userroles
+Authorization: Bearer {{adminToken}}
+
+### Получить назначение по ID
+GET {{host}}/api/userroles/1
+Authorization: Bearer {{adminToken}}
+
+### Обновить роль пользователя
+PUT {{host}}/api/userroles/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "roleId": 3
+}
+
+### Удалить назначение роли
+DELETE {{host}}/api/userroles/1
+Authorization: Bearer {{adminToken}}
