@@ -1,0 +1,25 @@
+.breadcrumbs {
+    display: flex;
+    font-size: 0.875rem;
+    color: var(--secondary-text);
+    margin-bottom: 1.5rem;
+}
+
+.breadcrumbLink {
+    color: var(--secondary-text);
+    transition: color 0.2s;
+    text-decoration: none;
+}
+
+.breadcrumbLink:hover {
+    color: var(--accent-color);
+}
+
+.breadcrumbSeparator {
+    margin: 0 0.5rem;
+}
+
+.breadcrumbActive {
+    color: var(--accent-color);
+    font-weight: 500;
+}
