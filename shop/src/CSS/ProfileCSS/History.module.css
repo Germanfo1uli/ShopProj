@@ -1,0 +1,61 @@
+/* History.module.css */
+
+.profileCard {
+    background: var(--input-bg);
+    color: var(--input-text);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--input-border);
+}
+
+[data-theme="dark"] .profileCard {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.cardTitle {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--nav-text);
+    margin: 0;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--input-placeholder);
+}
+
+.emptyState i {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .emptyState i {
+    color: #555555;
+}
+
+.emptyState p {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

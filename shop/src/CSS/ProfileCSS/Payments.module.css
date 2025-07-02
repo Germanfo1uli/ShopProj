@@ -1,0 +1,313 @@
+/* Payments.module.css */
+
+.profileCard {
+    background: var(--input-bg);
+    color: var(--input-text);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--input-border);
+}
+
+[data-theme="dark"] .profileCard {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.cardTitle {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--nav-text);
+    margin: 0;
+}
+
+.editButton {
+    color: #2563eb;
+    font-weight: 500;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background-color: transparent;
+    border: none;
+}
+
+.editButton:hover {
+    color: #1e40af;
+}
+
+.editButton i {
+    font-size: 0.75rem;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--input-placeholder);
+}
+
+.emptyState i {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: #a0a0a0;
+}
+
+.emptyState p {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* Add Card Form */
+.addCardForm {
+    background: var(--dropdown-hover);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.formTitle {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    color: var(--nav-text);
+}
+
+.formGroup {
+    margin-bottom: 15px;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: var(--nav-text);
+}
+
+.formInput {
+    width: 95%;
+    padding: 10px;
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--input-text);
+    font-size: 0.95rem;
+}
+.formInput2 {
+    width: 89.7%;
+    padding: 10px;
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--input-text);
+    font-size: 0.95rem;
+}
+
+.formRow {
+    display: flex;
+    gap: 15px;
+}
+
+.formRow .formGroup {
+    flex: 1;
+}
+
+.errorMessage {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    display: block;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--nav-text);
+    cursor: pointer;
+}
+
+.checkboxInput {
+    margin-right: 8px;
+}
+
+.formActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.submitButton {
+    background-color: var(--price-color);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.submitButton:hover {
+    background-color:rgb(30, 100, 220);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.submitButton:active {
+    background-color: rgb(14, 77, 181);
+}
+
+.cancelButton {
+    background-color: transparent;
+    color: var(--nav-text);
+    border: 1px solid #ddd;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.15s ease;
+}
+[data-theme="dark"] .cancelButton:hover {
+    background-color: #4e4a4a;
+    border-color: var(--border-hover, #d1d5db);
+    color: white;
+}
+
+.cancelButton:hover {
+    background-color: var(--secondary-hover, #e1e4e8);
+    border-color: var(--border-hover, #d1d5db);
+    color: var(--secondary-color-hover, #374151);
+}
+
+
+.cancelButton:active {
+    background-color: var(--secondary-active, #e5e7eb);
+}
+/* Cards List */
+.cardsList {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.cardItem {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    background: var(--input-bg);
+    transition: all 0.3s ease;
+}
+
+.cardItem.defaultCard {
+    border-color: var(--price-color);
+    background-color: var(--dropdown-hover);
+}
+
+.cardIcon {
+    font-size: 1.5rem;
+    color: var(--nav-text);
+    margin-right: 15px;
+    width: 40px;
+    text-align: center;
+}
+
+.cardInfo {
+    flex: 1;
+}
+
+.cardNumber {
+    font-weight: 500;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--nav-text);
+}
+
+.defaultBadge {
+    background: var(--price-color);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.cardDetails {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: var(--input-placeholder);
+}
+
+.cardActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.actionButton {
+    background: none;
+    border: 1px solid var(--input-border);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--price-color);
+    transition: all 0.2s;
+}
+
+.actionButton:hover {
+    background-color: var(--dropdown-hover);
+}
+
+.deleteButton {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: transform 0.2s;
+}
+
+.deleteButton:hover {
+    transform: scale(1.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Dark theme specific styles */
+[data-theme="dark"] .emptyState i {
+    color: #555555;
+}
+
+[data-theme="dark"] .deleteButton {
+    color: #ff6b6b;
+}
+[data-theme="dark"] .editButton {
+    color: #4d90fe;
+}
+
+[data-theme="dark"] .editButton:hover {
+    color: #6ba6ff;
+}
+

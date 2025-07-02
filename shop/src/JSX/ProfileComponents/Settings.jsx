@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import styles from '../../CSS/Profile.module.css';
+import styles from '../../CSS/ProfileCSS/Settings.module.css';
 import { useTheme } from '../Context/ThemeContext';
+import gosuslugiLogo from '../../CSS/image/gosusligi-logo.svg';
 
 const Settings = () => {
     const { darkMode, toggleTheme } = useTheme();
@@ -125,6 +126,14 @@ const Settings = () => {
                     <div className={styles.settingItem}>
                         <button className={styles.privacyButton}>
                             Удалить историю просмотров
+                        </button>
+                    </div>
+                    <div className={styles.settingItem}>
+                        <button className={styles.gosuslugiButton}>
+                            <img src={gosuslugiLogo} alt="Госуслуги" className={styles.gosuslugiIcon} />
+                            <span>
+                    Для лучшей <span className={styles.anonymousText}>защиты</span> привяжите аккаунт к <span className={styles.gosuslugiText}>Госуслугам</span>
+                </span>
                         </button>
                     </div>
                 </div>

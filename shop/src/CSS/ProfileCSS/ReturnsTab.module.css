@@ -1,0 +1,47 @@
+/* ReturnsTab.module.css */
+
+.ordersContent {
+    padding: 1.5rem;
+}
+
+.ordersHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.ordersTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+    color: #6b7280;
+}
+
+.emptyState i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #d1d5db;
+}
+
+/* Dark theme styles */
+[data-theme="dark"] .ordersTitle {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .emptyState {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .emptyState i {
+    color: #3a3a3a;
+}
