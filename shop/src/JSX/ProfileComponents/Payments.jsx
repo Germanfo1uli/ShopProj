@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import styles from '../../CSS/Profile.module.css';
+// import styles from '../../CSS/Profile.module.css';
+import styles from '../../CSS/ProfileCSS/Payments.module.css';
 
 const Payments = () => {
     const [cards, setCards] = useState([]);
@@ -115,7 +116,7 @@ const Payments = () => {
                                             type="text"
                                             name="expiryDate"
                                             placeholder="MM/YY"
-                                            className={styles.formInput}
+                                            className={styles.formInput2}
                                         />
                                         <ErrorMessage name="expiryDate" component="div" className={styles.errorMessage} />
                                     </div>
@@ -126,7 +127,7 @@ const Payments = () => {
                                             type="text"
                                             name="cvv"
                                             placeholder="123"
-                                            className={styles.formInput}
+                                            className={styles.formInput2}
                                         />
                                         <ErrorMessage name="cvv" component="div" className={styles.errorMessage} />
                                     </div>

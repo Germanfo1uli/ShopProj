@@ -1,4 +1,4 @@
-import styles from '../../CSS/Profile.module.css';
+import styles from '../../CSS/ProfileCSS/SubscriptionsTab.module.css';
 const SubscriptionsTab = () => {
     return (
         <div className={styles.ordersContent}>

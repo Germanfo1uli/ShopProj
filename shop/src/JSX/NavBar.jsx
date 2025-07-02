@@ -81,9 +81,6 @@ const NavBar = () => {
                                 className={st.userAvatar}
                                 onClick={() => navigate('/profile')}
                             />
-                            <div className={st.dropdownMenu}>
-                                <button onClick={handleLogout}>Выйти</button>
-                            </div>
                         </div>
                     ) : (
                         <button className={st.loginButton} onClick={toggleAuthModal}>Войти</button>

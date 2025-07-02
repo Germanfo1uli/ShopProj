@@ -1,4 +1,4 @@
-import styles from '../../CSS/Profile.module.css';
+import styles from '../../CSS/ProfileCSS/History.module.css';
 
 const History = () => {
     return (
