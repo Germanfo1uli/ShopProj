@@ -44,59 +44,24 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
     });
 
     const handleLoginSubmit = async (values, { setSubmitting }) => {
-        setAuthError(null);
         try {
-            console.log('Отправка данных для входа:', {
-                login: values.login,
-                password: values.password
-            });
-
             const response = await apiRequest('/api/users/login', {
                 method: 'POST',
-                body: {
-                    Email: values.login,
-                    Password: values.password
-                },
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                authenticated: false
+                body: { Email: values.login, Password: values.password }
             });
 
-            console.log('Ответ сервера:', response);
-
-            if (!response.message?.jwtToken || !response.message?.refreshToken || !response.message?.userId) {
-                throw new Error('Сервер не вернул необходимые данные для авторизации');
-            }
-
-            localStorage.setItem('authToken', response.message.jwtToken);
-            localStorage.setItem('refreshToken', response.message.refreshToken);
-            localStorage.setItem('userId', response.message.userId);
-
-            onLoginSuccess(
-                response.message.jwtToken, 
-                response.message.refreshToken,
-                response.message.userId
-            );
+            const { jwtToken, refreshToken, userId } = response.message;
             
+            localStorage.setItem('authToken', jwtToken);
+            localStorage.setItem('refreshToken', refreshToken);
+            localStorage.setItem('userId', userId);
+
+            // Передаем токены в onLoginSuccess
+            await onLoginSuccess(jwtToken, refreshToken, userId);
             onClose();
-        } 
-        
-        catch (error) {
-            console.error('Ошибка входа:', {
-                status: error.status,
-                message: error.message,
-                response: error.response
-            });
-            
-            setAuthError(
-                error.status === 401 
-                    ? 'Неверный email или пароль' 
-                    : error.message || 'Ошибка сервера. Попробуйте позже.'
-            );
-        } 
-        
-        finally {
+        } catch (error) {
+            setAuthError(error.message);
+        } finally {
             setSubmitting(false);
         }
     };
@@ -132,6 +97,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                 Password: values.password
             }
         });
+        
 
         localStorage.setItem('authToken', loginResponse.jwtToken);
         localStorage.setItem('refreshToken', loginResponse.refreshToken);
@@ -142,7 +108,6 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
             loginResponse.refreshToken,
             loginResponse.userId
         );
-        
         onClose();
     } 
     
