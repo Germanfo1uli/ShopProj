@@ -9,6 +9,8 @@ using ShopBack.Repositories;
 using Microsoft.OpenApi.Models;
 using System.Data;
 using System;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +47,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
     });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("SelfOrAdminAccess", policy => // политика по запросам - или сам пользователь, или админ
+        policy.RequireAssertion(context =>
+        {
+            var httpContext = context.Resource as HttpContext;
+            if (httpContext == null)
+                return false;
+
+            var routeData = httpContext.GetRouteData();
+            var requestedUserId = routeData.Values["userId"]?.ToString();
+
+            var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return requestedUserId == currentUserId || httpContext.User.IsInRole("Admin");
+        }));
+});
 
 builder.Services.AddControllers();
 
@@ -140,6 +160,45 @@ using (var scope = app.Services.CreateScope())
             await db.SaveChangesAsync();
             Console.WriteLine("Initial roles seeded successfully.");
         }
+        if (!db.UserRoles.Any(u => u.RoleId == 1))
+        {
+            Console.WriteLine("Creating admin user...");
+            var adminLogin = "Admin";
+            var adminPassword = "Password";
+
+            var userService = scope.ServiceProvider.GetRequiredService<UserService>();
+            var userRoleService = scope.ServiceProvider.GetRequiredService<IService<UserRoles>>();
+            var success = await userService.RegisterAsync(adminLogin, adminPassword, "Nikita", "Aleeksevich", "Shushakov");
+
+            if (success != null)
+            {
+                Console.WriteLine("Admin user created successfully.");
+
+                var existingUserRole = await db.UserRoles
+                    .FirstOrDefaultAsync(u => u.UserId == success.UserId);
+
+                if (existingUserRole != null)
+                {
+                    db.UserRoles.Remove(existingUserRole);
+                    await db.SaveChangesAsync();
+                }
+
+                var newUserRole = new UserRoles
+                {
+                    UserId = success.UserId,
+                    RoleId = 1
+                };
+
+                db.UserRoles.Add(newUserRole);
+                await db.SaveChangesAsync();
+
+                Console.WriteLine("Admin role assigned successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Failed to create admin user.");
+            }
+        }
     }
     catch (Exception ex)
     {
@@ -150,6 +209,32 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
+
+app.UseExceptionHandler(appError => // использование глобального обработчика ошибок
+{
+    appError.Run(async context =>
+    {
+        var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>(); // получаем информацию об ошибке из сервиса
+        var exception = exceptionHandlerFeature?.Error;
+
+        context.Response.ContentType = "application/json";
+        var (statusCode, message) = exception switch // обрабатываем статус ошибки
+        {
+            KeyNotFoundException => (StatusCodes.Status404NotFound, "Ресурс не найден"),
+            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Доступ запрещен"),
+            ArgumentException => (StatusCodes.Status400BadRequest, "Неверные параметры запроса"),
+            _ => (StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера")
+        };
+
+        context.Response.StatusCode = statusCode;
+        await context.Response.WriteAsJsonAsync(new // выкидываем ошибку в контроллер
+        {
+            StatusCode = statusCode,
+            Message = message,
+            Details = exception?.Message
+        });
+    });
+});
 
 app.UseHttpsRedirection();
 

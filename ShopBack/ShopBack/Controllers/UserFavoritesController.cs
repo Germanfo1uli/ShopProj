@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ShopBack.Models;
 using ShopBack.Services;
-using static System.Net.Mime.MediaTypeNames;
+using System.Security;
+using System.Security.Claims;
 
 namespace ShopBack.Controllers
 {
@@ -12,54 +16,64 @@ namespace ShopBack.Controllers
     {
         private readonly FavoriteService _favoritesService = favoritesService;
 
-        [Authorize]
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<UserFavorites>> Create([FromBody] FavoriteData createDto)
         {
-            try
+            var isAdmin = User.IsInRole("Admin");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
-                var favorite = new UserFavorites
-                {
-                    UserId = createDto.UserId,
-                    ProductId = createDto.ProductId,
-                };
-                await _favoritesService.AddAsync(favorite);
-                return Ok(favorite);
+                throw new SecurityException("Неверный формат идентификатора пользователя");
             }
-            catch (Exception ex)
+
+            if (!isAdmin && userId != createDto.UserId)
             {
-                return BadRequest(ex.Message);
+                return Forbid("Вы можете добавлять/убирать товары только в своем избранном списке");
             }
+
+            var favorite = new UserFavorites
+            {
+                UserId = createDto.UserId,
+                ProductId = createDto.ProductId,
+            };
+
+            await _favoritesService.AddAsync(favorite);
+            return CreatedAtAction(
+                actionName: nameof(GetAllByUserId),
+                routeValues: new { id = favorite.UserId },
+                value: favorite
+            );
         }
 
-        [Authorize]
         [HttpDelete]
+        [Authorize]
         public async Task<IActionResult> Delete([FromBody] FavoriteData createDto)
         {
-            try
+            var isAdmin = User.IsInRole("Admin");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
-                await _favoritesService.DeleteAsync(createDto.UserId, createDto.ProductId);
-                return NoContent();
+                throw new SecurityException("Неверный формат идентификатора пользователя");
             }
-            catch
+
+            if (!isAdmin && userId != createDto.UserId)
             {
-                return NotFound($"Добавленное в избранное не найдено");
+                return Forbid("Вы можете добавлять/убирать товары только в своем избранном списке");
             }
+                
+            await _favoritesService.DeleteAsync(createDto.UserId, createDto.ProductId);
+            return NoContent();
         }
 
-        [Authorize]
         [HttpGet("{userId}")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<IEnumerable<UserFavorites>>> GetAllByUserId(int userId)
         {
-            try
-            {
-                var result = await _favoritesService.GetAllByUserIdAsync(userId);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _favoritesService.GetAllByUserIdAsync(userId);
+            return Ok(result);
         }
     }
 

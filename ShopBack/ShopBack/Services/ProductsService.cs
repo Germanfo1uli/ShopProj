@@ -31,5 +31,10 @@ namespace ShopBack.Services
         {
             return await _productsRepository.GetProductMainImageAsync(productId);
         }
+
+        public async Task<IEnumerable<Products>> GetInactiveProductsAsync()
+        {
+            return await _productsRepository.GetInactiveProductsAsync();
+        }
     }
 }

@@ -14,6 +14,6 @@ namespace ShopBack.Models
         [StringLength(50)]
         public string Name { get; set; }
 
-        public UserRoles UserRole { get; set; }
+        public ICollection<UserRoles> UserRole { get; set; }
     }
 }

@@ -14,188 +14,110 @@ namespace ShopBack.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Products>>> GetAll()
         {
-            try
-            {
-                var products = await _productsService.GetAllAsync();
-                return Ok(products);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Ошибка сервера при получении списка товаров");
-            }
+            var products = await _productsService.GetAllAsync();
+            var activeProducts = products
+                .Where(products => products.IsActive)
+                .ToList();
+            return Ok(activeProducts);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Products>> GetById(int id)
         {
-            try
-            {
-                var product = await _productsService.GetByIdAsync(id);
-                if (product == null) return NotFound("Товар не найден");
-                return Ok(product);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Ошибка сервера при получении информации о товаре");
-            }
+            var product = await _productsService.GetByIdAsync(id);
+            return Ok(product);
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Products>> Create([FromBody] ProductCreate createDto)
         {
-            if (!ModelState.IsValid) return BadRequest("Некорректные данные товара");
-
-            try
+            var product = new Products
             {
-                var product = new Products
-                {
-                    Name = createDto.Name,
-                    Description = createDto.Description,
-                    Price = createDto.Price,
-                    QuantityInStock = createDto.QuantityInStock,
-                    CategoryId = createDto.CategoryId,
-                    IsActive = createDto.IsActive,
-                    CreatedAt = DateTime.UtcNow
-                };
+                Name = createDto.Name,
+                Description = createDto.Description,
+                Price = createDto.Price,
+                QuantityInStock = createDto.QuantityInStock,
+                CategoryId = createDto.CategoryId,
+                IsActive = createDto.IsActive,
+                CreatedAt = DateTime.UtcNow
+            };
 
-                await _productsService.AddAsync(product);
-                return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Ошибка сервера при создании товара");
-            }
+            await _productsService.AddAsync(product);
+            return CreatedAtAction(
+               actionName: nameof(GetById),
+               routeValues: new { id = product.Id },
+               value: product
+           );
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Products>> Update(int id, [FromBody] ProductUpdate updateDto)
         {
-            if (!ModelState.IsValid) return BadRequest("Некорректные данные для обновления товара");
+            var product = await _productsService.GetByIdAsync(id);
+            if (product == null) return NotFound("Товар не найден");
 
-            try
-            {
-                var product = await _productsService.GetByIdAsync(id);
-                if (product == null) return NotFound("Товар не найден");
+            if (updateDto.Name != null) product.Name = updateDto.Name;
+            if (updateDto.Description != null) product.Description = updateDto.Description;
+            if (updateDto.Price.HasValue) product.Price = updateDto.Price.Value;
+            if (updateDto.QuantityInStock.HasValue) product.QuantityInStock = updateDto.QuantityInStock.Value;
+            if (updateDto.CategoryId.HasValue) product.CategoryId = updateDto.CategoryId.Value;
+            if (updateDto.IsActive.HasValue) product.IsActive = updateDto.IsActive.Value;
 
-                if (updateDto.Name != null) product.Name = updateDto.Name;
-                if (updateDto.Description != null) product.Description = updateDto.Description;
-                if (updateDto.Price.HasValue) product.Price = updateDto.Price.Value;
-                if (updateDto.QuantityInStock.HasValue) product.QuantityInStock = updateDto.QuantityInStock.Value;
-                if (updateDto.CategoryId.HasValue) product.CategoryId = updateDto.CategoryId.Value;
-                if (updateDto.IsActive.HasValue) product.IsActive = updateDto.IsActive.Value;
-
-                await _productsService.UpdateAsync(product);
-                return Ok(product);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Ошибка сервера при обновлении товара");
-            }
+            await _productsService.UpdateAsync(product);
+            return Ok(product);
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var product = await _productsService.GetByIdAsync(id);
-                if (product == null) return NotFound("Товар не найден");
-
-                product.IsActive = false;
-                await _productsService.DeleteAsync(id);
-
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Ошибка сервера при удалении товара");
-            }
+            await _productsService.DeleteAsync(id);
+            return NoContent();
         }
 
         [HttpGet("category/{categoryId}")]
         public async Task<ActionResult<IEnumerable<Products>>> GetByCategory(int categoryId)
         {
-            try
-            {
-                var products = await _productsService.GetByCategoryAsync(categoryId);
-                return Ok(products);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Ошибка сервера при получении товаров по категории");
-            }
+            var products = await _productsService.GetByCategoryAsync(categoryId);
+            return Ok(products);
         }
 
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<Products>>> Search([FromQuery] string term)
         {
-            try
-            {
-                var products = await _productsService.SearchAsync(term);
-                return Ok(products);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Ошибка сервера при поиске товаров");
-            }
+            var products = await _productsService.SearchAsync(term);
+            return Ok(products);
         }
 
         [HttpGet("{productId}/images")]
         public async Task<ActionResult<IEnumerable<ProductImages>>> GetImages(int productId)
         {
-            try
-            {
-                var images = await _productsService.GetProductImagesAsync(productId);
-                return Ok(images);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Ошибка сервера при получении изображений товара");
-            }
+            var images = await _productsService.GetProductImagesAsync(productId);
+            return Ok(images);
         }
 
         [HttpGet("{productId}/main")]
         public async Task<ActionResult<ProductImages>> GetMainImage(int productId)
         {
-            try
-            {
-                var image = await _productsService.GetProductMainImageAsync(productId);
-                if (image == null) return NotFound("Основное изображение товара не найдено");
-                return Ok(image);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Ошибка сервера при получении основного изображения товара");
-            }
+            var image = await _productsService.GetProductMainImageAsync(productId);
+            return Ok(image);
         }
 
         [HttpGet("{productId}/specifications")]
         public async Task<ActionResult<IEnumerable<ProductSpecifications>>> GetSpecifications(int productId)
         {
-            try
-            {
-                var specs = await _productsService.GetProductSpecificationsAsync(productId);
-                return Ok(specs);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Ошибка сервера при получении характеристик товара");
-            }
+            var specs = await _productsService.GetProductSpecificationsAsync(productId);
+            return Ok(specs);
         }
 
-        [HttpGet("active")]
-        public async Task<ActionResult<IEnumerable<Products>>> GetActiveProducts()
+        [HttpGet("inactive")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<Products>>> GetInactiveProducts()
         {
-            try
-            {
-                var products = await _productsService.GetAllAsync();
-                var activeProducts = products.Where(p => p.IsActive);
-                return Ok(activeProducts);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Ошибка сервера при получении активных товаров");
-            }
+            var inactiveProducts = await _productsService.GetInactiveProductsAsync();
+            return Ok(inactiveProducts);
         }
     }
 

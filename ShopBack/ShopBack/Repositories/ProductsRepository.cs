@@ -48,5 +48,12 @@ namespace ShopBack.Repositories
                 .FirstOrDefaultAsync(img => img.ProductId == productId && img.IsMain);
 
         }
+
+        public async Task<IEnumerable<Products>> GetInactiveProductsAsync()
+        {
+            return await _context.Products
+                .Where(p => !p.IsActive)
+                .ToListAsync();
+        }
     }
 }
