@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using System.Security.Claims;
 
 namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] //api/users
     [ApiController]
-    public class UsersController(UserService userService, TokenService tokenService) : ControllerBase, IController<Users, UserRegisterData, UserUpdateData>
+    public class UsersController(UserService userService) : ControllerBase, IController<Users, UserRegisterData, UserUpdateData>
     {
         private readonly UserService _userService = userService;
-        private readonly TokenService _tokenService = tokenService;
 
         [HttpPost("register")]
         public async Task<ActionResult<Users>> Register([FromBody] UserRegisterData createDto)
@@ -46,6 +47,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpDelete("{userId}")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<IActionResult> Delete(int userId)
         {
             try
@@ -60,6 +62,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<Users>>> GetAll()
         {
             try
@@ -74,6 +77,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpGet("{userId}")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<Users>> GetById(int userId)
         {
             try
@@ -88,6 +92,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpPut("{userId}")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<Users>> Update(int userId, [FromBody] UserUpdateData updateDto)
         {
             try
@@ -108,6 +113,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpPut("{userId}/changepassword")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<Users>> UpdatePassword(int userId, [FromBody] UserUpdatePassword updateDto)
         {
             try

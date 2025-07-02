@@ -9,6 +9,7 @@ using ShopBack.Repositories;
 using Microsoft.OpenApi.Models;
 using System.Data;
 using System;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
     });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("SelfOrAdminAccess", policy => // политика по запросам - или сам пользователь, или адми
+        policy.RequireAssertion(context =>
+        {
+            var httpContext = context.Resource as HttpContext;
+            if (httpContext == null)
+                return false;
+
+            var routeData = httpContext.GetRouteData();
+            var requestedUserId = routeData.Values["userId"]?.ToString();
+
+            var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return requestedUserId == currentUserId || httpContext.User.IsInRole("Admin");
+        }));
+});
 
 builder.Services.AddControllers();
 

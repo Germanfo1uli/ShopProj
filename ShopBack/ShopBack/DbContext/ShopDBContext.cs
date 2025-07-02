@@ -58,8 +58,8 @@ namespace ShopBack.Data
 
             modelBuilder.Entity<UserRoles>()
                 .HasOne(ur => ur.Role)
-                .WithOne(r => r.UserRole)
-                .HasForeignKey<UserRoles>(ur => ur.RoleId)
+                .WithMany(r => r.UserRole)
+                .HasForeignKey(ur => ur.RoleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<RefreshTokens>()
