@@ -19,7 +19,14 @@ namespace ShopBack.Services
             var userRole = userRoles.FirstOrDefault(ur => ur.UserId == user.Id);
 
             if (userRole == null)
-                throw new Exception("User role not found");
+            {
+                userRole = new UserRoles
+                {
+                    UserId = user.Id,
+                    RoleId = 3
+                };
+                await _userRoleRepository.AddAsync(userRole);
+            }
 
             var roleName = await _roleRepository.GetByIdAsync(userRole.RoleId);
             return await _tokensRepository.GenerateTokensAsync(user, roleName.Name);
