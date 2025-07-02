@@ -20,77 +20,60 @@ namespace ShopBack.Controllers
         [Authorize]
         public async Task<ActionResult<UserFavorites>> Create([FromBody] FavoriteData createDto)
         {
-            try
+            var isAdmin = User.IsInRole("Admin");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
-                var isAdmin = User.IsInRole("Admin");
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-                {
-                    throw new SecurityException("Неверный формат идентификатора пользователя");
-                }
-
-                if (!isAdmin && userId != createDto.UserId)
-                {
-                    return Forbid("Вы можете добавлять товары только в свой избранный список");
-                }
-
-                var favorite = new UserFavorites
-                {
-                    UserId = createDto.UserId,
-                    ProductId = createDto.ProductId,
-                };
-
-                await _favoritesService.AddAsync(favorite);
-                return Ok(favorite);
+                throw new SecurityException("Неверный формат идентификатора пользователя");
             }
-            catch (Exception ex)
+
+            if (!isAdmin && userId != createDto.UserId)
             {
-                return BadRequest(ex.Message);
+                return Forbid("Вы можете добавлять/убирать товары только в своем избранном списке");
             }
+
+            var favorite = new UserFavorites
+            {
+                UserId = createDto.UserId,
+                ProductId = createDto.ProductId,
+            };
+
+            await _favoritesService.AddAsync(favorite);
+            return CreatedAtAction(
+                actionName: nameof(GetAllByUserId),
+                routeValues: new { id = favorite.UserId },
+                value: favorite
+            );
         }
 
         [HttpDelete]
         [Authorize]
         public async Task<IActionResult> Delete([FromBody] FavoriteData createDto)
         {
-            try
+            var isAdmin = User.IsInRole("Admin");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
-                var isAdmin = User.IsInRole("Admin");
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                throw new SecurityException("Неверный формат идентификатора пользователя");
+            }
 
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-                {
-                    throw new SecurityException("Неверный формат идентификатора пользователя");
-                }
-
-                if (!isAdmin && userId != createDto.UserId)
-                {
-                    return Forbid("Вы можете добавлять товары только в свой избранный список");
-                }
+            if (!isAdmin && userId != createDto.UserId)
+            {
+                return Forbid("Вы можете добавлять/убирать товары только в своем избранном списке");
+            }
                 
-                await _favoritesService.DeleteAsync(createDto.UserId, createDto.ProductId);
-                return NoContent();
-            }
-            catch
-            {
-                return NotFound($"Добавленное в избранное не найдено");
-            }
+            await _favoritesService.DeleteAsync(createDto.UserId, createDto.ProductId);
+            return NoContent();
         }
 
         [HttpGet("{userId}")]
         [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<IEnumerable<UserFavorites>>> GetAllByUserId(int userId)
         {
-            try
-            {
-                var result = await _favoritesService.GetAllByUserIdAsync(userId);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _favoritesService.GetAllByUserIdAsync(userId);
+            return Ok(result);
         }
     }
 

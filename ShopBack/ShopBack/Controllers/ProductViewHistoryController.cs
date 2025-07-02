@@ -1,160 +1,104 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using System.Data;
 
 
 namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] // api/productviewhistory
     [ApiController]
-    public class ProductViewsHistoryController(IService<ProductViewsHistory> service) : ControllerBase, IController<ProductViewsHistory, ProductViewCreate, ProductViewUpdate>
+    public class ProductViewsHistoryController(IService<ProductViewsHistory> service) : ControllerBase, IController<ProductViewsHistory, ProductViewCreate, ProductViewCreate>
     {
         private readonly IService<ProductViewsHistory> _service = service;
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<ProductViewsHistory>>> GetAll()
         {
-            try
-            {
-                var allViews = await _service.GetAllAsync();
-                return Ok(allViews.Cast<ProductViewsHistory>().OrderByDescending(v => v.ViewedAt));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = "Ошибка при получении истории просмотров", Details = ex.Message});
-            }
-        }
-
-        [HttpGet("filtered")]
-        public async Task<ActionResult<IEnumerable<ProductViewsHistory>>> GetAllFiltered(
-            [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null)
-        {
-            try
-            {
-                var allViews = (await _service.GetAllAsync()).Cast<ProductViewsHistory>();
-
-                if (startDate.HasValue) allViews = allViews.Where(v => v.ViewedAt >= startDate);
-                if (endDate.HasValue) allViews = allViews.Where(v => v.ViewedAt <= endDate);
-
-                return Ok(allViews.OrderByDescending(v => v.ViewedAt));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = "Ошибка при фильтрации истории просмотров", Details = ex.Message});
-            }
+            var allViews = await _service.GetAllAsync();
+            return Ok(allViews.Cast<ProductViewsHistory>().OrderByDescending(v => v.ViewedAt));
         }
 
         [HttpPost]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<ProductViewsHistory>> Create([FromBody] ProductViewCreate createDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(new { Message = "Неверные данные просмотра", Errors = ModelState.Values });
-
-            try
+            var view = new ProductViewsHistory
             {
-                var view = new ProductViewsHistory
-                {
-                    UserId = createDto.UserId,
-                    ProductId = createDto.ProductId,
-                    ViewedAt = DateTime.UtcNow
-                };
+                UserId = createDto.UserId,
+                ProductId = createDto.ProductId,
+                ViewedAt = DateTime.UtcNow
+            };
 
-                await _service.AddAsync(view);
-                return CreatedAtAction(nameof(GetById), new { id = view.Id }, view);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = "Ошибка при сохранении просмотра", Details = ex.Message });
-            }
+            await _service.AddAsync(view);
+            return CreatedAtAction(
+                actionName: nameof(GetById),
+                routeValues: new { id = view.Id },
+                value: view
+            );
         }
 
         [HttpGet("user/{userId}")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<IEnumerable<ProductViewsHistory>>> GetByUser(int userId)
         {
-            try
-            {
-                var allViews = await _service.GetAllAsync();
-                var userViews = new List<ProductViewsHistory>();
 
-                foreach (var view in allViews)
+            var allViews = await _service.GetAllAsync();
+            var userViews = new List<ProductViewsHistory>();
+
+            foreach (var view in allViews)
+            {
+                if (view is ProductViewsHistory pvh && pvh.UserId == userId)
                 {
-                    if (view is ProductViewsHistory pvh && pvh.UserId == userId)
-                    {
-                        userViews.Add(pvh);
-                    }
+                    userViews.Add(pvh);
                 }
+            }
 
-                return Ok(userViews);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = $"Ошибка при получении истории просмотров пользователя {userId}", Details = ex.Message });
-            }
+            return Ok(userViews);
         }
 
         [HttpGet("product/{productId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<ProductViewsHistory>>> GetByProduct(int productId)
         {
-            try
-            {
-                var allViews = await _service.GetAllAsync();
-                var productViews = new List<ProductViewsHistory>();
+            var allViews = await _service.GetAllAsync();
+            var productViews = new List<ProductViewsHistory>();
 
-                foreach (var view in allViews)
+            foreach (var view in allViews)
+            {
+                if (view is ProductViewsHistory pvh && pvh.ProductId == productId)
                 {
-                    if (view is ProductViewsHistory pvh && pvh.ProductId == productId)
-                    {
-                        productViews.Add(pvh);
-                    }
+                    productViews.Add(pvh);
                 }
+            }
 
-                return Ok(productViews);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = $"Ошибка при получении истории просмотров товара {productId}", Details = ex.Message });
-            }
+            return Ok(productViews);
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductViewsHistory>> GetById(int id)
         {
-            try
-            {
-                var view = await _service.GetByIdAsync(id);
-                if (view == null)
-                    return NotFound(new { Message = $"Запись просмотра с ID {id} не найдена" });
+            var view = await _service.GetByIdAsync(id);
+            if (view == null)
+                return NotFound(new { Message = $"Запись просмотра с ID {id} не найдена" });
 
-                return Ok(view);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = $"Ошибка при получении записи просмотра {id}", Details = ex.Message });
-            }
+            return Ok(view);
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var view = await _service.GetByIdAsync(id);
-                if (view == null)
-                    return NotFound(new { Message = $"Запись просмотра с ID {id} не найдена" });
-
-                await _service.DeleteAsync(id);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = $"Ошибка при удалении записи просмотра {id}", Details = ex.Message });
-            }
+            await _service.DeleteAsync(id);
+            return NoContent();
         }
 
         // Пустой метод - не нужен для хранения истории
         [HttpPut("{id}")]
-        public Task<ActionResult<ProductViewsHistory>> Update(int id, [FromBody] ProductViewUpdate updateDto)
+        public Task<ActionResult<ProductViewsHistory>> Update(int id, [FromBody] ProductViewCreate updateDto)
             => throw new NotImplementedException("Метод не поддерживается");
     }
 
@@ -163,10 +107,5 @@ namespace ShopBack.Controllers
         public int UserId { get; set; }
 
         public int ProductId { get; set; }
-    }
-
-    public class ProductViewUpdate
-    {
-        // Для истории просмотров обновление не предусмотрено
     }
 }

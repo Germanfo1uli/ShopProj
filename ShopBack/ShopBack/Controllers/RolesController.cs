@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
 
@@ -11,79 +12,53 @@ namespace ShopBack.Controllers
         private readonly IService<Roles> _roleService = roleService;
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Roles>> Create([FromBody] RoleDate createDto)
         {
-            try
+            var role = new Roles
             {
-                var role = new Roles
-                {
-                    Name = createDto.Name,
-                };
-                await _roleService.AddAsync(role);
-                return Ok(role);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+                Name = createDto.Name,
+            };
+            await _roleService.AddAsync(role);
+            return CreatedAtAction(
+                actionName: nameof(GetById),
+                routeValues: new { id = role.Id },
+                value: role
+            );
         }
 
         [HttpDelete("{roleId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int roleId)
         {
-            try
-            {
-                await _roleService.DeleteAsync(roleId);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return NotFound($"Роль с ID {roleId} не найдена");
-            }
+            await _roleService.DeleteAsync(roleId);
+            return NoContent();
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<Roles>>> GetAll()
         {
-            try
-            {
-                var result = await _roleService.GetAllAsync();
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _roleService.GetAllAsync();
+            return Ok(result);
         }
 
         [HttpGet("{roleId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Roles>> GetById(int roleId)
         {
-            try
-            {
-                var result = await _roleService.GetByIdAsync(roleId);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _roleService.GetByIdAsync(roleId);
+            return Ok(result);
         }
 
         [HttpPut("{roleId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Roles>> Update(int roleId, [FromBody] RoleDate updateDto)
         {
-            try
-            {
-                var role = await _roleService.GetByIdAsync(roleId);
-                role.Name = updateDto.Name;
-                await _roleService.UpdateAsync(role);
-                return Ok(role);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var role = await _roleService.GetByIdAsync(roleId);
+            role.Name = updateDto.Name;
+            await _roleService.UpdateAsync(role);
+            return Ok(role);
         }
     }
 
