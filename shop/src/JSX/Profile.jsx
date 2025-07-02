@@ -21,8 +21,6 @@ const Profile = () => {
     const [error, setError] = useState(null);
 
 useEffect(() => {
-    console.log('Текущий userId:', userId);
-
     const fetchUserData = async () => {
       if (!isAuthenticated || authLoading || !userId) {
         setLoading(false);

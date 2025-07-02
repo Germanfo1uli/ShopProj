@@ -8,10 +8,8 @@ export const apiRequest = async (endpoint, options = {}) => {
     authenticated = false // можно перезаписать при объявлении
   } = options;
 
-  // Формируем полный URL
   const url = `${API_BASE_URL}${endpoint}`;
 
-  // Подготавливаем конфигурацию запроса
   const config = {
     method,
     headers: {
@@ -20,7 +18,6 @@ export const apiRequest = async (endpoint, options = {}) => {
     }
   };
 
-  // Добавляем токен авторизации если требуется
  if (authenticated) {
         const token = localStorage.getItem('authToken');
         if (token) {
@@ -30,7 +27,6 @@ export const apiRequest = async (endpoint, options = {}) => {
         }
     }
 
-  // Добавляем тело запроса если есть
   if (body) {
     config.body = JSON.stringify(body);
   }
@@ -63,31 +59,4 @@ class ApiError extends Error {
   }
 }
 
-// // Примеры конкретных методов API
-// export const api = {
-//   
-//   login: (credentials) => apiRequest('/auth/login', {
-//     method: 'POST',
-//     body: credentials
-//   }),
-//   
-//   getProducts: () => apiRequest('/products', { authenticated: true }),
-//   
-//   createProduct: (productData) => apiRequest('/products', {
-//     method: 'POST',
-//     body: productData,
-//     authenticated: true
-//   }),
-//   
-//   updateProduct: (id, productData) => apiRequest(`/products/${id}`, {
-//     method: 'PUT',
-//     body: productData,
-//     authenticated: true
-//   }),
-//   
-//   deleteProduct: (id) => apiRequest(`/products/${id}`, {
-//     method: 'DELETE',
-//     authenticated: true
-//   })
-//}
 
