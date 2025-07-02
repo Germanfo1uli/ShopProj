@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using System.Data;
 using System;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,7 +50,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("SelfOrAdminAccess", policy => // политика по запросам - или сам пользователь, или адми
+    options.AddPolicy("SelfOrAdminAccess", policy => // политика по запросам - или сам пользователь, или админ
         policy.RequireAssertion(context =>
         {
             var httpContext = context.Resource as HttpContext;
@@ -208,6 +209,32 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
+
+app.UseExceptionHandler(appError => // использование глобального обработчика ошибок
+{
+    appError.Run(async context =>
+    {
+        var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>(); // получаем информацию об ошибке из сервиса
+        var exception = exceptionHandlerFeature?.Error;
+
+        context.Response.ContentType = "application/json";
+        var (statusCode, message) = exception switch // обрабатываем статус ошибки
+        {
+            KeyNotFoundException => (StatusCodes.Status404NotFound, "Ресурс не найден"),
+            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Доступ запрещен"),
+            ArgumentException => (StatusCodes.Status400BadRequest, "Неверные параметры запроса"),
+            _ => (StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера")
+        };
+
+        context.Response.StatusCode = statusCode;
+        await context.Response.WriteAsJsonAsync(new // выкидываем ошибку в контроллер
+        {
+            StatusCode = statusCode,
+            Message = message,
+            Details = exception?.Message
+        });
+    });
+});
 
 app.UseHttpsRedirection();
 

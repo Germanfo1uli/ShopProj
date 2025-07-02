@@ -3,6 +3,7 @@ using ShopBack.Models;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Primitives;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ShopBack.Services
 {
@@ -97,6 +98,15 @@ namespace ShopBack.Services
 
             await _usersRepository.UpdateAsync(user);
             await _tokenService.RevokeRefreshTokensUserAsync(userId, token);
+        }
+
+        public async Task SwitchActivateAccountAsync(int userId)
+        {
+            var user = await _usersRepository.GetByIdAsync(userId);
+            if(user == null)
+                throw new KeyNotFoundException("Пользователь с ID {userId} не найден");
+            user.IsActive = !user.IsActive;
+            await _usersRepository.UpdateAsync(user);
         }
 
         private static string GenerateSalt()

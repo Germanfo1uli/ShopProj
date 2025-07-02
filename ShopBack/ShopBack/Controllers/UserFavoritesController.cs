@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ShopBack.Models;
 using ShopBack.Services;
-using static System.Net.Mime.MediaTypeNames;
+using System.Security;
+using System.Security.Claims;
 
 namespace ShopBack.Controllers
 {
@@ -12,17 +16,31 @@ namespace ShopBack.Controllers
     {
         private readonly FavoriteService _favoritesService = favoritesService;
 
-        [Authorize]
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<UserFavorites>> Create([FromBody] FavoriteData createDto)
         {
             try
             {
+                var isAdmin = User.IsInRole("Admin");
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    throw new SecurityException("Неверный формат идентификатора пользователя");
+                }
+
+                if (!isAdmin && userId != createDto.UserId)
+                {
+                    return Forbid("Вы можете добавлять товары только в свой избранный список");
+                }
+
                 var favorite = new UserFavorites
                 {
                     UserId = createDto.UserId,
                     ProductId = createDto.ProductId,
                 };
+
                 await _favoritesService.AddAsync(favorite);
                 return Ok(favorite);
             }
@@ -32,12 +50,25 @@ namespace ShopBack.Controllers
             }
         }
 
-        [Authorize]
         [HttpDelete]
+        [Authorize]
         public async Task<IActionResult> Delete([FromBody] FavoriteData createDto)
         {
             try
             {
+                var isAdmin = User.IsInRole("Admin");
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    throw new SecurityException("Неверный формат идентификатора пользователя");
+                }
+
+                if (!isAdmin && userId != createDto.UserId)
+                {
+                    return Forbid("Вы можете добавлять товары только в свой избранный список");
+                }
+                
                 await _favoritesService.DeleteAsync(createDto.UserId, createDto.ProductId);
                 return NoContent();
             }
@@ -47,8 +78,8 @@ namespace ShopBack.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet("{userId}")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<IEnumerable<UserFavorites>>> GetAllByUserId(int userId)
         {
             try
