@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ShopBack.Repositories;
 using Microsoft.OpenApi.Models;
+using System.Data;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -110,7 +112,43 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ShopDbContext>();
+    try
+    {
+        if (!db.Database.CanConnect())
+        {
+            Console.WriteLine("Creating database...");
+            db.Database.EnsureCreated();
+        }
+        else
+        {
+            Console.WriteLine("Applying migrations...");
+            db.Database.Migrate();
+        }
+        if (!db.Roles.Any())
+        {
+            Console.WriteLine("Seeding initial roles...");
+            db.Roles.AddRange(
+                new Roles { Id = 1, Name = "Admin" },
+                new Roles { Id = 2, Name = "Moder" },
+                new Roles { Id = 3, Name = "User" }
+            );
+            await db.SaveChangesAsync();
+            Console.WriteLine("Initial roles seeded successfully.");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database error: {ex.Message}");
+        if (ex.InnerException != null)
+        {
+            Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+        }
+    }
 }
 
 app.UseHttpsRedirection();
