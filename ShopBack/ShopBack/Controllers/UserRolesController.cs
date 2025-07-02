@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
 
@@ -6,11 +7,12 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] //api/userroles
     [ApiController]
-    public class UserRolesController(IService<UserRoles> userRoleService) : ControllerBase, IController<UserRoles, UserRolesDate, UserRolesDate>
+    public class UserRolesController(IService<UserRoles> userRoleService) : ControllerBase, IController<UserRoles, UserRolesDate, int>
     {
         private readonly IService<UserRoles> _userRoleService = userRoleService;
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<UserRoles>> Create([FromBody] UserRolesDate createDto)
         {
             try
@@ -30,6 +32,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpDelete("{userId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int userId)
         {
             try
@@ -44,6 +47,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<UserRoles>>> GetAll()
         {
             try
@@ -58,6 +62,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpGet("{userRoleId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<UserRoles>> GetById(int userRoleId)
         {
             try
@@ -72,12 +77,13 @@ namespace ShopBack.Controllers
         }
 
         [HttpPut("{userId}")]
-        public async Task<ActionResult<UserRoles>> Update(int userId, [FromBody] UserRolesDate updateDto)
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<UserRoles>> Update(int userId, [FromBody] int roleId)
         {
             try
             {
                 var userRole = await _userRoleService.GetByIdAsync(userId);
-                userRole.RoleId = updateDto.RoleId;
+                userRole.RoleId = roleId;
                 await _userRoleService.UpdateAsync(userRole);
                 return Ok(userRole);
             }

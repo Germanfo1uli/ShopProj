@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
 
@@ -11,6 +12,7 @@ namespace ShopBack.Controllers
         private readonly AnalyticsService _analyticsService = analyticsService;
 
         [HttpGet("users/{userId}")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<IEnumerable<ProductViewsHistory>>> GetProductViewHistory(int userId)
         {
             try

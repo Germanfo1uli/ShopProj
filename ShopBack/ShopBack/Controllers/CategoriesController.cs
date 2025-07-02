@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
 
@@ -29,6 +30,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Categories>> Create([FromBody] CategoryCreate createDto)
         {
             if (!ModelState.IsValid)
@@ -53,6 +55,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Categories>> Update(int id, [FromBody] CategoryUpdate updateDto)
         {
             if (!ModelState.IsValid)
@@ -81,6 +84,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             try

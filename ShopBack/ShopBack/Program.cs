@@ -159,6 +159,45 @@ using (var scope = app.Services.CreateScope())
             await db.SaveChangesAsync();
             Console.WriteLine("Initial roles seeded successfully.");
         }
+        if (!db.UserRoles.Any(u => u.RoleId == 1))
+        {
+            Console.WriteLine("Creating admin user...");
+            var adminLogin = "Admin";
+            var adminPassword = "Password";
+
+            var userService = scope.ServiceProvider.GetRequiredService<UserService>();
+            var userRoleService = scope.ServiceProvider.GetRequiredService<IService<UserRoles>>();
+            var success = await userService.RegisterAsync(adminLogin, adminPassword, "Nikita", "Aleeksevich", "Shushakov");
+
+            if (success != null)
+            {
+                Console.WriteLine("Admin user created successfully.");
+
+                var existingUserRole = await db.UserRoles
+                    .FirstOrDefaultAsync(u => u.UserId == success.UserId);
+
+                if (existingUserRole != null)
+                {
+                    db.UserRoles.Remove(existingUserRole);
+                    await db.SaveChangesAsync();
+                }
+
+                var newUserRole = new UserRoles
+                {
+                    UserId = success.UserId,
+                    RoleId = 1
+                };
+
+                db.UserRoles.Add(newUserRole);
+                await db.SaveChangesAsync();
+
+                Console.WriteLine("Admin role assigned successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Failed to create admin user.");
+            }
+        }
     }
     catch (Exception ex)
     {
