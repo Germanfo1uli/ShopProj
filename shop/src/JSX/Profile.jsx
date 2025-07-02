@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import {useAuth} from './Hooks/UseToken.js';
+import {useToken} from './Hooks/UseToken.js';
 import { apiRequest } from './Api/ApiRequest.js'; 
 import styles from '../CSS/Profile.module.css';
 import Footer from "./Components/Footer";
@@ -17,29 +17,46 @@ const Profile = () => {
     const [activeTab, setActiveTab] = useState('orders');
     const [activeMenu, setActiveMenu] = useState('profile');
     const [userData, setUserData] = useState(null); 
-    const { isAuthenticated, userId } = useAuth(); 
+    const { isAuthenticated, userId, token, isLoading: authLoading } = useToken();
+    const [error, setError] = useState(null);
 
-    useEffect(() => {
-    const fetchUserData = async () => { // ПОКА ЧТО FETCH ТОЛЬКО ДЛЯ ИНФЫ О ПОЛЬЗОВАТЕЛЕ 
-        try {
-            
-                const data = await apiRequest(`/api/users/${1}`, {
-                    
-                });
-                setUserData(data);
-                console.log(data)
-            
-            setLoading(false);
-            
-        } catch (error) {
-            console.error('Ошибка загрузки данных:', error);
-            setLoading(false);
-        }
+useEffect(() => {
+    console.log('Текущий userId:', userId);
+
+    const fetchUserData = async () => {
+      if (!isAuthenticated || authLoading || !userId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const data = await apiRequest(`/api/users/${userId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        setUserData(data);
+        console.log('Data:', data);
+      } 
+      
+      catch (err) {
+        console.error('Ошибка загрузки данных пользователя:', err);
+        setError('Не удалось загрузить данные пользователя');
+      } 
+      
+      finally {
+        setLoading(false);
+      }
     };
 
-        fetchUserData();
-        
-    }, [isAuthenticated, userId]);
+    fetchUserData();
+  }, [isAuthenticated, userId, token, authLoading]);
 
     const renderTabContent = () => {
         switch (activeTab) {

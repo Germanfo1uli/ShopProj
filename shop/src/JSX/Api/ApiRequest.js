@@ -21,12 +21,14 @@ export const apiRequest = async (endpoint, options = {}) => {
   };
 
   // Добавляем токен авторизации если требуется
-  if (authenticated) {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+ if (authenticated) {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        } else {
+            console.warn('Запрос требует аутентификации, но токен не найден');
+        }
     }
-  }
 
   // Добавляем тело запроса если есть
   if (body) {

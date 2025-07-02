@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import st from '../CSS/NavBar.module.css';
 import AuthModal from './Components/AuthModal';
+import { useToken } from './Hooks/UseToken';
 
 const NavBar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,6 +21,14 @@ const NavBar = () => {
             setUserAvatar('');
         }
     };
+
+    const { 
+        isAuthenticated, 
+        userId, 
+        username, 
+        logout,
+        isLoading: authLoading 
+    } = useToken();
 
     useEffect(() => {
         checkAuth();
@@ -40,20 +49,19 @@ const NavBar = () => {
         document.body.style.overflow = isAuthModalOpen ? 'auto' : 'hidden';
     };
 
-    const handleLoginSuccess = () => {
-        localStorage.setItem('authToken', 'user-token');
-        checkAuth();
+    const handleLoginSuccess = (token, refreshToken, userId) => {
+        console.log('Успешный вход, userId:', userId);
         setIsAuthModalOpen(false);
         navigate('/profile');
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        checkAuth();
+        logout(); 
         navigate('/');
     };
 
-    return (
+
+return (
         <>
             <nav className={st.navPage}>
                 <div className={st.burger} onClick={toggleMenu}>
@@ -73,7 +81,7 @@ const NavBar = () => {
                     <div className={st.searchContainer}>
                         <input type="text" placeholder="Поиск..." className={st.Input}/>
                     </div>
-                    {isLoggedIn ? (
+                    {!authLoading && isAuthenticated ? (
                         <div className={st.userAvatarContainer}>
                             <img
                                 src={userAvatar}
@@ -86,7 +94,13 @@ const NavBar = () => {
                             </div>
                         </div>
                     ) : (
-                        <button className={st.loginButton} onClick={toggleAuthModal}>Войти</button>
+                        <button 
+                            className={st.loginButton} 
+                            onClick={toggleAuthModal}
+                            disabled={authLoading}
+                        >
+                            {authLoading ? 'Загрузка...' : 'Войти'}
+                        </button>
                     )}
                 </div>
             </nav>
@@ -101,7 +115,7 @@ const NavBar = () => {
                         </Link>
                     </li>
                     <li className={st.mobileNavItem}>
-                        <Link to="/catalog" class Name={st.mobileNavLink} onClick={closeMenu}>
+                        <Link to="/catalog" className={st.mobileNavLink} onClick={closeMenu}>
                             Каталог
                         </Link>
                     </li>
@@ -119,7 +133,7 @@ const NavBar = () => {
 
                 <div className={st.mobileSearchContainer}>
                     <input type="text" placeholder="Поиск..." className={st.mobileInput}/>
-                    {isLoggedIn ? (
+                    {!authLoading && isAuthenticated ? (
                         <div className={st.mobileUserInfo}>
                             <img
                                 src={userAvatar}
@@ -132,8 +146,12 @@ const NavBar = () => {
                             </button>
                         </div>
                     ) : (
-                        <button className={st.mobileLoginButton} onClick={toggleAuthModal}>
-                            Войти
+                        <button 
+                            className={st.mobileLoginButton} 
+                            onClick={toggleAuthModal}
+                            disabled={authLoading}
+                        >
+                            {authLoading ? 'Загрузка...' : 'Войти'}
                         </button>
                     )}
                 </div>

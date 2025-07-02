@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import styles from '../../CSS/AuthModal.module.css';
+import { apiRequest } from '../Api/ApiRequest.js';
 
 const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
     const [isLoginMode, setIsLoginMode] = useState(true);
+    const [authError, setAuthError] = useState(null);
 
     const switchAuthMode = () => {
         setIsLoginMode(!isLoginMode);
@@ -30,9 +32,9 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
         email: Yup.string()
             .email('Некорректный email')
             .required('Обязательное поле'),
-        phone: Yup.string()
-            .matches(/^\+?[0-9]{10,15}$/, 'Некорректный номер телефона')
-            .required('Обязательное поле'),
+        // phone: Yup.string()
+        //     .matches(/^\+?[0-9]{10,15}$/, 'Некорректный номер телефона')
+        //     .required('Обязательное поле'),
         password: Yup.string()
             .required('Обязательное поле')
             .min(6, 'Пароль должен быть не менее 6 символов'),
@@ -41,22 +43,123 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
             .required('Подтвердите пароль'),
     });
 
-    const handleLoginSubmit = (values, { setSubmitting }) => {
-        console.log('Login values:', values);
-        setTimeout(() => {
-            setSubmitting(false);
-            onLoginSuccess();
+    const handleLoginSubmit = async (values, { setSubmitting }) => {
+        setAuthError(null);
+        try {
+            console.log('Отправка данных для входа:', {
+                login: values.login,
+                password: values.password
+            });
+
+            const response = await apiRequest('/api/users/login', {
+                method: 'POST',
+                body: {
+                    Email: values.login,
+                    Password: values.password
+                },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                authenticated: false
+            });
+
+            console.log('Ответ сервера:', response);
+
+            if (!response.message?.jwtToken || !response.message?.refreshToken || !response.message?.userId) {
+                throw new Error('Сервер не вернул необходимые данные для авторизации');
+            }
+
+            localStorage.setItem('authToken', response.message.jwtToken);
+            localStorage.setItem('refreshToken', response.message.refreshToken);
+            localStorage.setItem('userId', response.message.userId);
+
+            onLoginSuccess(
+                response.message.jwtToken, 
+                response.message.refreshToken,
+                response.message.userId
+            );
+            
             onClose();
-        }, 1000);
+        } 
+        
+        catch (error) {
+            console.error('Ошибка входа:', {
+                status: error.status,
+                message: error.message,
+                response: error.response
+            });
+            
+            setAuthError(
+                error.status === 401 
+                    ? 'Неверный email или пароль' 
+                    : error.message || 'Ошибка сервера. Попробуйте позже.'
+            );
+        } 
+        
+        finally {
+            setSubmitting(false);
+        }
     };
 
-    const handleRegisterSubmit = (values, { setSubmitting }) => {
-        console.log('Register values:', values);
-        setTimeout(() => {
-            setSubmitting(false);
-            setIsLoginMode(true);
-        }, 1000);
+    const handleRegisterSubmit = async (values, { setSubmitting }) => {
+    setAuthError(null);
+    try {
+        const nameParts = values.fullName.trim().split(/\s+/);
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts[1] || '';
+        const middleName = nameParts.slice(2).join(' ') || '';
+
+        const response = await apiRequest('/api/users/register', {
+            method: 'POST',
+            body: {
+                Email: values.email,
+                Password: values.password,
+                FirstName: firstName,
+                LastName: lastName,
+                MiddleName: middleName,
+            },
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log('Ответ сервера при регистрации:', response);
+        
+        const loginResponse = await apiRequest('/api/users/login', {
+            method: 'POST',
+            body: {
+                Email: values.email,
+                Password: values.password
+            }
+        });
+
+        localStorage.setItem('authToken', loginResponse.jwtToken);
+        localStorage.setItem('refreshToken', loginResponse.refreshToken);
+        localStorage.setItem('userId', loginResponse.userId);
+
+        onLoginSuccess(
+            loginResponse.jwtToken, 
+            loginResponse.refreshToken,
+            loginResponse.userId
+        );
+        
+        onClose();
+    } 
+    
+    catch (error) {
+        console.error('Полная ошибка регистрации:', error);
+        setAuthError(
+            error.status === 400 
+                ? 'Пользователь с таким email уже существует' 
+                : 'Ошибка сервера. Попробуйте позже.'
+        );
+    } 
+    
+    finally {
+        setSubmitting(false);
+    }
     };
+
 
     if (!isOpen) return null;
 
@@ -73,6 +176,12 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                     <h2 className={styles.title}>{isLoginMode ? 'Вход в аккаунт' : 'Регистрация'}</h2>
                     <p className={styles.subtitle}>{isLoginMode ? 'Введите свои данные для входа' : 'Создайте новый аккаунт'}</p>
                 </div>
+
+                {authError && (
+                    <div className={styles.authError}>
+                        {authError}
+                    </div>
+                )}
 
                 {isLoginMode ? (
                     <Formik
@@ -163,7 +272,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                                     <ErrorMessage name="email" component="div" className={styles.error} />
                                 </div>
 
-                                <div className={styles.inputGroup}>
+                                {/* <div className={styles.inputGroup}>
                                     <label htmlFor="phone" className={styles.label}>Телефон</label>
                                     <Field
                                         type="tel"
@@ -173,7 +282,7 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                                         className={styles.input}
                                     />
                                     <ErrorMessage name="phone" component="div" className={styles.error} />
-                                </div>
+                                </div> */}
 
                                 <div className={styles.inputGroup}>
                                     <label htmlFor="password" className={styles.label}>Пароль</label>
