@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import {useToken} from './Hooks/UseToken.js';
+import { useAuth } from './Hooks/UseAuth.js';
 import { apiRequest } from './Api/ApiRequest.js'; 
 import styles from '../CSS/Profile.module.css';
 import Footer from "./Components/Footer";
@@ -14,58 +14,67 @@ import FavoritesTab from './ProfileComponents/FavoritesTab';
 import {useNavigate} from "react-router-dom";
 
 const Profile = () => {
-    const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('orders');
-    const [activeMenu, setActiveMenu] = useState('profile');
-    const [userData, setUserData] = useState(null); 
-    const { isAuthenticated, userId, token, isLoading: authLoading } = useToken();
-    const [error, setError] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
+    const { isAuthenticated, userId, token, logout,  isLoading: authLoading } = useAuth();
+    
     const [profileData, setProfileData] = useState({
-        firstName: 'Никита',
-        lastName: 'Шушаков',
-        birthDate: '15 января 2000',
-        email: 'Zolodov@gmail.com',
-        phone: '+7 (912) 345-67-89',
-        preferences: ['Электроника', 'Спорт', 'Книги']
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        birthDate: '',
+        email: '',
+        phone: '',
+        preferences: []
     });
+    
+    const [isEditing, setIsEditing] = useState(false);
     const [newPreference, setNewPreference] = useState('');
+    const [activeMenu, setActiveMenu] = useState('profile');
+    const [activeTab, setActiveTab] = useState('orders');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-useEffect(() => {
-    const fetchUserData = async () => {
-      if (!isAuthenticated || authLoading || !userId) {
-        setLoading(false);
-        return;
-      }
+    useEffect(() => {
+        console.log('Текущий userId:', userId);
 
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const data = await apiRequest(`/api/users/${userId}`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        setUserData(data);
-        console.log('Data:', data);
-      } 
-      
-      catch (err) {
-        console.error('Ошибка загрузки данных пользователя:', err);
-        setError('Не удалось загрузить данные пользователя');
-      } 
-      
-      finally {
-        setLoading(false);
-      }
-    };
+        const fetchUserData = async () => {
+            if (!isAuthenticated || authLoading || !userId) {
+                setLoading(false);
+                return;
+            }
 
-    fetchUserData();
-  }, [isAuthenticated, userId, token, authLoading]);
+            try {
+                setLoading(true);
+                setError(null);
+                
+                const data = await apiRequest(`/api/users/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                setProfileData({
+                    firstName: data.firstName || '',
+                    lastName: data.lastName || '',
+                    middleName: data.middleName || '',
+                    birthDate: data.birthDate || '',
+                    email: data.email || '',
+                    phone: data.phone || '',
+                    preferences: data.preferences || []
+                });
+                
+                console.log('Data:', data);
+            } catch (err) {
+                console.error('Ошибка загрузки данных пользователя:', err);
+                setError('Не удалось загрузить данные пользователя');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, [isAuthenticated, userId, token, authLoading]);
 
 
 
@@ -73,13 +82,9 @@ useEffect(() => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userData');
+        logout();
         navigate('/home');
     };
-
-
-
 
     const handleEditClick = () => {
         setIsEditing(!isEditing);
@@ -93,10 +98,30 @@ useEffect(() => {
         }));
     };
 
-    const handleSaveChanges = () => {
-        setIsEditing(false);
-        //  GIVE ME would typically send the updated data to your suka backend
-        console.log('Profile data saved:', profileData);
+    const handleSaveChanges = async () => {
+        if (!userId) return;
+
+        try {
+            setLoading(true);
+            setError(null);
+            
+            const updatedData = await apiRequest(`/api/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: profileData
+            });
+            
+            setProfileData(updatedData);
+            setIsEditing(false);
+        } catch (err) {
+            console.error('Ошибка сохранения данных:', err);
+            setError('Не удалось сохранить изменения');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleAddPreference = () => {
@@ -127,74 +152,92 @@ useEffect(() => {
         }
     };
 
-    const renderProfileInfo = () => {
+const renderProfileInfo = () => {
+        if (authLoading || loading) return <div className={styles.loading}>Загрузка...</div>;
+        if (error) return <div className={styles.error}>{error}</div>;
+        if (!isAuthenticated) return <div className={styles.error}>Требуется авторизация</div>;
+
         if (isEditing) {
             return (
-                <div className={styles.profileGrid}>
-                    <div>
-                        <h3 className={styles.sectionTitle}>Основная информация</h3>
-                        <div className={styles.infoSection}>
-                            <div>
-                                <p className={styles.infoLabel}>Имя</p>
-                                <input
-                                    type="text"
-                                    name="firstName"
-                                    value={profileData.firstName}
-                                    onChange={handleInputChange}
-                                    className={styles.editInput}
-                                />
-                            </div>
-                            <div>
-                                <p className={styles.infoLabel}>Фамилия</p>
-                                <input
-                                    type="text"
-                                    name="lastName"
-                                    value={profileData.lastName}
-                                    onChange={handleInputChange}
-                                    className={styles.editInput}
-                                />
-                            </div>
-                            <div>
-                                <p className={styles.infoLabel}>Дата рождения</p>
-                                <input
-                                    type="text"
-                                    name="birthDate"
-                                    value={profileData.birthDate}
-                                    onChange={handleInputChange}
-                                    className={styles.editInput}
-                                />
+                    <div className={styles.profileGrid}>
+                        <div>
+                            <h3 className={styles.sectionTitle}>Основная информация</h3>
+                            <div className={styles.infoSection}>
+                                <div>
+                                    <p className={styles.infoLabel}>Имя</p>
+                                    <input
+                                        type="text"
+                                        name="firstName"
+                                        value={profileData.firstName}
+                                        onChange={handleInputChange}
+                                        className={styles.editInput}
+                                    />
+                                </div>
+                                <div>
+                                    <p className={styles.infoLabel}>Фамилия</p>
+                                    <input
+                                        type="text"
+                                        name="lastName"
+                                        value={profileData.lastName}
+                                        onChange={handleInputChange}
+                                        className={styles.editInput}
+                                    />
+                                </div>
+                                <div>
+                                    <p className={styles.infoLabel}>Отчество</p>
+                                    <input
+                                        type="text"
+                                        name="middleName"
+                                        value={profileData.middleName}
+                                        onChange={handleInputChange}
+                                        className={styles.editInput}
+                                    />
+                                </div>
+                                <div>
+                                    <p className={styles.infoLabel}>Дата рождения</p>
+                                    <input
+                                        type="date"
+                                        name="birthDate"
+                                        value={profileData.birthDate}
+                                        onChange={handleInputChange}
+                                        className={styles.editInput}
+                                    />
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div>
-                        <h3 className={styles.sectionTitle}>Контакты</h3>
-                        <div className={styles.infoSection}>
-                            <div>
-                                <p className={styles.infoLabel}>Эл. почта</p>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={profileData.email}
-                                    onChange={handleInputChange}
-                                    className={styles.editInput}
-                                />
-                            </div>
-                            <div>
-                                <p className={styles.infoLabel}>Телефон</p>
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    value={profileData.phone}
-                                    onChange={handleInputChange}
-                                    className={styles.editInput}
-                                />
+                        <div>
+                            <h3 className={styles.sectionTitle}>Контакты</h3>
+                            <div className={styles.infoSection}>
+                                <div>
+                                    <p className={styles.infoLabel}>Эл. почта</p>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={profileData.email}
+                                        onChange={handleInputChange}
+                                        className={styles.editInput}
+                                        disabled
+                                    />
+                                </div>
+                                <div>
+                                    <p className={styles.infoLabel}>Телефон</p>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        value={profileData.phone}
+                                        onChange={handleInputChange}
+                                        className={styles.editInput}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            );
-        } else {
+                );
+        } 
+
+        else 
+        {
             return (
                 <div className={styles.profileGrid}>
                     <div>
@@ -209,8 +252,14 @@ useEffect(() => {
                                 <p className={styles.infoValue}>{profileData.lastName}</p>
                             </div>
                             <div>
+                                <p className={styles.infoLabel}>Отчество</p>
+                                <p className={styles.infoValue}>{profileData.middleName}</p>
+                            </div>
+                            <div>
                                 <p className={styles.infoLabel}>Дата рождения</p>
-                                <p className={styles.infoValue}>{profileData.birthDate}</p>
+                                <p className={styles.infoValue}>
+                                    {profileData.birthDate ? new Date(profileData.birthDate).toLocaleDateString() : 'Не указана'}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -224,7 +273,7 @@ useEffect(() => {
                             </div>
                             <div>
                                 <p className={styles.infoLabel}>Телефон</p>
-                                <p className={styles.infoValue}>{profileData.phone}</p>
+                                <p className={styles.infoValue}>{profileData.phone || 'Не указан'}</p>
                             </div>
                         </div>
                     </div>

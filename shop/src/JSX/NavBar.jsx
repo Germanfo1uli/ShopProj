@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import st from '../CSS/NavBar.module.css';
 import AuthModal from './Components/AuthModal';
-import { useToken } from './Hooks/UseToken';
+import { useAuth } from './Hooks/UseAuth.js';
+
 
 const NavBar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,10 +13,9 @@ const NavBar = () => {
 
     const { 
         isAuthenticated, 
-        logout,
         login, 
         isLoading: authLoading 
-    } = useToken();
+    } = useAuth();
 
     const toggleMenu = useCallback(() => {
         const newState = !isMenuOpen;
@@ -35,11 +35,7 @@ const NavBar = () => {
         navigate('/profile');
     }, [login, navigate]);
 
-    const handleLogout = useCallback(() => {
-        logout();
-        navigate('/');
-    }, [logout, navigate]);
-
+   
     const closeMenu = useCallback(() => {
         setIsMenuOpen(false);
         document.body.style.overflow = 'auto';
@@ -47,7 +43,7 @@ const NavBar = () => {
     const userAvatar = isAuthenticated 
         ? 'https://randomuser.me/api/portraits/men/32.jpg' 
         : '';
-
+    console.log(isAuthenticated)
     return (
         <>
             <nav className={st.navPage}>
@@ -134,12 +130,7 @@ const NavBar = () => {
                                     className={st.mobileUserAvatar}
                                     onClick={() => navigate('/profile')}
                                 />
-                                <button 
-                                    className={st.mobileLogoutButton} 
-                                    onClick={handleLogout}
-                                >
-                                    Выйти
-                                </button>
+                                
                             </div>
                         ) : (
                             <button 

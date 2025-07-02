@@ -1,7 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
-export const useToken = () => {
+const AuthContext = createContext();
+
+
+const useToken = () => {
     const [auth, setAuth] = useState({
         isAuthenticated: false,
         userId: null,
@@ -21,13 +24,14 @@ export const useToken = () => {
             if (token) {
                 try {
                     const decoded = jwtDecode(token);
-                    
-                    // Проверяем разные варианты названий полей
+
                     const email = decoded.email || decoded.Email || decoded.sub;
-                    const roleId = decoded.roleId || decoded.role || 
-                                  decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 
-                                  decoded.RoleId || 0;
-                    
+                    const roleId = decoded.roleId ||
+                                   decoded.role ||
+                                   decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
+                                   decoded.RoleId ||
+                                   0;
+
                     setAuth({
                         isAuthenticated: true,
                         userId: Number(userId || decoded.userId || decoded.sub),
@@ -39,12 +43,9 @@ export const useToken = () => {
                     });
                 } catch (error) {
                     console.error('Ошибка декодирования токена:', error);
-                    console.log('Токен, который не удалось декодировать:', token);
                     logout();
                 }
-            } 
-            
-            else {
+            } else {
                 setAuth(prev => ({ ...prev, isLoading: false }));
             }
         };
@@ -52,9 +53,14 @@ export const useToken = () => {
         initAuth();
     }, []);
 
-     const login = useCallback((token, refreshToken, userId) => {
+    const login = useCallback((token, refreshToken, userId) => {
         try {
             const decoded = jwtDecode(token);
+
+            localStorage.setItem('authToken', token);
+            localStorage.setItem('refreshToken', refreshToken);
+            localStorage.setItem('userId', userId);
+
             setAuth({
                 isAuthenticated: true,
                 userId: Number(userId),
@@ -69,10 +75,11 @@ export const useToken = () => {
         }
     }, []);
 
-    const logout = () => {
+    const logout = useCallback(() => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('userId');
+
         setAuth({
             isAuthenticated: false,
             userId: null,
@@ -82,11 +89,20 @@ export const useToken = () => {
             refreshToken: null,
             isLoading: false
         });
-    };
+    }, []);
 
     return { 
         ...auth,
         login,
         logout
     };
+};
+
+export const useAuth = () => {
+    return useContext(AuthContext);
+};
+
+export const AuthProvider = ({ children }) => {
+    const auth = useToken();
+    return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 };
