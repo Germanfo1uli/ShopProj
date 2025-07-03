@@ -50,7 +50,9 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                 body: { Email: values.login, Password: values.password }
             });
 
-            const { jwtToken, refreshToken, userId } = response.message;
+            const jwtToken = response.jwtToken || response.token || response?.data?.token;
+            const refreshToken = response.refreshToken || response?.data?.refreshToken;
+            const userId = response.userId || response?.data?.userId;
             
             localStorage.setItem('authToken', jwtToken);
             localStorage.setItem('refreshToken', refreshToken);
@@ -141,12 +143,6 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
                     <h2 className={styles.title}>{isLoginMode ? 'Вход в аккаунт' : 'Регистрация'}</h2>
                     <p className={styles.subtitle}>{isLoginMode ? 'Введите свои данные для входа' : 'Создайте новый аккаунт'}</p>
                 </div>
-
-                {authError && (
-                    <div className={styles.authError}>
-                        {authError}
-                    </div>
-                )}
 
                 {isLoginMode ? (
                     <Formik

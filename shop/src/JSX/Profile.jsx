@@ -20,10 +20,10 @@ const Profile = () => {
         firstName: '',
         lastName: '',
         middleName: '',
-        birthDate: '',
+        // birthDate: '',
         email: '',
-        phone: '',
-        preferences: []
+        phoneNumber: '',
+        // preferences: []
     });
     
     const [isEditing, setIsEditing] = useState(false);
@@ -53,15 +53,15 @@ const Profile = () => {
                         'Content-Type': 'application/json'
                     }
                 });
-                
+                console.log(data)
                 setProfileData({
                     firstName: data.firstName || '',
                     lastName: data.lastName || '',
                     middleName: data.middleName || '',
-                    birthDate: data.birthDate || '',
+                    // birthDate: data.birthDate || '',
                     email: data.email || '',
-                    phone: data.phone || '',
-                    preferences: data.preferences || []
+                    phoneNumber: data.phoneNumber || '',
+                    // preferences: data.preferences || []
                 });
                 
                 console.log('Data:', data);
@@ -104,7 +104,7 @@ const Profile = () => {
         try {
             setLoading(true);
             setError(null);
-            
+            console.log(profileData)
             const updatedData = await apiRequest(`/api/users/${userId}`, {
                 method: 'PUT',
                 headers: {
@@ -124,22 +124,22 @@ const Profile = () => {
         }
     };
 
-    const handleAddPreference = () => {
-        if (newPreference.trim() && !profileData.preferences.includes(newPreference)) {
-            setProfileData(prev => ({
-                ...prev,
-                preferences: [...prev.preferences, newPreference.trim()]
-            }));
-            setNewPreference('');
-        }
-    };
+    // const handleAddPreference = () => {
+    //     if (newPreference.trim() && !profileData.preferences.includes(newPreference)) {
+    //         setProfileData(prev => ({
+    //             ...prev,
+    //             preferences: [...prev.preferences, newPreference.trim()]
+    //         }));
+    //         setNewPreference('');
+    //     }
+    // };
 
-    const handleRemovePreference = (prefToRemove) => {
-        setProfileData(prev => ({
-            ...prev,
-            preferences: prev.preferences.filter(pref => pref !== prefToRemove)
-        }));
-    };
+    // const handleRemovePreference = (prefToRemove) => {
+    //     setProfileData(prev => ({
+    //         ...prev,
+    //         preferences: prev.preferences.filter(pref => pref !== prefToRemove)
+    //     }));
+    // };
 
     const renderTabContent = () => {
         switch (activeTab) {
@@ -193,7 +193,7 @@ const renderProfileInfo = () => {
                                         className={styles.editInput}
                                     />
                                 </div>
-                                <div>
+                                {/* <div>
                                     <p className={styles.infoLabel}>Дата рождения</p>
                                     <input
                                         type="date"
@@ -202,7 +202,7 @@ const renderProfileInfo = () => {
                                         onChange={handleInputChange}
                                         className={styles.editInput}
                                     />
-                                </div>
+                                </div> */}
                             </div>
                         </div>
 
@@ -224,8 +224,8 @@ const renderProfileInfo = () => {
                                     <p className={styles.infoLabel}>Телефон</p>
                                     <input
                                         type="tel"
-                                        name="phone"
-                                        value={profileData.phone}
+                                        name="phoneNumber"
+                                        value={profileData.phoneNumber}
                                         onChange={handleInputChange}
                                         className={styles.editInput}
                                     />
@@ -256,10 +256,10 @@ const renderProfileInfo = () => {
                                 <p className={styles.infoValue}>{profileData.middleName}</p>
                             </div>
                             <div>
-                                <p className={styles.infoLabel}>Дата рождения</p>
-                                <p className={styles.infoValue}>
+                                {/* <p className={styles.infoLabel}>Дата рождения</p> */}
+                                {/* <p className={styles.infoValue}>
                                     {profileData.birthDate ? new Date(profileData.birthDate).toLocaleDateString() : 'Не указана'}
-                                </p>
+                                </p> */}
                             </div>
                         </div>
                     </div>
@@ -273,7 +273,7 @@ const renderProfileInfo = () => {
                             </div>
                             <div>
                                 <p className={styles.infoLabel}>Телефон</p>
-                                <p className={styles.infoValue}>{profileData.phone || 'Не указан'}</p>
+                                <p className={styles.infoValue}>{profileData.phoneNumber || 'Не указан'}</p>
                             </div>
                         </div>
                     </div>
@@ -282,54 +282,54 @@ const renderProfileInfo = () => {
         }
     };
 
-    const renderPreferences = () => {
-        if (isEditing) {
-            return (
-                <div className={styles.preferencesSection}>
-                    <h3 className={styles.sectionTitle}>Предпочтения</h3>
-                    <div className={styles.preferencesTags}>
-                        {profileData.preferences.map((pref, index) => (
-                            <span key={index} className={styles.tag}>
-                            {pref}
-                                <button
-                                    onClick={() => handleRemovePreference(pref)}
-                                    className={styles.removeTagButton}
-                                >
-                                <i className="fas fa-times"></i>
-                            </button>
-                        </span>
-                        ))}
-                        <div className={styles.addPreferenceContainer}>
-                            <input
-                                type="text"
-                                value={newPreference}
-                                onChange={(e) => setNewPreference(e.target.value)}
-                                placeholder="Добавить предпочтение"
-                                className={styles.addPreferenceInput}
-                            />
-                            <button
-                                onClick={handleAddPreference}
-                                className={styles.addTagButton}
-                            >
-                                <i className="fas fa-plus"></i> Добавить
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            );
-        } else {
-            return (
-                <div className={styles.preferencesSection}>
-                    <h3 className={styles.sectionTitle}>Предпочтения</h3>
-                    <div className={styles.preferencesTags}>
-                        {profileData.preferences.map((pref, index) => (
-                            <span key={index} className={styles.tag}>{pref}</span>
-                        ))}
-                    </div>
-                </div>
-            );
-        }
-    };
+    // const renderPreferences = () => {
+    //     if (isEditing) {
+    //         return (
+    //             <div className={styles.preferencesSection}>
+    //                 <h3 className={styles.sectionTitle}>Предпочтения</h3>
+    //                 <div className={styles.preferencesTags}>
+    //                     {profileData.preferences.map((pref, index) => (
+    //                         <span key={index} className={styles.tag}>
+    //                         {pref}
+    //                             <button
+    //                                 onClick={() => handleRemovePreference(pref)}
+    //                                 className={styles.removeTagButton}
+    //                             >
+    //                             <i className="fas fa-times"></i>
+    //                         </button>
+    //                     </span>
+    //                     ))}
+    //                     <div className={styles.addPreferenceContainer}>
+    //                         <input
+    //                             type="text"
+    //                             value={newPreference}
+    //                             onChange={(e) => setNewPreference(e.target.value)}
+    //                             placeholder="Добавить предпочтение"
+    //                             className={styles.addPreferenceInput}
+    //                         />
+    //                         <button
+    //                             onClick={handleAddPreference}
+    //                             className={styles.addTagButton}
+    //                         >
+    //                             <i className="fas fa-plus"></i> Добавить
+    //                         </button>
+    //                     </div>
+    //                 </div>
+    //             </div>
+    //         );
+    //     } else {
+    //         return (
+    //             <div className={styles.preferencesSection}>
+    //                 <h3 className={styles.sectionTitle}>Предпочтения</h3>
+    //                 <div className={styles.preferencesTags}>
+    //                     {profileData.preferences.map((pref, index) => (
+    //                         <span key={index} className={styles.tag}>{pref}</span>
+    //                     ))}
+    //                 </div>
+    //             </div>
+    //         );
+    //     }
+    // };
 
     const renderMenuContent = () => {
         switch (activeMenu) {
@@ -375,7 +375,7 @@ const renderProfileInfo = () => {
                             </div>
 
                             {renderProfileInfo()}
-                            {renderPreferences()}
+                            {/* {renderPreferences()} */}
                         </div>
 
                         <div className={styles.statsGrid}>
