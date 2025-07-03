@@ -51,18 +51,61 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("SelfOrAdminAccess", policy => // политика по запросам - или сам пользователь, или админ
+        policy.RequireAssertion(async context =>
+        {
+            var httpContext = context.Resource as HttpContext;
+            if (httpContext == null)
+                return false;
+
+            // Проверка роли Admin
+            if (httpContext.User.IsInRole("Admin"))
+                return true;
+
+            // Получаем userId из токена
+            var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(currentUserId))
+                return false;
+
+            // Проверяем userId из route
+            var routeData = httpContext.GetRouteData();
+            var routeUserId = routeData.Values["userId"]?.ToString();
+
+            if (routeUserId == currentUserId)
+                return true;
+
+            // Если в route нет, проверяем body
+            try
+            {
+                // Читаем body запроса
+                httpContext.Request.EnableBuffering(); // Важно для повторного чтения body
+                var body = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
+                httpContext.Request.Body.Position = 0; // Возвращаем позицию для последующего чтения
+
+                if (!string.IsNullOrEmpty(body))
+                {
+                    var json = JObject.Parse(body);
+                    var bodyUserId = json["userId"]?.ToString(); // предполагаем, что userId есть в теле
+
+                    if (bodyUserId == currentUserId)
+                        return true;
+                }
+            }
+            catch
+            {
+                // В случае ошибок парсинга просто игнорируем body
+            }
+
+            return false;
+        }));
+
+    options.AddPolicy("AdminOrModerAccess", policy => // политика по запросам - только админ или модер
         policy.RequireAssertion(context =>
         {
             var httpContext = context.Resource as HttpContext;
             if (httpContext == null)
                 return false;
 
-            var routeData = httpContext.GetRouteData();
-            var requestedUserId = routeData.Values["userId"]?.ToString();
-
-            var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            return requestedUserId == currentUserId || httpContext.User.IsInRole("Admin");
+            return httpContext.User.IsInRole("Admin") || httpContext.User.IsInRole("Moder");
         }));
 });
 

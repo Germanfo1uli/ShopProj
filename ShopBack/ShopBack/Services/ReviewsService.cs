@@ -22,9 +22,7 @@ namespace ShopBack.Services
         {
             var review = await GetByIdAsync(reviewId);
             if (review == null)
-            {
                 throw new ArgumentException("Review not found", nameof(reviewId));
-            }
 
             review.Approved = true;
             review.ModeratorId = moderatorId;
@@ -48,6 +46,11 @@ namespace ShopBack.Services
             review.ModeratedAt = DateTime.UtcNow;
 
             await UpdateAsync(review);
+        }
+
+        public async Task DecoratorAddAsync(ProductReviews review)
+        {
+            await AddAsync(review);
         }
     }
 }

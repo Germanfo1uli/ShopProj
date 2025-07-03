@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using System.Security.Claims;
+using System.Security;
 
 namespace ShopBack.Controllers
 {
@@ -12,58 +16,64 @@ namespace ShopBack.Controllers
         private readonly OrdersService _ordersService = ordersService;
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<Payments>>> GetAll()
         {
-            try
-            {
-                var payments = await _paymentsService.GetAllAsync();
-                return Ok(payments);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Внутренняя ошибка сервера при получении списка платежей");
-            }
+            var payments = await _paymentsService.GetAllAsync();
+            return Ok(payments);
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Payments>> GetById(int id)
         {
-            try
+            var isAdmin = User.IsInRole("Admin");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
-                var payment = await _paymentsService.GetByIdAsync(id);
-                if (payment == null) return NotFound("Платеж не найден");
-                return Ok(payment);
+                throw new SecurityException("Неверный формат идентификатора пользователя");
             }
-            catch (Exception)
+
+            var payment = await _paymentsService.GetByIdAsync(id);
+            var order = await _ordersService.GetByIdAsync(payment.OrderId);
+
+            if (!isAdmin && userId != order.UserId)
             {
-                return StatusCode(500, "Внутренняя ошибка сервера при получении платежа");
+                return Forbid("Вы можете просматривать только свои оплаты");
             }
+            
+            return Ok(payment);
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<Payments>> Create([FromBody] PaymentsCreate createDto)
         {
-            if (!ModelState.IsValid) return BadRequest("Некорректные данные платежа");
+            var isAdmin = User.IsInRole("Admin");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            try
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
-                var payment = new Payments
-                {
-                    OrderId = createDto.OrderId,
-                    Amount = createDto.Amount,
-                    PaymentMethod = createDto.PaymentMethod,
-                    Status = createDto.Status,
-                    TransactionId = createDto.TransactionId,
-                    PaymentDate = DateTime.UtcNow
-                };
+                throw new SecurityException("Неверный формат идентификатора пользователя");
+            }
 
-                await _paymentsService.AddAsync(payment);
-                return CreatedAtAction(nameof(GetById), new { id = payment.Id }, payment);
-            }
-            catch (Exception)
+            var payment = new Payments
             {
-                return StatusCode(500, "Внутренняя ошибка сервера при создании платежа");
-            }
+                OrderId = createDto.OrderId,
+                Amount = createDto.Amount,
+                PaymentMethod = createDto.PaymentMethod,
+                Status = createDto.Status,
+                TransactionId = createDto.TransactionId,
+                PaymentDate = DateTime.UtcNow
+            };
+
+            await _paymentsService.AddAsync(payment);
+            return CreatedAtAction(
+               actionName: nameof(GetById),
+               routeValues: new { id = payment.Id },
+               value: payment
+           );
         }
 
         [HttpPut("{id}")]

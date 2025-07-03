@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
 
@@ -20,10 +21,11 @@ namespace ShopBack.Controllers
         public async Task<ActionResult<IEnumerable<ProductSpecifications>>> GetByProduct(int productId)
         {
             var allSpecs = await _service.GetAllAsync();
-            return Ok(allSpecs.Where(s => (s as ProductSpecifications)?.ProductId == productId));
+            return Ok(allSpecs.Where(s => s.ProductId == productId));
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductSpecifications>> Create([FromBody] SpecificationCreateDto dto)
         {
             var spec = new ProductSpecifications
@@ -49,6 +51,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] SpecificationUpdateDto dto)
         {
             var spec = await _service.GetByIdAsync(id);
@@ -61,6 +64,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             await _service.DeleteAsync(id);

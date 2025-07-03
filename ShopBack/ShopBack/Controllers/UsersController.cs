@@ -61,7 +61,7 @@ namespace ShopBack.Controllers
         public async Task<ActionResult<Users>> Update(int userId, [FromBody] UserUpdateData updateDto)
         {
             var user = await _userService.GetByIdAsync(userId);
-            user.Email = updateDto.Email;
+            user.Email = updateDto.Email ?? user.Email;
             user.FirstName = updateDto.FirstName;
             user.MiddleName = updateDto.MiddleName;
             user.LastName = updateDto.LastName;
@@ -79,9 +79,9 @@ namespace ShopBack.Controllers
         }
 
         [HttpPost("generatetokens")]
-        public async Task<ActionResult<Users>> GenerateTokens([FromBody] RefreshToken token)
+        public async Task<ActionResult<Users>> GenerateTokens([FromBody] string token)
         {
-            var result = await _userService.GetNewTokensAsync(token.Token);
+            var result = await _userService.GetNewTokensAsync(token);
             return Ok(result);
         }
 
@@ -112,22 +112,17 @@ namespace ShopBack.Controllers
 
     public class UserUpdateData
     {
-        public string Email { get; set; }
-        public string FirstName { get; set; }
-        public string MiddleName { get; set; }
-        public string LastName { get; set; }
-        public string PhoneNumber { get; set; }
+        public string? Email { get; set; }
+        public string? FirstName { get; set; }
+        public string? MiddleName { get; set; }
+        public string? LastName { get; set; }
+        public string? PhoneNumber { get; set; }
     }
 
     public class UserUpdatePassword
     {
         public string OldPassword { get; set; }
         public string NewPassword { get; set; }
-        public string Token { get; set; }
-    }
-
-    public class RefreshToken
-    {
         public string Token { get; set; }
     }
 }

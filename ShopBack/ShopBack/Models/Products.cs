@@ -20,6 +20,16 @@ namespace ShopBack.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
 
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? OldPrice { get; set; }
+
+        [Required]
+        [Column(TypeName = "decimal(3,1)")]
+        public decimal Rating { get; set; } = 0.0M;
+
+        [Required]
+        public int ReviewsNumber { get; set; } = 0;
+
         [Required]
         public int QuantityInStock { get; set; } = 0;
 
