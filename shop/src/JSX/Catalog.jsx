@@ -1,26 +1,77 @@
 import React, { useState } from 'react';
 import styles from '../CSS/Catalog.module.css';
-import { FaHeart, FaRegHeart, FaShoppingCart, FaStar, FaRegStar, FaStarHalfAlt, FaChevronLeft, FaChevronRight, FaStore,FaSearch  } from 'react-icons/fa';
+import sb from '../CSS/Breadcrumbs.module.css'
+import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaStarHalfAlt, FaChevronLeft, FaChevronRight, FaStore, FaSearch, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import Footer from "./Components/Footer";
-import sb from "../CSS/Breadcrumbs.module.css";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Catalog = () => {
-    const [activeTab, setActiveTab] = useState('Все товары');
-    const [favorites, setFavorites] = useState([2]); // Товар с id 2 в избранном
+    const [activeCategory, setActiveCategory] = useState('Все товары');
+    const [activeSubcategory, setActiveSubcategory] = useState(null);
+    const [expandedCategory, setExpandedCategory] = useState(null);
+    const [favorites, setFavorites] = useState([2]);
     const [priceRange, setPriceRange] = useState([0, 12000]);
 
+    // Новая структура категорий с подкатегориями
     const categories = [
-        { name: 'Вся одежда', count: 124 },
-        { name: 'Женская одежда', count: 56 },
-        { name: 'Мужская одежда', count: 42 },
-        { name: 'Детская одежда', count: 26 },
-        { name: 'Посуда', count: 38 },
-        { name: 'Декор', count: 19 },
-        { name: 'Текстиль', count: 31 }
+        {
+            name: 'Все товары',
+            subcategories: []
+        },
+        {
+            name: 'Одежда',
+            subcategories: [
+                'Женская одежда',
+                'Мужская одежда',
+                'Детская одежда',
+                'Футболки',
+                'Джинсы',
+                'Платья',
+                'Верхняя одежда'
+            ]
+        },
+        {
+            name: 'Посуда',
+            subcategories: [
+                'Кухонная посуда',
+                'Столовая посуда',
+                'Чайные наборы',
+                'Кофейные наборы',
+                'Стеклянная посуда'
+            ]
+        },
+        {
+            name: 'Декор',
+            subcategories: [
+                'Картины',
+                'Вазы',
+                'Статуэтки',
+                'Зеркала',
+                'Часы'
+            ]
+        },
+        {
+            name: 'Текстиль',
+            subcategories: [
+                'Пледы',
+                'Подушки',
+                'Скатерти',
+                'Шторы',
+                'Полотенца'
+            ]
+        },
+        {
+            name: 'Аксессуары',
+            subcategories: [
+                'Сумки',
+                'Кошельки',
+                'Ремни',
+                'Головные уборы',
+                'Шарфы'
+            ]
+        }
     ];
 
-    const tabs = ['Все товары', 'Одежда', 'Посуда', 'Декор', 'Текстиль', 'Аксессуары'];
 
     const products = [
         {
@@ -88,6 +139,20 @@ const Catalog = () => {
         'white', 'black', 'blue', 'gray', 'red',
         'green', 'yellow', 'purple', 'pink'
     ];
+
+    const toggleCategory = (categoryName) => {
+        if (expandedCategory === categoryName) {
+            setExpandedCategory(null);
+        } else {
+            setExpandedCategory(categoryName);
+        }
+    };
+
+    const selectCategory = (categoryName, subcategory = null) => {
+        setActiveCategory(categoryName);
+        setActiveSubcategory(subcategory);
+        setExpandedCategory(null);
+    };
 
     const toggleFavorite = (productId) => {
         if (favorites.includes(productId)) {
@@ -226,15 +291,54 @@ const Catalog = () => {
                     </aside>
 
                     <main className={styles.main}>
-                        <div className={styles.tabs}>
-                            {tabs.map((tab) => (
-                                <button
-                                    key={tab}
-                                    className={`${styles.tab} ${activeTab === tab ? styles.activeTab : ''}`}
-                                    onClick={() => setActiveTab(tab)}
+                        <div className={styles.categoryMenu}>
+                            {categories.map((category) => (
+                                <div
+                                    key={category.name}
+                                    className={styles.categoryItem}
+                                    onMouseEnter={() => category.subcategories.length > 0 && setExpandedCategory(category.name)}
+                                    onMouseLeave={() => setExpandedCategory(null)}
                                 >
-                                    {tab}
-                                </button>
+                                    <button
+                                        className={`${styles.categoryButton} ${
+                                            activeCategory === category.name ? styles.activeCategory : ''
+                                        }`}
+                                        onClick={() => {
+                                            if (category.subcategories.length > 0) {
+                                                toggleCategory(category.name);
+                                            } else {
+                                                selectCategory(category.name);
+                                            }
+                                        }}
+                                    >
+                                        {category.name}
+                                        {category.subcategories.length > 0 && (
+                                            expandedCategory === category.name ?
+                                                <FaChevronUp className={styles.categoryArrow} /> :
+                                                <FaChevronDown className={styles.categoryArrow} />
+                                        )}
+                                    </button>
+
+                                    {category.subcategories.length > 0 && (
+                                        <div
+                                            className={`${styles.subcategories} ${
+                                                expandedCategory === category.name ? styles.visible : ''
+                                            }`}
+                                        >
+                                            {category.subcategories.map((subcategory) => (
+                                                <button
+                                                    key={subcategory}
+                                                    className={`${styles.subcategoryButton} ${
+                                                        activeSubcategory === subcategory ? styles.activeSubcategory : ''
+                                                    }`}
+                                                    onClick={() => selectCategory(category.name, subcategory)}
+                                                >
+                                                    {subcategory}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             ))}
                         </div>
 
@@ -247,8 +351,8 @@ const Catalog = () => {
                                     >
                                         {product.badge && (
                                             <span className={`${styles.badge} ${styles[product.badgeColor]}`}>
-                        {product.badge}
-                      </span>
+                                                {product.badge}
+                                            </span>
                                         )}
                                         <button
                                             className={styles.favoriteButton}
@@ -279,7 +383,6 @@ const Catalog = () => {
                                                 Перейти к товару
                                             </Link>
                                         </button>
-
                                     </div>
                                 </div>
                             ))}
