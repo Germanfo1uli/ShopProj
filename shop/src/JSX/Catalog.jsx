@@ -13,209 +13,102 @@ import { apiRequest } from './Api/ApiRequest';
 const Catalog = () => {
     const [activeCategory, setActiveCategory] = useState('Все товары');
     const [activeSubcategory, setActiveSubcategory] = useState(null);
-    const [expandedFilterCategory, setExpandedFilterCategory] = useState(null); // только для filterSection
-    const [expandedMainCategory, setExpandedMainCategory] = useState(null); // только для main
+    const [expandedFilterCategory, setExpandedFilterCategory] = useState(null);
+    const [expandedMainCategory, setExpandedMainCategory] = useState(null);
     const [favorites, setFavorites] = useState([2]);
     const [priceRange, setPriceRange] = useState([0, 12000]);
     const [selectedSizes, setSelectedSizes] = useState([]);
     const [selectedColors, setSelectedColors] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [sortOption, setSortOption] = useState('popularity');
-
-    const categories = [
-        {
-            name: 'Все товары',
-            subcategories: [],
-            icon: null,
-            buttonStyle: styles.defaultCategoryButton
-        },
-        {
-            name: 'Популярные товары',
-            subcategories: [],
-            icon: <FaFire className={styles.categoryIcon} />,
-            buttonStyle: styles.popularButton,
-            isPopular: true
-        },
-        {
-            name: 'Рекомендации для вас',
-            subcategories: [],
-            icon: <FaGem className={styles.categoryIcon} />,
-            buttonStyle: styles.recommendationsButton,
-            isRecommended: true
-        },
-        {
-            name: 'Спецпредложения',
-            subcategories: [],
-            icon: <FaGift className={styles.categoryIcon} />,
-            buttonStyle: styles.specialOffersButton,
-            isSpecial: true
-        },
-        {
-            name: 'Одежда',
-            subcategories: [
-                'Женская одежда',
-                'Мужская одежда',
-                'Детская одежда',
-                'Футболки',
-                'Джинсы',
-                'Платья',
-                'Верхняя одежда'
-            ],
-            icon: null,
-            buttonStyle: styles.defaultCategoryButton,
-            type: 'clothing'
-        },
-        {
-            name: 'Посуда',
-            subcategories: [
-                'Кухонная посуда',
-                'Столовая посуда',
-                'Чайные наборы',
-                'Кофейные наборы',
-                'Стеклянная посуда'
-            ],
-            icon: null,
-            buttonStyle: styles.defaultCategoryButton,
-            type: 'dishes'
-        },
-        {
-            name: 'Декор',
-            subcategories: [
-                'Картины',
-                'Вазы',
-                'Статуэтки',
-                'Зеркала',
-                'Часы'
-            ],
-            icon: null,
-            buttonStyle: styles.defaultCategoryButton,
-            type: 'decor'
-        },
-        {
-            name: 'Текстиль',
-            subcategories: [
-                'Пледы',
-                'Подушки',
-                'Скатерти',
-                'Шторы',
-                'Полотенца'
-            ],
-            icon: null,
-            buttonStyle: styles.defaultCategoryButton,
-            type: 'textile'
-        },
-        {
-            name: 'Аксессуары',
-            subcategories: [
-                'Сумки',
-                'Кошельки',
-                'Ремни',
-                'Головные уборы',
-                'Шарфы'
-            ],
-            icon: null,
-            buttonStyle: styles.defaultCategoryButton,
-            type: 'accessories'
-        }
-    ];
-
-    const allProducts = [
-        {
-            id: 1,
-            name: 'Платье хлопковое нежно-розовое',
-            price: 3490,
-            oldPrice: 4290,
-            rating: 4.5,
-            reviews: 24,
-            badge: 'Новинка',
-            badgeColor: 'blue',
-            bgColor: '#f5f5f5',
-            type: 'clothing',
-            sizes: ['S', 'M', 'L'],
-            color: 'pink',
-            isPopular: true,
-            dateAdded: '2023-05-15'
-        },
-        {
-            id: 2,
-            name: 'Чайный набор фарфоровый, 12 предметов',
-            price: 7290,
-            rating: 4,
-            reviews: 18,
-            bgColor: '#e6e6e6',
-            type: 'dishes',
-            color: 'white',
-            isRecommended: true,
-            dateAdded: '2023-06-20'
-        },
-        {
-            id: 3,
-            name: 'Свитер мужской с принтом, хлопок',
-            price: 4990,
-            oldPrice: 6290,
-            rating: 5,
-            reviews: 32,
-            badge: 'Скидка',
-            badgeColor: 'red',
-            bgColor: '#f0f0f0',
-            type: 'clothing',
-            sizes: ['M', 'L', 'XL'],
-            color: 'blue',
-            isSpecial: true,
-            dateAdded: '2023-04-10'
-        },
-        {
-            id: 4,
-            name: 'Плед вязаный, 140×180 см, голубой',
-            price: 2990,
-            rating: 4.5,
-            reviews: 27,
-            bgColor: '#e6e6e6',
-            type: 'textile',
-            color: 'blue',
-            dateAdded: '2023-07-05'
-        },
-        {
-            id: 5,
-            name: 'Платье детское с вышивкой, 3-5 лет',
-            price: 1790,
-            oldPrice: 2490,
-            rating: 4,
-            reviews: 15,
-            badge: 'Акция',
-            badgeColor: 'blue',
-            bgColor: '#f5f5f5',
-            type: 'clothing',
-            sizes: ['XS'],
-            color: 'pink',
-            dateAdded: '2023-08-12'
-        },
-        {
-            id: 6,
-            name: 'Кружка керамическая с рисунком, 350 мл',
-            price: 690,
-            rating: 5,
-            reviews: 42,
-            badge: 'Хит',
-            badgeColor: 'red',
-            bgColor: 'white',
-            type: 'dishes',
-            color: 'white',
-            isPopular: true,
-            dateAdded: '2023-03-22'
-        }
-    ];
-
-    const colors = ['white', 'black', 'blue', 'gray', 'red', 'green', 'yellow', 'purple', 'pink'];
-    const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+    const [categories, setCategories] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        let result = [...allProducts];
+        const fetchCategories = async () => {
+            try {
+                setIsLoading(true);
+                const allCategories = await apiRequest('/api/categories');
+                const parentCategories = await apiRequest('/api/categories/parents');
+                const categoriesStructure = parentCategories.map(parent => {
+                    const children = allCategories.filter(
+                        cat => cat.parentCategoryId === parent.id
+                    );
+                    
+                    return {
+                        id: parent.id,
+                        name: parent.name,
+                        subcategories: children.map(child => ({
+                            id: child.id,
+                            name: child.name
+                        })),
+                        // Добавляем свойства для специальных категорий
+                        icon: null,
+                        buttonStyle: styles.defaultCategoryButton,
+                        isPopular: parent.name === 'Популярные товары',
+                        isRecommended: parent.name === 'Рекомендации для вас',
+                        isSpecial: parent.name === 'Спецпредложения'
+                    };
+                });
 
-        // Фильтрация по категории
+                // Добавляем специальные категории в начало
+                const specialCategories = [
+                    {
+                        id: 0,
+                        name: 'Все товары',
+                        subcategories: [],
+                        icon: null,
+                        buttonStyle: styles.defaultCategoryButton
+                    },
+                    {
+                        id: -1,
+                        name: 'Популярные товары',
+                        subcategories: [],
+                        icon: <FaFire className={styles.categoryIcon} />,
+                        buttonStyle: styles.popularButton,
+                        isPopular: true
+                    },
+                    {
+                        id: -2,
+                        name: 'Рекомендации для вас',
+                        subcategories: [],
+                        icon: <FaGem className={styles.categoryIcon} />,
+                        buttonStyle: styles.recommendationsButton,
+                        isRecommended: true
+                    },
+                    {
+                        id: -3,
+                        name: 'Спецпредложения',
+                        subcategories: [],
+                        icon: <FaGift className={styles.categoryIcon} />,
+                        buttonStyle: styles.specialOffersButton,
+                        isSpecial: true
+                    }
+                ];
+
+                setCategories([...specialCategories, ...categoriesStructure]);
+                
+            } catch (err) {
+                console.error('Ошибка загрузки категорий:', err);
+                setError('Не удалось загрузить категории');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
+
+    useEffect(() => {
+        if (products.length === 0) return;
+
+        let result = [...products];
+
         if (activeCategory !== 'Все товары') {
             const category = categories.find(cat => cat.name === activeCategory);
-
             if (category) {
                 if (category.isPopular) {
                     result = result.filter(product => product.isPopular);
@@ -229,34 +122,33 @@ const Catalog = () => {
             }
         }
 
-        // Фильтрация по цене
+        if (activeSubcategory) {
+            result = result.filter(product => product.subcategory === activeSubcategory);
+        }
+
         result = result.filter(product =>
             product.price >= priceRange[0] && product.price <= priceRange[1]
         );
 
-        // Фильтрация по размеру
         if (selectedSizes.length > 0) {
             result = result.filter(product =>
                 product.sizes && product.sizes.some(size => selectedSizes.includes(size))
             );
         }
 
-        // Фильтрация по цвету
         if (selectedColors.length > 0) {
             result = result.filter(product =>
                 selectedColors.includes(product.color)
             );
         }
 
-        // Сортировка
         result = sortProducts(result, sortOption);
 
         setFilteredProducts(result);
-    }, [activeCategory, priceRange, selectedSizes, selectedColors, sortOption]);
+    }, [activeCategory, activeSubcategory, priceRange, selectedSizes, selectedColors, sortOption, products, categories]);
 
     const sortProducts = (products, option) => {
         const sorted = [...products];
-
         switch(option) {
             case 'price-asc':
                 return sorted.sort((a, b) => a.price - b.price);
@@ -268,6 +160,36 @@ const Catalog = () => {
             default:
                 return sorted.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
         }
+    };
+
+    const toggleCategory = (categoryName, section = 'main') => {
+        if (section === 'filter') {
+            setExpandedFilterCategory(expandedFilterCategory === categoryName ? null : categoryName);
+        } else {
+            setExpandedMainCategory(expandedMainCategory === categoryName ? null : categoryName);
+        }
+    };
+
+    const selectCategory = (categoryName, subcategory = null) => {
+        setActiveCategory(categoryName);
+        setActiveSubcategory(subcategory);
+        setExpandedFilterCategory(null);
+        setExpandedMainCategory(null);
+    };
+
+    const toggleFavorite = (productId) => {
+        if (favorites.includes(productId)) {
+            setFavorites(favorites.filter(id => id !== productId));
+        } else {
+            setFavorites([...favorites, productId]);
+        }
+    };
+
+    const handlePriceChange = (e, index) => {
+        const newValue = parseInt(e.target.value) || 0;
+        const newPriceRange = [...priceRange];
+        newPriceRange[index] = newValue;
+        setPriceRange(newPriceRange);
     };
 
     const handleSortChange = (e) => {
@@ -288,36 +210,6 @@ const Catalog = () => {
                 ? prev.filter(c => c !== color)
                 : [...prev, color]
         );
-    };
-
-    const toggleCategory = (categoryName, section = 'main') => {
-        if (section === 'filter') {
-            setExpandedFilterCategory(expandedFilterCategory === categoryName ? null : categoryName);
-        } else {
-            setExpandedMainCategory(expandedMainCategory === categoryName ? null : categoryName);
-        }
-    };
-
-    const selectCategory = (categoryName, subcategory = null) => {
-        setActiveCategory(categoryName);
-        setActiveSubcategory(subcategory);
-        // Сбрасываем оба состояния раскрытия категорий
-        setExpandedFilterCategory(null);
-        setExpandedMainCategory(null);
-    };
-    const toggleFavorite = (productId) => {
-        if (favorites.includes(productId)) {
-            setFavorites(favorites.filter(id => id !== productId));
-        } else {
-            setFavorites([...favorites, productId]);
-        }
-    };
-
-    const handlePriceChange = (e, index) => {
-        const newValue = parseInt(e.target.value) || 0;
-        const newPriceRange = [...priceRange];
-        newPriceRange[index] = newValue;
-        setPriceRange(newPriceRange);
     };
 
     const renderStars = (rating) => {
@@ -346,11 +238,22 @@ const Catalog = () => {
         setSortOption('popularity');
     };
 
+    if (isLoading) {
+        return <div className={styles.loading}>Загрузка...</div>;
+    }
+
+    if (error) {
+        return <div className={styles.error}>{error}</div>;
+    }
+
+    const colors = ['white', 'black', 'blue', 'gray', 'red', 'green', 'yellow', 'purple', 'pink'];
+    const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+
     return (
         <div className={styles.catalog}>
             <div className={styles.container}>
                 <nav className={sb.breadcrumbs}>
-                    <a href="/home" className={sb.breadcrumbLink}>Главная</a>
+                    <Link to="/home" className={sb.breadcrumbLink}>Главная</Link>
                     <span className={sb.breadcrumbSeparator}>/</span>
                     <span className={sb.breadcrumbActive}>Каталог</span>
                 </nav>
@@ -381,7 +284,7 @@ const Catalog = () => {
                             <h3 className={styles.filterTitle}>Категории</h3>
                             <ul className={styles.categoryList}>
                                 {categories.map((category) => (
-                                    <li key={category.name}>
+                                    <li key={category.id}>
                                         <div 
                                             className={`${styles.categoryLink} ${
                                                 activeCategory === category.name ? styles.active : ''
@@ -405,15 +308,15 @@ const Catalog = () => {
                                         
                                         {category.subcategories.length > 0 && expandedFilterCategory === category.name && (
                                             <ul className={styles.subcategoryList}>
-                                                {category.subcategories.map((subcategory, index) => (
-                                                    <li key={`${category.name}-${index}`}>
+                                                {category.subcategories.map(subcategory => (
+                                                    <li key={subcategory.id}>
                                                         <div
                                                             className={`${styles.subcategoryLink} ${
-                                                                activeSubcategory === subcategory ? styles.active : ''
+                                                                activeSubcategory === subcategory.name ? styles.active : ''
                                                             }`}
-                                                            onClick={() => selectCategory(category.name, subcategory)}
+                                                            onClick={() => selectCategory(category.name, subcategory.name)}
                                                         >
-                                                            {subcategory}
+                                                            {subcategory.name}
                                                         </div>
                                                     </li>
                                                 ))}
@@ -424,11 +327,12 @@ const Catalog = () => {
                             </ul>
                         </div>
 
+                        {/* Остальные фильтры остаются без изменений */}
                         <div className={styles.filterSection}>
                             <h3 className={styles.filterTitle}>Цена</h3>
                             <div className={styles.priceRange}>
-                                <span>{priceRange[0].toLocaleString()} ₽</span>
-                                <span>{priceRange[1].toLocaleString()} ₽</span>
+                                <span>0 ₽</span>
+                                <span>20 000 ₽</span>
                             </div>
                             <input
                                 type="range"
@@ -510,7 +414,7 @@ const Catalog = () => {
                         <div className={styles.categoryMenu}>
                             {categories.map((category) => (
                                 <div
-                                    key={category.name}
+                                    key={category.id}
                                     className={styles.categoryItem}
                                     onMouseEnter={() => category.subcategories.length > 0 && setExpandedMainCategory(category.name)}
                                     onMouseLeave={() => setExpandedMainCategory(null)}
@@ -518,7 +422,7 @@ const Catalog = () => {
                                     <button
                                         className={`${styles.categoryButton} ${
                                             activeCategory === category.name ? styles.activeCategory : ''
-                                        } ${category.buttonStyle}`}
+                                        } ${category.buttonStyle || ''}`}
                                         onClick={() => {
                                             if (category.subcategories.length > 0) {
                                                 toggleCategory(category.name, 'main');
@@ -544,15 +448,15 @@ const Catalog = () => {
 
                                     {category.subcategories.length > 0 && expandedMainCategory === category.name && (
                                         <div className={styles.subcategories}>
-                                            {category.subcategories.map((subcategory, index) => (
+                                            {category.subcategories.map((subcategory) => (
                                                 <button
-                                                    key={`${category.name}-sub-${index}`}
+                                                    key={subcategory.id}
                                                     className={`${styles.subcategoryButton} ${
-                                                        activeSubcategory === subcategory ? styles.activeSubcategory : ''
+                                                        activeSubcategory === subcategory.name ? styles.activeSubcategory : ''
                                                     }`}
-                                                    onClick={() => selectCategory(category.name, subcategory)}
+                                                    onClick={() => selectCategory(category.name, subcategory.name)}
                                                 >
-                                                    {subcategory}
+                                                    {subcategory.name}
                                                 </button>
                                             ))}
                                         </div>
@@ -567,10 +471,10 @@ const Catalog = () => {
                                     <div key={product.id} className={styles.productCard}>
                                         <div
                                             className={styles.productImage}
-                                            style={{ backgroundColor: product.bgColor }}
+                                            style={{ backgroundColor: product.bgColor || '#f5f5f5' }}
                                         >
                                             {product.badge && (
-                                                <span className={`${styles.badge} ${styles[product.badgeColor]}`}>
+                                                <span className={`${styles.badge} ${styles[product.badgeColor || 'blue']}`}>
                                                     {product.badge}
                                                 </span>
                                             )}
@@ -594,8 +498,8 @@ const Catalog = () => {
                                                 )}
                                             </div>
                                             <div className={styles.productRating}>
-                                                {renderStars(product.rating)}
-                                                <span className={styles.reviews}>({product.reviews})</span>
+                                                {renderStars(product.rating || 0)}
+                                                <span className={styles.reviews}>({product.reviews || 0})</span>
                                             </div>
                                             <button className={styles.addToCart}>
                                                 <Link to={`/product/${product.id}`} className={styles.linkToCart}>
