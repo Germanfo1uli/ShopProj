@@ -13,9 +13,8 @@ import { apiRequest } from './Api/ApiRequest';
 const Catalog = () => {
     const [activeCategory, setActiveCategory] = useState('Все товары');
     const [activeSubcategory, setActiveSubcategory] = useState(null);
-    const [expandedCategory, setExpandedCategory] = useState(null);
-    const [expandedFilterCategory, setExpandedFilterCategory] = useState(null); // для filterSection
-    const [expandedMainCategory, setExpandedMainCategory] = useState(null); // для main
+    const [expandedFilterCategory, setExpandedFilterCategory] = useState(null); // только для filterSection
+    const [expandedMainCategory, setExpandedMainCategory] = useState(null); // только для main
     const [favorites, setFavorites] = useState([2]);
     const [priceRange, setPriceRange] = useState([0, 12000]);
     const [selectedSizes, setSelectedSizes] = useState([]);
@@ -291,20 +290,21 @@ const Catalog = () => {
         );
     };
 
-    const toggleCategory = (categoryName) => {
-        if (expandedCategory === categoryName) {
-            setExpandedCategory(null);
+    const toggleCategory = (categoryName, section = 'main') => {
+        if (section === 'filter') {
+            setExpandedFilterCategory(expandedFilterCategory === categoryName ? null : categoryName);
         } else {
-            setExpandedCategory(categoryName);
+            setExpandedMainCategory(expandedMainCategory === categoryName ? null : categoryName);
         }
     };
 
     const selectCategory = (categoryName, subcategory = null) => {
         setActiveCategory(categoryName);
         setActiveSubcategory(subcategory);
-        setExpandedCategory(null);
+        // Сбрасываем оба состояния раскрытия категорий
+        setExpandedFilterCategory(null);
+        setExpandedMainCategory(null);
     };
-
     const toggleFavorite = (productId) => {
         if (favorites.includes(productId)) {
             setFavorites(favorites.filter(id => id !== productId));
@@ -380,33 +380,49 @@ const Catalog = () => {
                         <div className={styles.filterSection}>
                             <h3 className={styles.filterTitle}>Категории</h3>
                             <ul className={styles.categoryList}>
-                                {categories.map((category, index) => (
-                                    <li key={index}>
-                                        <a
-                                            href="#"
+                                {categories.map((category) => (
+                                    <li key={category.name}>
+                                        <div 
                                             className={`${styles.categoryLink} ${
-                                                activeCategory === category.name ? styles.activeCategoryLink : ''
+                                                activeCategory === category.name ? styles.active : ''
                                             }`}
-                                            onClick={(e) => {
-                                                e.preventDefault();
+                                            onMouseEnter={() => category.subcategories.length > 0 && setExpandedFilterCategory(category.name)}
+                                            onMouseLeave={() => setExpandedFilterCategory(null)}
+                                            onClick={() => {
                                                 selectCategory(category.name);
+                                                setExpandedFilterCategory(null);
                                             }}
                                         >
                                             <span>{category.name}</span>
-                                            <span className={styles.categoryCount}>
-                                                {allProducts.filter(p => {
-                                                    if (category.isPopular) return p.isPopular;
-                                                    if (category.isRecommended) return p.isRecommended;
-                                                    if (category.isSpecial) return p.isSpecial;
-                                                    if (category.type) return p.type === category.type;
-                                                    return true;
-                                                }).length}
-                                            </span>
-                                        </a>
+                                            {category.subcategories.length > 0 && (
+                                                <span className={styles.categoryArrow}>
+                                                    {expandedFilterCategory === category.name ? 
+                                                        <FaChevronUp /> : <FaChevronDown />
+                                                    }
+                                                </span>
+                                            )}
+                                        </div>
+                                        
+                                        {category.subcategories.length > 0 && expandedFilterCategory === category.name && (
+                                            <ul className={styles.subcategoryList}>
+                                                {category.subcategories.map((subcategory, index) => (
+                                                    <li key={`${category.name}-${index}`}>
+                                                        <div
+                                                            className={`${styles.subcategoryLink} ${
+                                                                activeSubcategory === subcategory ? styles.active : ''
+                                                            }`}
+                                                            onClick={() => selectCategory(category.name, subcategory)}
+                                                        >
+                                                            {subcategory}
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
                                     </li>
                                 ))}
                             </ul>
-                    </div>
+                        </div>
 
                         <div className={styles.filterSection}>
                             <h3 className={styles.filterTitle}>Цена</h3>
@@ -491,25 +507,13 @@ const Catalog = () => {
                     </aside>
 
                     <main className={styles.main}>
-                    <div className={styles.categoryMenu}>
-                        {categories.map((category) => (
-                            <div
-                                key={category.id}
-                                className={styles.categoryItem}
-                                onMouseEnter={() => category.subcategories.length > 0 && setExpandedMainCategory(category.name)}
-                                onMouseLeave={() => setExpandedMainCategory(null)}
-                            >
-                                <button
-                                    className={`${styles.categoryButton} ${
-                                        activeCategory === category.name ? styles.activeCategory : ''
-                                    }`}
-                                    onClick={() => {
-                                        if (category.subcategories.length > 0) {
-                                            setExpandedMainCategory(expandedMainCategory === category.name ? null : category.name);
-                                        } else {
-                                            selectCategory(category.name);
-                                        }
-                                    }}
+                        <div className={styles.categoryMenu}>
+                            {categories.map((category) => (
+                                <div
+                                    key={category.name}
+                                    className={styles.categoryItem}
+                                    onMouseEnter={() => category.subcategories.length > 0 && setExpandedMainCategory(category.name)}
+                                    onMouseLeave={() => setExpandedMainCategory(null)}
                                 >
                                     <button
                                         className={`${styles.categoryButton} ${
@@ -517,7 +521,7 @@ const Catalog = () => {
                                         } ${category.buttonStyle}`}
                                         onClick={() => {
                                             if (category.subcategories.length > 0) {
-                                                toggleCategory(category.name);
+                                                toggleCategory(category.name, 'main');
                                             } else {
                                                 selectCategory(category.name);
                                             }
@@ -532,37 +536,30 @@ const Catalog = () => {
                                             {category.name}
                                         </span>
                                         {category.subcategories.length > 0 && (
-                                            expandedCategory === category.name ?
+                                            expandedMainCategory === category.name ?
                                                 <FaChevronUp className={styles.categoryArrow} /> :
                                                 <FaChevronDown className={styles.categoryArrow} />
                                         )}
                                     </button>
 
-                                    {category.subcategories.length > 0 && (
-                                        expandedMainCategory === category.name ?
-                                            <FaChevronUp className={styles.categoryArrow} /> :
-                                            <FaChevronDown className={styles.categoryArrow} />
+                                    {category.subcategories.length > 0 && expandedMainCategory === category.name && (
+                                        <div className={styles.subcategories}>
+                                            {category.subcategories.map((subcategory, index) => (
+                                                <button
+                                                    key={`${category.name}-sub-${index}`}
+                                                    className={`${styles.subcategoryButton} ${
+                                                        activeSubcategory === subcategory ? styles.activeSubcategory : ''
+                                                    }`}
+                                                    onClick={() => selectCategory(category.name, subcategory)}
+                                                >
+                                                    {subcategory}
+                                                </button>
+                                            ))}
+                                        </div>
                                     )}
-                                </button>
-
-                                {category.subcategories.length > 0 && expandedMainCategory === category.name && (
-                                    <div className={styles.subcategories}>
-                                        {category.subcategories.map((subcategory) => (
-                                            <button
-                                                key={subcategory.id}
-                                                className={`${styles.subcategoryButton} ${
-                                                    activeSubcategory === subcategory.name ? styles.activeSubcategory : ''
-                                                }`}
-                                                onClick={() => selectCategory(category.name, subcategory.name)}
-                                            >
-                                                {subcategory.name}
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
+                                </div>
+                            ))}
+                        </div>
 
                         <div className={styles.products}>
                             {filteredProducts.length > 0 ? (
