@@ -9,7 +9,6 @@ import Profile from "./JSX/Profile";
 import Catalog from "./JSX/Catalog";
 import ProductPage from "./JSX/ProductPage";
 import { ThemeProvider } from "./JSX/Context/ThemeContext";
-import NewProducts from "./JSX/NewProducts";
 
 function App() {
     return (

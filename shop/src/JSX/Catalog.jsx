@@ -1,76 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../CSS/Catalog.module.css';
 import sb from '../CSS/Breadcrumbs.module.css'
 import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaStarHalfAlt, FaChevronLeft, FaChevronRight, FaStore, FaSearch, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import Footer from "./Components/Footer";
 import { Link } from "react-router-dom";
+import { apiRequest } from './Api/ApiRequest';
 
 const Catalog = () => {
     const [activeCategory, setActiveCategory] = useState('Все товары');
     const [activeSubcategory, setActiveSubcategory] = useState(null);
     const [expandedCategory, setExpandedCategory] = useState(null);
+    const [expandedFilterCategory, setExpandedFilterCategory] = useState(null); // для filterSection
+    const [expandedMainCategory, setExpandedMainCategory] = useState(null); // для main
     const [favorites, setFavorites] = useState([2]);
     const [priceRange, setPriceRange] = useState([0, 12000]);
+    const [categories, setCategories] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Новая структура категорий с подкатегориями
-    const categories = [
-        {
-            name: 'Все товары',
-            subcategories: []
-        },
-        {
-            name: 'Одежда',
-            subcategories: [
-                'Женская одежда',
-                'Мужская одежда',
-                'Детская одежда',
-                'Футболки',
-                'Джинсы',
-                'Платья',
-                'Верхняя одежда'
-            ]
-        },
-        {
-            name: 'Посуда',
-            subcategories: [
-                'Кухонная посуда',
-                'Столовая посуда',
-                'Чайные наборы',
-                'Кофейные наборы',
-                'Стеклянная посуда'
-            ]
-        },
-        {
-            name: 'Декор',
-            subcategories: [
-                'Картины',
-                'Вазы',
-                'Статуэтки',
-                'Зеркала',
-                'Часы'
-            ]
-        },
-        {
-            name: 'Текстиль',
-            subcategories: [
-                'Пледы',
-                'Подушки',
-                'Скатерти',
-                'Шторы',
-                'Полотенца'
-            ]
-        },
-        {
-            name: 'Аксессуары',
-            subcategories: [
-                'Сумки',
-                'Кошельки',
-                'Ремни',
-                'Головные уборы',
-                'Шарфы'
-            ]
-        }
-    ];
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                setIsLoading(true);
+                const allCategories = await apiRequest('/api/categories');
+                const parentCategories = await apiRequest('/api/categories/parents');
+                const categoriesStructure = parentCategories.map(parent => {
+                    const children = allCategories.filter(
+                        cat => cat.parentCategoryId === parent.id
+                    );
+                    
+                    return {
+                        id: parent.id,
+                        name: parent.name,
+                        subcategories: children
+                    };
+                });
+
+                setCategories([
+                    {
+                        id: 0,
+                        name: 'Все товары',
+                        subcategories: []
+                    },
+                    ...categoriesStructure
+                ]);
+                
+            } catch (err) {
+                console.error('Ошибка загрузки категорий:', err);
+                setError('Не удалось загрузить категории');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
 
     const products = [
@@ -215,16 +199,46 @@ const Catalog = () => {
                         <div className={styles.filterSection}>
                             <h3 className={styles.filterTitle}>Категории</h3>
                             <ul className={styles.categoryList}>
-                                {categories.map((category, index) => (
-                                    <li key={index}>
-                                        <a href="#" className={styles.categoryLink}>
+                                {categories.map((category) => (
+                                    <li key={category.id}>
+                                        <button 
+                                            className={`${styles.categoryLink} ${
+                                                activeCategory === category.name ? styles.active : ''
+                                            }`}
+                                            onClick={() => selectCategory(category.name)}
+                                            onMouseEnter={() => category.subcategories.length > 0 && setExpandedFilterCategory(category.name)}
+                                            onMouseLeave={() => setExpandedFilterCategory(null)}
+                                        >
                                             <span>{category.name}</span>
-                                            <span className={styles.categoryCount}>{category.count}</span>
-                                        </a>
+                                            {category.subcategories.length > 0 && (
+                                                <span className={styles.categoryArrow}>
+                                                    {expandedFilterCategory === category.name ? 
+                                                        <FaChevronUp /> : <FaChevronDown />
+                                                    }
+                                                </span>
+                                            )}
+                                        </button>
+                                        
+                                        {category.subcategories.length > 0 && expandedFilterCategory === category.name && (
+                                            <ul className={styles.subcategoryList}>
+                                                {category.subcategories.map(subcategory => (
+                                                    <li key={subcategory.id}>
+                                                        <button
+                                                            className={`${styles.subcategoryLink} ${
+                                                                activeSubcategory === subcategory.name ? styles.active : ''
+                                                            }`}
+                                                            onClick={() => selectCategory(category.name, subcategory.name)}
+                                                        >
+                                                            {subcategory.name}
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
                                     </li>
                                 ))}
                             </ul>
-                        </div>
+                    </div>
 
                         <div className={styles.filterSection}>
                             <h3 className={styles.filterTitle}>Цена</h3>
@@ -291,56 +305,52 @@ const Catalog = () => {
                     </aside>
 
                     <main className={styles.main}>
-                        <div className={styles.categoryMenu}>
-                            {categories.map((category) => (
-                                <div
-                                    key={category.name}
-                                    className={styles.categoryItem}
-                                    onMouseEnter={() => category.subcategories.length > 0 && setExpandedCategory(category.name)}
-                                    onMouseLeave={() => setExpandedCategory(null)}
+                    <div className={styles.categoryMenu}>
+                        {categories.map((category) => (
+                            <div
+                                key={category.id}
+                                className={styles.categoryItem}
+                                onMouseEnter={() => category.subcategories.length > 0 && setExpandedMainCategory(category.name)}
+                                onMouseLeave={() => setExpandedMainCategory(null)}
+                            >
+                                <button
+                                    className={`${styles.categoryButton} ${
+                                        activeCategory === category.name ? styles.activeCategory : ''
+                                    }`}
+                                    onClick={() => {
+                                        if (category.subcategories.length > 0) {
+                                            setExpandedMainCategory(expandedMainCategory === category.name ? null : category.name);
+                                        } else {
+                                            selectCategory(category.name);
+                                        }
+                                    }}
                                 >
-                                    <button
-                                        className={`${styles.categoryButton} ${
-                                            activeCategory === category.name ? styles.activeCategory : ''
-                                        }`}
-                                        onClick={() => {
-                                            if (category.subcategories.length > 0) {
-                                                toggleCategory(category.name);
-                                            } else {
-                                                selectCategory(category.name);
-                                            }
-                                        }}
-                                    >
-                                        {category.name}
-                                        {category.subcategories.length > 0 && (
-                                            expandedCategory === category.name ?
-                                                <FaChevronUp className={styles.categoryArrow} /> :
-                                                <FaChevronDown className={styles.categoryArrow} />
-                                        )}
-                                    </button>
-
+                                    {category.name}
                                     {category.subcategories.length > 0 && (
-                                        <div
-                                            className={`${styles.subcategories} ${
-                                                expandedCategory === category.name ? styles.visible : ''
-                                            }`}
-                                        >
-                                            {category.subcategories.map((subcategory) => (
-                                                <button
-                                                    key={subcategory}
-                                                    className={`${styles.subcategoryButton} ${
-                                                        activeSubcategory === subcategory ? styles.activeSubcategory : ''
-                                                    }`}
-                                                    onClick={() => selectCategory(category.name, subcategory)}
-                                                >
-                                                    {subcategory}
-                                                </button>
-                                            ))}
-                                        </div>
+                                        expandedMainCategory === category.name ?
+                                            <FaChevronUp className={styles.categoryArrow} /> :
+                                            <FaChevronDown className={styles.categoryArrow} />
                                     )}
-                                </div>
-                            ))}
-                        </div>
+                                </button>
+
+                                {category.subcategories.length > 0 && expandedMainCategory === category.name && (
+                                    <div className={styles.subcategories}>
+                                        {category.subcategories.map((subcategory) => (
+                                            <button
+                                                key={subcategory.id}
+                                                className={`${styles.subcategoryButton} ${
+                                                    activeSubcategory === subcategory.name ? styles.activeSubcategory : ''
+                                                }`}
+                                                onClick={() => selectCategory(category.name, subcategory.name)}
+                                            >
+                                                {subcategory.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
 
                         <div className={styles.products}>
                             {products.map((product) => (
