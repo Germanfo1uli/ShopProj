@@ -1,12 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using ShopBack.Models;
 using ShopBack.Repositories;
 
 namespace ShopBack.Services
 {
-    public class ReviewsService(IReviewsRepository reviewsRepository) : Service<ProductReviews>(reviewsRepository)
+    public class ReviewsService(IReviewsRepository reviewsRepository, ProductsService productsService) : Service<ProductReviews>(reviewsRepository)
     {
         private readonly IReviewsRepository _reviewsRepository = reviewsRepository;
+        private readonly ProductsService _productsService = productsService;
 
         public async Task<IEnumerable<ProductReviews>> GetProductReviewsAsync(int productId, bool onlyApproved = true)
         {
@@ -20,9 +22,7 @@ namespace ShopBack.Services
 
         public async Task ApproveReviewAsync(int reviewId, int moderatorId, string? comment = null)
         {
-            var review = await GetByIdAsync(reviewId);
-            if (review == null)
-                throw new ArgumentException("Review not found", nameof(reviewId));
+            var review = await GetByIdAsync(reviewId) ?? throw new ArgumentException("Review not found", nameof(reviewId));
 
             review.Approved = true;
             review.ModeratorId = moderatorId;
@@ -34,23 +34,28 @@ namespace ShopBack.Services
 
         public async Task RejectReviewAsync(int reviewId, int moderatorId, string? comment = null)
         {
-            var review = await GetByIdAsync(reviewId);
-            if (review == null)
-            {
-                throw new ArgumentException("Review not found", nameof(reviewId));
-            }
+            var review = await GetByIdAsync(reviewId) ?? throw new ArgumentException("Review not found", nameof(reviewId));
 
             review.Approved = false;
             review.ModeratorId = moderatorId;
             review.Comment = comment;
             review.ModeratedAt = DateTime.UtcNow;
 
+            await RecalculateRating(review.ProductId);
+
             await UpdateAsync(review);
         }
 
-        public async Task DecoratorAddAsync(ProductReviews review)
+        public async Task RecalculateRating(int productId)
         {
-            await AddAsync(review);
+            var reviewsByProductId = await GetProductReviewsAsync(productId, true);
+            decimal averageRating = (decimal)reviewsByProductId.Average(r => r.Rating);
+
+            averageRating = Math.Round(averageRating, 1);
+            averageRating = Math.Clamp(averageRating, 1.0m, 5.0m);
+
+            var reviewCount = reviewsByProductId.Count();
+            await _productsService.AssignmentRating(productId, averageRating, reviewCount);
         }
     }
 }

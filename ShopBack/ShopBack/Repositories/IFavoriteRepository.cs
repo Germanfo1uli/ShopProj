@@ -6,6 +6,7 @@ namespace ShopBack.Repositories
     {
         Task AddAsync(UserFavorites userFavorite);
         Task DeleteAsync(int userId, int productId);
+        Task<UserFavorites> GetByIdsAsync(int userId, int productId);
         Task<IEnumerable<UserFavorites>> GetAllByUserIdAsync(int userId);
     }
 }

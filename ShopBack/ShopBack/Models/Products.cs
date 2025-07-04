@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace ShopBack.Models
 {
@@ -46,7 +47,9 @@ namespace ShopBack.Models
         public Categories Category { get; set; }
         public ICollection<ProductImages> ProductImage { get; set; } = new List<ProductImages>();
         public ICollection<ProductSpecifications> ProductSpecification { get; set; } = new List<ProductSpecifications>();
+        [JsonIgnore]
         public ICollection<ProductReviews> ProductReview { get; set; } = new List<ProductReviews>();
+        [JsonIgnore]
         public ICollection<UserFavorites> UserFavorite { get; set; } = new List<UserFavorites>();
         public ICollection<ProductViewsHistory> ProductViewHistory { get; set; } = new List<ProductViewsHistory>();
     }

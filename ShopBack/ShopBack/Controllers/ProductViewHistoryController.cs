@@ -82,9 +82,6 @@ namespace ShopBack.Controllers
         public async Task<ActionResult<ProductViewsHistory>> GetById(int id)
         {
             var view = await _service.GetByIdAsync(id);
-            if (view == null)
-                return NotFound(new { Message = $"Запись просмотра с ID {id} не найдена" });
-
             return Ok(view);
         }
 
