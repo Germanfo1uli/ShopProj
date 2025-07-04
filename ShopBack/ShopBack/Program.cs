@@ -1,16 +1,15 @@
 using ShopBack.Data;
 using ShopBack.Models;
 using ShopBack.Services;
+using ShopBack.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using ShopBack.Repositories;
 using Microsoft.OpenApi.Models;
-using System.Data;
-using System;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Diagnostics;
+using Newtonsoft.Json.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 
