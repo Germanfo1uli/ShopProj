@@ -25,7 +25,7 @@ const Catalog = () => {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const { userId, isAuthenticated, logout } = useAuth();
+    const {userId, isAuthenticated, logout } = useAuth();
     const [favorites, setFavorites] = useState([]);
 
     useEffect(() => {
@@ -35,11 +35,13 @@ const Catalog = () => {
                 const allCategories = await apiRequest('/api/categories');
                 const parentCategories = await apiRequest('/api/categories/parents');
                 if (userId) {
-                const userFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
-                    authenticated: isAuthenticated  
-                });
-                setFavorites(userFavorites.map(fav => fav.productId));
-                } 
+                    const userFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
+                        authenticated: isAuthenticated  
+                    });
+                    
+                    const favoriteIds = userFavorites.map(fav => Number(fav.id)); 
+                    setFavorites(favoriteIds);
+                }
                 else {
                     setFavorites([]);
                 }
@@ -214,46 +216,64 @@ const Catalog = () => {
 
 
     const toggleFavorite = async (productId) => {
-  if (!userId) {
-    alert('Войдите в систему, чтобы добавлять товары в избранное');
-    return;
-  }
+        const numericProductId = Number(productId);
+        if (!userId) {
+            alert('Войдите в систему, чтобы добавлять товары в избранное');
+            return;
+        }
 
-  try {
-    const favoriteData = {
-      UserId: userId,
-      ProductId: productId
+        try {
+            const isCurrentlyFavorite = favorites.includes(numericProductId);
+            const newFavorites = isCurrentlyFavorite
+                ? favorites.filter(id => id !== numericProductId)
+                : [...favorites, numericProductId];
+            setFavorites(newFavorites);
+            const response = await apiRequest('/api/userfavorites', {
+                method: isCurrentlyFavorite ? 'DELETE' : 'POST',
+                body: {
+                    userId: userId,
+                    productId: numericProductId
+                },
+                authenticated: isAuthenticated
+            });
+            if (response) {
+                const updatedFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
+                    authenticated: isAuthenticated
+                });
+                
+                const favoriteIds = updatedFavorites.map(item => {
+                    if (item.id) return Number(item.id);
+                    if (item.productId) return Number(item.productId);
+                    return null;
+                }).filter(id => id !== null);
+                
+                setFavorites(favoriteIds);
+            }
+        } 
+        catch (error) {
+            console.error('Ошибка при обновлении избранного:', error);
+            
+            // Восстанавливаем предыдущее состояние
+            try {
+                const currentFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
+                    authenticated: isAuthenticated
+                });
+                
+                const favoriteIds = currentFavorites.map(item => {
+                    if (item.id) return Number(item.id);
+                    if (item.productId) return Number(item.productId);
+                    return null;
+                }).filter(id => id !== null);
+                
+                setFavorites(favoriteIds);
+            } catch (err) {
+                console.error('Не удалось восстановить избранное:', err);
+                setFavorites([]); // В крайнем случае сбрасываем избранное
+            }
+            
+            alert('Не удалось обновить избранное: ' + error.message);
+        }
     };
-
-    const newFavorites = favorites.includes(productId)
-      ? favorites.filter(id => id !== productId)
-      : [...favorites, productId];
-    setFavorites(newFavorites);
-
-    if (favorites.includes(productId)) {
-      await apiRequest('/api/userfavorites', {
-        method: 'DELETE',
-        body: favoriteData,
-        authenticated: isAuthenticated
-      });
-    } else {
-      await apiRequest('/api/userfavorites', {
-        method: 'POST',
-        body: favoriteData,
-        authenticated: isAuthenticated
-      });
-    }
-
-    const updatedFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
-      authenticated: isAuthenticated
-    });
-    setFavorites(updatedFavorites?.map(fav => fav.productId) || []);
-  } catch (error) {
-    console.error('Ошибка при обновлении избранного:', error);
-    setFavorites(favorites);
-    alert('Не удалось обновить избранное: ' + error.message);
-  }
-};
 
     const handlePriceChange = (e, index) => {
         const newValue = parseInt(e.target.value) || 0;
@@ -317,10 +337,9 @@ const Catalog = () => {
     if (error) {
         return <div className={styles.error}>{error}</div>;
     }
-
+    console.log(products)
     const colors = ['white', 'black', 'blue', 'gray', 'red', 'green', 'yellow', 'purple', 'pink'];
     const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-
     return (
         <div className={styles.catalog}>
             <div className={styles.container}>
@@ -551,11 +570,11 @@ const Catalog = () => {
                                             {/* Кнопка избранного */}
                                             <button
                                                 className={styles.favoriteButton}
-                                                onClick={() => toggleFavorite(product.id)}
+                                                onClick={() => toggleFavorite(Number(product.id))} 
                                                 disabled={!userId} 
                                                 title={!userId ? "Войдите, чтобы добавить в избранное" : ""}
-                                            >
-                                                {favorites.includes(product.id) ? (
+                                                >
+                                                {favorites.includes(Number(product.id)) ? ( 
                                                     <FaHeart className={styles.favoriteIconActive} />
                                                 ) : (
                                                     <FaRegHeart className={styles.favoriteIcon} />

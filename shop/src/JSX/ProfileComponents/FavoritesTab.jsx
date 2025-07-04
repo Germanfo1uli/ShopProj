@@ -1,44 +1,55 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from '../../CSS/ProfileCSS/FavoritetesTab.module.css';
 import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaStarHalfAlt, FaSearch } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../Hooks/UseAuth.js';
+import { apiRequest } from '../Api/ApiRequest.js';
 
 const FavoritesTab = () => {
-    const [favorites, setFavorites] = useState([
-        {
-            id: 1,
-            image: "https://m.media-amazon.com/images/I/71h6PpGaz9L._AC_UL320_.jpg",
-            title: "Наушники Sony WH-1000XM4",
-            price: 24990,
-            oldPrice: 27990,
-            rating: 4.7,
-            reviews: 128,
-            bgColor: "#f5f5f5"
-        },
-        {
-            id: 2,
-            image: "https://m.media-amazon.com/images/I/71Kc2oLYRFL._AC_UL320_.jpg",
-            title: "Фитнес-браслет Xiaomi Mi Band 6",
-            price: 3490,
-            rating: 4.5,
-            reviews: 86,
-            bgColor: "#e6e6e6"
-        },
-        {
-            id: 3,
-            image: "https://m.media-amazon.com/images/I/71xBS8kJ0jL._AC_UL320_.jpg",
-            title: "Чехол для iPhone 13 Pro, черный",
-            price: 1290,
-            oldPrice: 1990,
-            rating: 5.0,
-            reviews: 42,
-            bgColor: "#f0f0f0"
-        },
+    const [favorites, setFavorites] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const { userId, isAuthenticated } = useAuth();
 
-    ]);
+    useEffect(() => {
+        const fetchFavorites = async () => {
+            try {
+                if (!userId || !isAuthenticated) return;
+                
+                setLoading(true);
+                const response = await apiRequest(`/api/userfavorites/${userId}`, {
+                    authenticated: isAuthenticated 
+                });
+                setFavorites(response || []);
+            } catch (err) {
+                setError(err.message || 'Failed to fetch favorites');
+                console.error('Error fetching favorites:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const removeFromFavorites = (id) => {
-        setFavorites(favorites.filter(item => item.id !== id));
+        fetchFavorites();
+    }, [userId, isAuthenticated]);
+
+    const removeFromFavorites = async (productId) => {
+        try {
+            if (!userId || !isAuthenticated) return;
+            
+            await apiRequest('/api/userfavorites', {
+                method: 'DELETE',
+                body: {
+                    userId: userId,
+                    productId: productId
+                },
+                authenticated: isAuthenticated
+            });
+            setFavorites(favorites.filter(item => item.id !== productId));
+        } 
+        catch (err) {
+            console.error('Error removing favorite:', err);
+            alert(err.message || 'Failed to remove favorite');
+        }
     };
 
     const renderStars = (rating) => {
@@ -58,6 +69,24 @@ const FavoritesTab = () => {
         return stars;
     };
 
+    if (loading) {
+        return (
+            <div className={styles.profileCard}>
+                <h1 className={styles.cardTitle}>Избранное</h1>
+                <div className={styles.loadingState}>Загрузка...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className={styles.profileCard}>
+                <h1 className={styles.cardTitle}>Избранное</h1>
+                <div className={styles.errorState}>{error}</div>
+            </div>
+        );
+    }
+
     return (
         <div className={styles.profileCard}>
             <h1 className={styles.cardTitle}>Избранное</h1>
@@ -67,13 +96,8 @@ const FavoritesTab = () => {
                         <div key={item.id} className={styles.productCard}>
                             <div
                                 className={styles.productImageWrapper}
-                                style={{ backgroundColor: item.bgColor }}
+                                style={{ backgroundColor: '#f5f5f5' }}
                             >
-                                {item.badge && (
-                                    <span className={`${styles.badge} ${styles[item.badgeColor]}`}>
-                                        {item.badge}
-                                    </span>
-                                )}
                                 <button
                                     className={styles.favoriteButton}
                                     onClick={() => removeFromFavorites(item.id)}
@@ -81,27 +105,27 @@ const FavoritesTab = () => {
                                     <FaHeart className={styles.favoriteIconActive} />
                                 </button>
                                 <img
-                                    src={item.image}
-                                    alt={item.title}
+                                    src={item.imageUrl || 'https://via.placeholder.com/150'}
+                                    alt={item.name}
                                     className={styles.productImage}
                                 />
                             </div>
                             <div className={styles.productDetails}>
-                                <h3 className={styles.productTitle}>{item.title}</h3>
+                                <h3 className={styles.productTitle}>{item.name}</h3>
                                 <div className={styles.priceContainer}>
-                                    <span className={styles.currentPrice}>{item.price.toLocaleString()} ₽</span>
+                                    <span className={styles.currentPrice}>{item.price?.toLocaleString()} ₽</span>
                                     {item.oldPrice && (
-                                        <span className={styles.oldPrice}>{item.oldPrice.toLocaleString()} ₽</span>
+                                        <span className={styles.oldPrice}>{item.oldPrice?.toLocaleString()} ₽</span>
                                     )}
                                 </div>
                                 <div className={styles.ratingContainer}>
                                     <div className={styles.stars}>
-                                        {renderStars(item.rating)}
+                                        {renderStars(item.rating || 0)}
                                     </div>
-                                    <span className={styles.reviewsCount}>({item.reviews})</span>
+                                    <span className={styles.reviewsCount}>({item.reviewsCount || 0})</span>
                                 </div>
                                 <Link
-                                    to={`/productPage`}
+                                    to={`/product/${item.id}`}
                                     className={styles.viewProductButton}
                                 >
                                     <FaSearch className={styles.searchIcon} />
