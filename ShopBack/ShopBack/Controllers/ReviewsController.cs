@@ -23,7 +23,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpGet("{id}")]
-        //[Authorize(Policy = "AdminOrModerAccess")]
+        [Authorize(Policy = "AdminOrModerAccess")]
         public async Task<ActionResult<ProductReviews>> GetById(int id)
         {
             var review = await _reviewsService.GetByIdAsync(id);
@@ -39,7 +39,7 @@ namespace ShopBack.Controllers
 
         [HttpGet("user/{userId}")]
         [Authorize(Policy = "SelfOrAdminAccess")]
-        public async Task<ActionResult<IEnumerable<ProductReviews>>> GetByUser(int userId)
+        public async Task<ActionResult<IEnumerable<ProductReviews>>> GetByUserId(int userId)
         {
             var reviews = await _reviewsService.GetUserReviewsAsync(userId);
             return Ok(reviews);

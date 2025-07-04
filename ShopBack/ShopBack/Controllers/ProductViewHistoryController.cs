@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
 using System.Data;
+using System.Security.Claims;
 
 
 namespace ShopBack.Controllers
@@ -44,37 +45,11 @@ namespace ShopBack.Controllers
         [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<IEnumerable<ProductViewsHistory>>> GetByUser(int userId)
         {
-
             var allViews = await _service.GetAllAsync();
-            var userViews = new List<ProductViewsHistory>();
 
-            foreach (var view in allViews)
-            {
-                if (view is ProductViewsHistory pvh && pvh.UserId == userId)
-                {
-                    userViews.Add(pvh);
-                }
-            }
-
-            return Ok(userViews);
-        }
-
-        [HttpGet("product/{productId}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<ProductViewsHistory>>> GetByProduct(int productId)
-        {
-            var allViews = await _service.GetAllAsync();
-            var productViews = new List<ProductViewsHistory>();
-
-            foreach (var view in allViews)
-            {
-                if (view is ProductViewsHistory pvh && pvh.ProductId == productId)
-                {
-                    productViews.Add(pvh);
-                }
-            }
-
-            return Ok(productViews);
+            return allViews
+                .Where(pvh => pvh.UserId == userId)
+                .ToList();
         }
 
         [HttpGet("{id}")]
@@ -86,9 +61,20 @@ namespace ShopBack.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            bool isAdmin = User.IsInRole("Admin");
+
+            var view = await _service.GetByIdAsync(id);
+
+            if (view.UserId != currentUserId && !isAdmin)
+            {
+                return Forbid();
+            }
+
             await _service.DeleteAsync(id);
             return NoContent();
         }

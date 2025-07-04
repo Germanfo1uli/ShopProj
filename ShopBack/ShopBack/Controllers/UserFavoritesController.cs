@@ -38,19 +38,15 @@ namespace ShopBack.Controllers
         [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<IActionResult> Delete([FromBody] FavoriteData createDto)
         {
-            var isAdmin = User.IsInRole("Admin");
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            bool isAdmin = User.IsInRole("Admin");
+
+            if (createDto.UserId != currentUserId && !isAdmin)
             {
-                throw new SecurityException("Неверный формат идентификатора пользователя");
+                return Forbid();
             }
 
-            if (!isAdmin && userId != createDto.UserId)
-            {
-                return Forbid("Вы можете добавлять/убирать товары только в своем избранном списке");
-            }
-                
             await _favoritesService.DeleteAsync(createDto.UserId, createDto.ProductId);
             return NoContent();
         }
