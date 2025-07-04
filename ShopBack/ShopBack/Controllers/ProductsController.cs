@@ -30,7 +30,13 @@ namespace ShopBack.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductWithStatsDto>> GetById(int id)
         {
-            var product = await _productsService.GetByIdAsync(id);
+            var product = await _productsService.DecoratedGetByIdAsync(id);
+
+            if (product.IsActive == false && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
             var (viewCount, favoriteCount) = await _analyticsService.GetProductStatsAsync(id);
 
             var result = new ProductWithStatsDto

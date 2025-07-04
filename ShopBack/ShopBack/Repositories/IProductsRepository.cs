@@ -10,5 +10,6 @@ namespace ShopBack.Repositories
         Task<IEnumerable<ProductSpecifications>> GetProductSpecificationsAsync(int productId); // Получает все характеристики товара
         Task<ProductImages> GetProductMainImageAsync(int productId); // Получает основную картинку товара
         Task<IEnumerable<Products>> GetInactiveProductsAsync(); // Получает отключенные товары 
+        Task<Products> DecoratedGetByIdAsync(int productId); // Получает товар с избыточной информацией
     }
 }

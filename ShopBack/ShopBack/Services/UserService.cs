@@ -48,7 +48,7 @@ namespace ShopBack.Services
 
         public async Task<AuthResult> LoginAsync(string email, string password)
         {
-            var user = await _usersRepository.GetByEmailAsync(email) ?? throw new UnauthorizedAccessException("Неверный email");
+            var user = await _usersRepository.GetByEmailAsync(email) ?? throw new UnauthorizedAccessException("Email незарегистрирован");
             if (!VerifyPassword(password, user.PasswordHash, user.Salt))
                 throw new UnauthorizedAccessException("Неверный email или пароль");
 

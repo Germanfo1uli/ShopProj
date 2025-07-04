@@ -47,8 +47,7 @@ namespace ShopBack.Controllers
         public async Task<ActionResult<IEnumerable<ProductViewsHistory>>> GetByUser(int userId)
         {
             var allViews = await _analyticsService.GetProductViewHistoryAsync(userId);
-
-            return Ok(allViews);
+            return Ok(allViews.OrderByDescending(v => v.ViewedAt));
         }
 
         [HttpGet("{id}")]

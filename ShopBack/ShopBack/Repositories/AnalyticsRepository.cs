@@ -45,6 +45,7 @@ namespace ShopBack.Repositories
         {
             return await _context.ProductReviews
                 .Where(r => r.ProductId == productId && r.Rating >= 1 && r.Rating <= 5)
+                .AsNoTracking()
                 .AverageAsync(r => (double?)r.Rating) ?? 0.0;
         }
 
@@ -52,6 +53,7 @@ namespace ShopBack.Repositories
         {
             return await _context.ProductReviews
                 .Where(r => r.ProductId == productId)
+                .AsNoTracking()
                 .CountAsync();
         }
     }
