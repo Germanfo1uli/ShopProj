@@ -51,6 +51,7 @@ namespace ShopBack.Models
         public ICollection<ProductReviews> ProductReview { get; set; } = new List<ProductReviews>();
         [JsonIgnore]
         public ICollection<UserFavorites> UserFavorite { get; set; } = new List<UserFavorites>();
+        [JsonIgnore]
         public ICollection<ProductViewsHistory> ProductViewHistory { get; set; } = new List<ProductViewsHistory>();
     }
 }

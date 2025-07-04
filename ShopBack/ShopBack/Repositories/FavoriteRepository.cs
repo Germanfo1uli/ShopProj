@@ -29,7 +29,9 @@ namespace ShopBack.Repositories
         public async Task<IEnumerable<UserFavorites>> GetAllByUserIdAsync(int userId)
         {
             return await _context.UserFavorites
-                .Where(x => x.UserId == userId)
+                .Where(uf => uf.UserId == userId)
+                .Include(uf => uf.Product)
+                .AsNoTracking()
                 .ToListAsync();
         }
     }

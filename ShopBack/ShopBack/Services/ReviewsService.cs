@@ -5,9 +5,10 @@ using ShopBack.Repositories;
 
 namespace ShopBack.Services
 {
-    public class ReviewsService(IReviewsRepository reviewsRepository, ProductsService productsService) : Service<ProductReviews>(reviewsRepository)
+    public class ReviewsService(IReviewsRepository reviewsRepository, AnalyticsService analyticsService, ProductsService productsService) : Service<ProductReviews>(reviewsRepository)
     {
         private readonly IReviewsRepository _reviewsRepository = reviewsRepository;
+        private readonly AnalyticsService _analyticsService = analyticsService;
         private readonly ProductsService _productsService = productsService;
 
         public async Task<IEnumerable<ProductReviews>> GetProductReviewsAsync(int productId, bool onlyApproved = true)
@@ -42,20 +43,13 @@ namespace ShopBack.Services
             review.ModeratedAt = DateTime.UtcNow;
 
             await RecalculateRating(review.ProductId);
-
             await UpdateAsync(review);
         }
 
         public async Task RecalculateRating(int productId)
         {
-            var reviewsByProductId = await GetProductReviewsAsync(productId, true);
-            decimal averageRating = (decimal)reviewsByProductId.Average(r => r.Rating);
-
-            averageRating = Math.Round(averageRating, 1);
-            averageRating = Math.Clamp(averageRating, 1.0m, 5.0m);
-
-            var reviewCount = reviewsByProductId.Count();
-            await _productsService.AssignmentRating(productId, averageRating, reviewCount);
+            var (averageRating, reviewCount) = await _analyticsService.GetReviewStatsAsync(productId);
+            await _productsService.AssignmentRating(productId, (decimal)averageRating, reviewCount);
         }
     }
 }

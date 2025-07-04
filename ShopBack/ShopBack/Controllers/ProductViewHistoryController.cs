@@ -10,9 +10,10 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] // api/productviewhistory
     [ApiController]
-    public class ProductViewsHistoryController(IService<ProductViewsHistory> service) : ControllerBase, IController<ProductViewsHistory, ProductViewCreate, ProductViewCreate>
+    public class ProductViewsHistoryController(IService<ProductViewsHistory> service, AnalyticsService analyticsService) : ControllerBase, IController<ProductViewsHistory, ProductViewCreate, ProductViewCreate>
     {
         private readonly IService<ProductViewsHistory> _service = service;
+        private readonly AnalyticsService _analyticsService = analyticsService;
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
@@ -45,11 +46,9 @@ namespace ShopBack.Controllers
         [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<IEnumerable<ProductViewsHistory>>> GetByUser(int userId)
         {
-            var allViews = await _service.GetAllAsync();
+            var allViews = await _analyticsService.GetProductViewHistoryAsync(userId);
 
-            return allViews
-                .Where(pvh => pvh.UserId == userId)
-                .ToList();
+            return Ok(allViews);
         }
 
         [HttpGet("{id}")]

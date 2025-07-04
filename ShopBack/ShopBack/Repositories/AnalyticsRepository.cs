@@ -12,6 +12,8 @@ namespace ShopBack.Repositories
         {
             return await _context.ProductViewsHistory
                 .Where(p => p.UserId == userId)
+                .Include(pvh => pvh.Product)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -19,6 +21,7 @@ namespace ShopBack.Repositories
         {
             return await _context.UserFavorites
                 .Where(uf => uf.UserId == userId)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -26,6 +29,7 @@ namespace ShopBack.Repositories
         {
             return await _context.ProductViewsHistory
                 .Where(pvh => pvh.ProductId == productId)
+                .AsNoTracking()
                 .CountAsync();
         }
 
@@ -33,6 +37,7 @@ namespace ShopBack.Repositories
         {
             return await _context.UserFavorites
                 .Where(uf => uf.ProductId == productId)
+                .AsNoTracking()
                 .CountAsync();
         }
 
