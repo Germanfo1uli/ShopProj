@@ -17,22 +17,9 @@ namespace ShopBack.Controllers
         private readonly FavoriteService _favoritesService = favoritesService;
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<UserFavorites>> Create([FromBody] FavoriteData createDto)
         {
-            var isAdmin = User.IsInRole("Admin");
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-            {
-                throw new SecurityException("Неверный формат идентификатора пользователя");
-            }
-
-            if (!isAdmin && userId != createDto.UserId)
-            {
-                return Forbid("Вы можете добавлять/убирать товары только в своем избранном списке");
-            }
-
             var favorite = new UserFavorites
             {
                 UserId = createDto.UserId,
@@ -41,14 +28,14 @@ namespace ShopBack.Controllers
 
             await _favoritesService.AddAsync(favorite);
             return CreatedAtAction(
-                actionName: nameof(GetAllByUserId),
-                routeValues: new { id = favorite.UserId },
+                actionName: nameof(GetByIds),
+                routeValues: new { userId = favorite.UserId, productId = favorite.ProductId },
                 value: favorite
             );
         }
 
         [HttpDelete]
-        [Authorize]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<IActionResult> Delete([FromBody] FavoriteData createDto)
         {
             var isAdmin = User.IsInRole("Admin");
@@ -68,9 +55,17 @@ namespace ShopBack.Controllers
             return NoContent();
         }
 
+        [HttpGet]
+        [Authorize(Policy = "SelfOrAdminAccess")]
+        public async Task<ActionResult<UserFavorites>> GetByIds([FromBody] FavoriteData favoriteDto)
+        {
+            var result = await _favoritesService.GetByIdsAsync(favoriteDto.UserId, favoriteDto.ProductId);
+            return Ok(result);
+        }
+
         [HttpGet("{userId}")]
         [Authorize(Policy = "SelfOrAdminAccess")]
-        public async Task<ActionResult<IEnumerable<UserFavorites>>> GetAllByUserId(int userId)
+        public async Task<ActionResult<IEnumerable<Products>>> GetAllByUserId(int userId)
         {
             var result = await _favoritesService.GetAllByUserIdAsync(userId);
             return Ok(result);

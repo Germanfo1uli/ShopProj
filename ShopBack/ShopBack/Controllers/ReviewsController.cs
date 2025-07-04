@@ -10,7 +10,7 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] //api/reviews
     [ApiController]
-    public class ProductReviewsController(ReviewsService reviewsService) : ControllerBase, IController<ProductReviews, ReviewCreate, ReviewUpdate>
+    public class ReviewsController(ReviewsService reviewsService) : ControllerBase, IController<ProductReviews, ReviewCreate, ReviewUpdate>
     {
         private readonly ReviewsService _reviewsService = reviewsService;
 
@@ -46,22 +46,9 @@ namespace ShopBack.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<ProductReviews>> Create([FromBody] ReviewCreate createDto)
         {
-            var isAdmin = User.IsInRole("Admin");
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-            {
-                throw new SecurityException("Неверный формат идентификатора пользователя");
-            }
-
-            if (!isAdmin && userId != createDto.UserId)
-            {
-                return Forbid("Вы можете оставлять отзывы только от своего имени");
-            }
-
             var review = new ProductReviews
             {
                 ProductId = createDto.ProductId,
@@ -73,6 +60,7 @@ namespace ShopBack.Controllers
             };
 
             await _reviewsService.AddAsync(review);
+            await _reviewsService.RecalculateRating(review.ProductId);
             return CreatedAtAction(
                actionName: nameof(GetById),
                routeValues: new { id = review.Id },
@@ -81,32 +69,21 @@ namespace ShopBack.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<ProductReviews>> Update(int id, [FromBody] ReviewUpdate updateDto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-            {
-                throw new SecurityException("Неверный формат идентификатора пользователя");
-            }
-
-            if (userId != updateDto.UserId)
-            {
-                return Forbid("Вы можете изменять только свои отзывы");
-            }
-
             var review = await _reviewsService.GetByIdAsync(id);
 
             review.Rating = updateDto.Rating != null ? updateDto.Rating.Value : review.Rating;
             review.Comment = updateDto.Comment;
 
             await _reviewsService.UpdateAsync(review);
+            await _reviewsService.RecalculateRating(review.ProductId);
             return Ok(review);
         }
 
         [HttpDelete("{id}")]
-        
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<IActionResult> Delete(int id)
         {
             var isAdmin = User.IsInRole("Admin");
@@ -117,12 +94,15 @@ namespace ShopBack.Controllers
                 throw new SecurityException("Неверный формат идентификатора пользователя");
             }
 
-            if (!isAdmin && userId != id)
+            var review = await _reviewsService.GetByIdAsync(id);
+
+            if (!isAdmin && userId != review.UserId)
             {
                 return Forbid("Вы можете удалять только свои отзывы");
             }
 
             await _reviewsService.DeleteAsync(id);
+            await _reviewsService.RecalculateRating(review.ProductId);
             return NoContent();
         }
 
@@ -130,38 +110,16 @@ namespace ShopBack.Controllers
         [Authorize(Policy = "AdminOrModerAccess")]
         public async Task<IActionResult> Approve(int id, [FromBody] ModerateReview moderateDto)
         {
-            try
-            {
-                await _reviewsService.ApproveReviewAsync(id, moderateDto.ModeratorId, moderateDto.Comment);
-                return NoContent();
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = $"Ошибка при одобрении отзыва {id}", Details = ex.Message });
-            }
+            await _reviewsService.ApproveReviewAsync(id, moderateDto.ModeratorId, moderateDto.Comment);
+            return Ok();
         }
 
         [HttpPatch("{id}/reject")]
         [Authorize(Policy = "AdminOrModerAccess")]
         public async Task<IActionResult> Reject(int id, [FromBody] ModerateReview moderateDto)
         {
-            try
-            {
-                await _reviewsService.RejectReviewAsync(id, moderateDto.ModeratorId, moderateDto.Comment);
-                return NoContent();
-            }
-            catch (ArgumentException ex)
-            {
-                return NotFound(new { ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = $"Ошибка при отклонении отзыва {id}", Details = ex.Message });
-            }
+            await _reviewsService.RejectReviewAsync(id, moderateDto.ModeratorId, moderateDto.Comment);
+            return Ok();
         }
     }
 

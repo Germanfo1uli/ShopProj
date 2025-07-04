@@ -37,7 +37,7 @@ namespace ShopBack.Services
             return await _productsRepository.GetInactiveProductsAsync();
         }
 
-        public async Task RecalculateRating(int productId, decimal rating, int numReviews)
+        public async Task AssignmentRating(int productId, decimal rating, int numReviews)
         {
             var product = await GetByIdAsync(productId);
             product.Rating = rating;
