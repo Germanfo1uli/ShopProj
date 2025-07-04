@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using System.Security.Claims;
+using System.Security;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ShopBack.Controllers
 {
@@ -11,136 +15,119 @@ namespace ShopBack.Controllers
         private readonly ReviewsService _reviewsService = reviewsService;
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<ProductReviews>>> GetAll()
         {
-            try
-            {
-                var reviews = await _reviewsService.GetAllAsync();
-                return Ok(reviews);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = "Ошибка при получении списка отзывов", Details = ex.Message });
-            }
+            var reviews = await _reviewsService.GetAllAsync();
+            return Ok(reviews);
         }
 
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrModerAccess")]
         public async Task<ActionResult<ProductReviews>> GetById(int id)
         {
-            try
-            {
-                var review = await _reviewsService.GetByIdAsync(id);
-                if (review == null)
-                    return NotFound(new { Message = $"Отзыв с ID {id} не найден" });
-
-                return Ok(review);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = $"Ошибка при получении отзыва {id}", Details = ex.Message });
-            }
+            var review = await _reviewsService.GetByIdAsync(id);
+            return Ok(review);
         }
 
         [HttpGet("product/{productId}")]
-        public async Task<ActionResult<IEnumerable<ProductReviews>>> GetByProduct(int productId, [FromQuery] bool onlyApproved = true)
+        public async Task<ActionResult<IEnumerable<ProductReviews>>> GetByProduct(int productId)
         {
-            try
-            {
-                var reviews = await _reviewsService.GetProductReviewsAsync(productId, onlyApproved);
-                return Ok(reviews);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = $"Ошибка при получении отзывов для товара {productId}", Details = ex.Message });
-            }
+            var reviews = await _reviewsService.GetProductReviewsAsync(productId, true);
+            return Ok(reviews);
         }
 
         [HttpGet("user/{userId}")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<IEnumerable<ProductReviews>>> GetByUser(int userId)
         {
-            try
-            {
-                var reviews = await _reviewsService.GetUserReviewsAsync(userId);
-                return Ok(reviews);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { Message = $"Ошибка при получении отзывов пользователя {userId}", Details = ex.Message });
-            }
+            var reviews = await _reviewsService.GetUserReviewsAsync(userId);
+            return Ok(reviews);
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<ProductReviews>> Create([FromBody] ReviewCreate createDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(new { Message = "Неверные данные отзыва", Errors = ModelState.Values });
+            var isAdmin = User.IsInRole("Admin");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            try
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
-                var review = new ProductReviews
-                {
-                    ProductId = createDto.ProductId,
-                    UserId = createDto.UserId,
-                    Rating = createDto.Rating,
-                    Comment = createDto.Comment,
-                    CreatedAt = DateTime.UtcNow,
-                    Approved = true 
-                };
+                throw new SecurityException("Неверный формат идентификатора пользователя");
+            }
 
-                await _reviewsService.AddAsync(review);
-                return CreatedAtAction(nameof(GetById), new { id = review.Id }, review);
-            }
-            catch (Exception ex)
+            if (!isAdmin && userId != createDto.UserId)
             {
-                return StatusCode(500, new { Message = "Ошибка при создании отзыва", Details = ex.Message });
+                return Forbid("Вы можете оставлять отзывы только от своего имени");
             }
+
+            var review = new ProductReviews
+            {
+                ProductId = createDto.ProductId,
+                UserId = createDto.UserId,
+                Rating = createDto.Rating,
+                Comment = createDto.Comment,
+                CreatedAt = DateTime.UtcNow,
+                Approved = true 
+            };
+
+            await _reviewsService.AddAsync(review);
+            return CreatedAtAction(
+               actionName: nameof(GetById),
+               routeValues: new { id = review.Id },
+               value: review
+           );
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<ActionResult<ProductReviews>> Update(int id, [FromBody] ReviewUpdate updateDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(new { Message = "Неверные данные для обновления", Errors = ModelState.Values });
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            try
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
-                var review = await _reviewsService.GetByIdAsync(id);
-                if (review == null)
-                    return NotFound(new { Message = $"Отзыв с ID {id} не найден" });
-
-                if (updateDto.Rating.HasValue)
-                    review.Rating = updateDto.Rating.Value;
-                if (updateDto.Comment != null)
-                    review.Comment = updateDto.Comment;
-
-                await _reviewsService.UpdateAsync(review);
-                return Ok(review);
+                throw new SecurityException("Неверный формат идентификатора пользователя");
             }
-            catch (Exception ex)
+
+            if (userId != updateDto.UserId)
             {
-                return StatusCode(500, new { Message = $"Ошибка при обновлении отзыва {id}", Details = ex.Message });
+                return Forbid("Вы можете изменять только свои отзывы");
             }
+
+            var review = await _reviewsService.GetByIdAsync(id);
+
+            review.Rating = updateDto.Rating != null ? updateDto.Rating.Value : review.Rating;
+            review.Comment = updateDto.Comment;
+
+            await _reviewsService.UpdateAsync(review);
+            return Ok(review);
         }
 
         [HttpDelete("{id}")]
+        
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var review = await _reviewsService.GetByIdAsync(id);
-                if (review == null)
-                    return NotFound(new { Message = $"Отзыв с ID {id} не найден" });
+            var isAdmin = User.IsInRole("Admin");
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                await _reviewsService.DeleteAsync(id);
-                return NoContent();
-            }
-            catch (Exception ex)
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
-                return StatusCode(500, new { Message = $"Ошибка при удалении отзыва {id}", Details = ex.Message });
+                throw new SecurityException("Неверный формат идентификатора пользователя");
             }
+
+            if (!isAdmin && userId != id)
+            {
+                return Forbid("Вы можете удалять только свои отзывы");
+            }
+
+            await _reviewsService.DeleteAsync(id);
+            return NoContent();
         }
 
         [HttpPatch("{id}/approve")]
+        [Authorize(Policy = "AdminOrModerAccess")]
         public async Task<IActionResult> Approve(int id, [FromBody] ModerateReview moderateDto)
         {
             try
@@ -159,6 +146,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpPatch("{id}/reject")]
+        [Authorize(Policy = "AdminOrModerAccess")]
         public async Task<IActionResult> Reject(int id, [FromBody] ModerateReview moderateDto)
         {
             try
@@ -190,6 +178,8 @@ namespace ShopBack.Controllers
 
     public class ReviewUpdate
     {
+        public int UserId { get; set; }
+
         public int? Rating { get; set; }
 
         public string? Comment { get; set; }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
 
@@ -11,51 +12,36 @@ namespace ShopBack.Controllers
         private readonly IService<ProductImages> _productImageService = productImageService;
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductImages>> Create([FromBody] ImagesData createDto)
         {
-            try
+            var productImage = new ProductImages
             {
-                var productImage = new ProductImages
-                {
-                    ProductId = createDto.ProductId,
-                    ImageUrl = createDto.ImageUrl,
-                    IsMain = createDto.IsMain,
-                };
-                await _productImageService.AddAsync(productImage);
-                return Ok(productImage);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+                ProductId = createDto.ProductId,
+                ImageUrl = createDto.ImageUrl,
+                IsMain = createDto.IsMain,
+            };
+            await _productImageService.AddAsync(productImage);
+            return CreatedAtAction(
+               actionName: nameof(GetById),
+               routeValues: new { id = productImage.Id },
+               value: productImage
+           );
         }
 
         [HttpDelete("{imageId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int imageId)
         {
-            try
-            {
-                await _productImageService.DeleteAsync(imageId);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return NotFound($"Изображение с ID {imageId} не найдена");
-            }
+            await _productImageService.DeleteAsync(imageId);
+            return NoContent();
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductImages>>> GetAll()
         {
-            try
-            {
-                var result = await _productImageService.GetAllAsync();
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _productImageService.GetAllAsync();
+            return Ok(result);
         }
 
         [HttpGet("{imageId}")]
@@ -73,6 +59,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpPut("{imageId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductImages>> Update(int imageId, [FromBody] ImagesData updateDto)
         {
             try

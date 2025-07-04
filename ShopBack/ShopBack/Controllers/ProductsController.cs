@@ -37,6 +37,7 @@ namespace ShopBack.Controllers
                 Name = createDto.Name,
                 Description = createDto.Description,
                 Price = createDto.Price,
+                OldPrice = createDto.OldPrice,
                 QuantityInStock = createDto.QuantityInStock,
                 CategoryId = createDto.CategoryId,
                 IsActive = createDto.IsActive,
@@ -56,14 +57,14 @@ namespace ShopBack.Controllers
         public async Task<ActionResult<Products>> Update(int id, [FromBody] ProductUpdate updateDto)
         {
             var product = await _productsService.GetByIdAsync(id);
-            if (product == null) return NotFound("Товар не найден");
 
-            if (updateDto.Name != null) product.Name = updateDto.Name;
-            if (updateDto.Description != null) product.Description = updateDto.Description;
-            if (updateDto.Price.HasValue) product.Price = updateDto.Price.Value;
-            if (updateDto.QuantityInStock.HasValue) product.QuantityInStock = updateDto.QuantityInStock.Value;
-            if (updateDto.CategoryId.HasValue) product.CategoryId = updateDto.CategoryId.Value;
-            if (updateDto.IsActive.HasValue) product.IsActive = updateDto.IsActive.Value;
+            product.Name = updateDto.Name ?? product.Name;
+            product.Description = updateDto.Description ?? product.Description;
+            product.Price = updateDto.Price ?? product.Price;
+            product.OldPrice = updateDto.OldPrice ?? product.OldPrice;
+            product.QuantityInStock = updateDto.QuantityInStock ?? product.QuantityInStock;
+            product.CategoryId = updateDto.CategoryId ?? product.CategoryId;
+            product.IsActive = updateDto.IsActive ?? product.IsActive;
 
             await _productsService.UpdateAsync(product);
             return Ok(product);
@@ -129,6 +130,8 @@ namespace ShopBack.Controllers
 
         public decimal Price { get; set; }
 
+        public decimal? OldPrice { get; set; }
+
         public int QuantityInStock { get; set; }
 
         public int CategoryId { get; set; }
@@ -143,6 +146,8 @@ namespace ShopBack.Controllers
         public string? Description { get; set; }
 
         public decimal? Price { get; set; }
+
+        public decimal? OldPrice { get; set; }
 
         public int? QuantityInStock { get; set; }
 

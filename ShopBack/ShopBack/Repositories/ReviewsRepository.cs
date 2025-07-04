@@ -10,7 +10,7 @@ namespace ShopBack.Repositories
         {
         }
 
-        public async Task<IEnumerable<ProductReviews>> GetProductReviewsAsync(int productId, bool onlyApproved = true)
+        public async Task<IEnumerable<ProductReviews>> GetProductReviewsAsync(int productId, bool onlyApproved)
         {
             return await _context.ProductReviews
                 .Where(pr => pr.ProductId == productId)
