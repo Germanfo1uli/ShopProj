@@ -4,7 +4,9 @@ namespace ShopBack.Repositories
 {
     public interface IOrdersRepository : IRepository<Orders>
     {
-        Task<IEnumerable<Orders>> GetUserOrdersAsync(int userId); // Получает все заказы пользователя
+        Task CreateCart(int userId); // Создает новую корзину (Нужно для нового пользователя)
+
+        Task<Orders> GetUserCartOrderAsync(int userId); // Получает все заказы пользователя
 
         Task<IEnumerable<OrderItems>> GetOrderItemsAsync(int orderId); // Получает все товары в заказе
 

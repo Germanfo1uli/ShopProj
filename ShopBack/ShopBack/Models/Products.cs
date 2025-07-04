@@ -45,6 +45,8 @@ namespace ShopBack.Models
 
         [ForeignKey("CategoryId")]
         public Categories Category { get; set; }
+        [JsonIgnore]
+        public ICollection<OrderItems> OrderItems { get; set; } = new List<OrderItems>();
         public ICollection<ProductImages> ProductImage { get; set; } = new List<ProductImages>();
         public ICollection<ProductSpecifications> ProductSpecification { get; set; } = new List<ProductSpecifications>();
         [JsonIgnore]

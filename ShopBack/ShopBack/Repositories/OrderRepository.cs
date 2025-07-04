@@ -8,21 +8,19 @@ namespace ShopBack.Repositories
     {
         private readonly ShopDbContext _context = context;
 
-        //override из IRepository
         public async Task<Orders> GetByIdAsync(int id)
         {
             return await _context.Orders
-                .Include(o => o.User)
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.Payment)
-                .FirstOrDefaultAsync(o => o.Id == id);
+                .FirstOrDefaultAsync(o => o.Id == id)
+                ?? throw new KeyNotFoundException($"Заказ с ID {id} не найден");
         }
 
         public async Task<IEnumerable<Orders>> GetAllAsync()
         {
             return await _context.Orders
-                .Include(o => o.User)
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.Payment)
@@ -32,10 +30,9 @@ namespace ShopBack.Repositories
 
         public async Task AddAsync(Orders order)
         {
-            order.OrderTime ??= DateTime.UtcNow;
-            order.CreatedAt ??= DateTime.UtcNow;
+            order.OrderTime = null;
+            order.CreatedAt = DateTime.UtcNow;
             order.UpdatedAt = DateTime.UtcNow;
-            order.Status ??= "Pending";
 
             await _context.Orders.AddAsync(order);
             await _context.SaveChangesAsync();
@@ -43,8 +40,7 @@ namespace ShopBack.Repositories
 
         public async Task UpdateAsync(Orders order)
         {
-            order.UpdatedAt = DateTime.UtcNow;
-            _context.Entry(order).State = EntityState.Modified;
+            _context.Orders.Update(order);
             await _context.SaveChangesAsync();
         }
 
@@ -55,16 +51,23 @@ namespace ShopBack.Repositories
             await _context.SaveChangesAsync();
         }
 
-        //Новые методы
-        public async Task<IEnumerable<Orders>> GetUserOrdersAsync(int userId)
+        public async Task CreateCart(int userId)
+        {
+            var order = new Orders
+            {
+                UserId = userId,
+                Status = "Cart"
+            };
+            await AddAsync(order);
+        }
+
+        public async Task<Orders> GetUserCartOrderAsync(int userId)
         {
             return await _context.Orders
-                .Where(o => o.UserId == userId)
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.Payment)
-                .OrderByDescending(o => o.OrderTime)
-                .ToListAsync();
+                .FirstOrDefaultAsync(o => o.UserId == userId);
         }
 
         public async Task<IEnumerable<OrderItems>> GetOrderItemsAsync(int orderId)
