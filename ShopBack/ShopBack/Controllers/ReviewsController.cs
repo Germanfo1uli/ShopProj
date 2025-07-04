@@ -23,7 +23,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Policy = "AdminOrModerAccess")]
+        //[Authorize(Policy = "AdminOrModerAccess")]
         public async Task<ActionResult<ProductReviews>> GetById(int id)
         {
             var review = await _reviewsService.GetByIdAsync(id);
@@ -83,22 +83,18 @@ namespace ShopBack.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = "SelfOrAdminAccess")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            var isAdmin = User.IsInRole("Admin");
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-            {
-                throw new SecurityException("Неверный формат идентификатора пользователя");
-            }
+            bool isAdmin = User.IsInRole("Admin");
 
             var review = await _reviewsService.GetByIdAsync(id);
 
-            if (!isAdmin && userId != review.UserId)
+            if (review.UserId != currentUserId && !isAdmin)
             {
-                return Forbid("Вы можете удалять только свои отзывы");
+                return Forbid();
             }
 
             await _reviewsService.DeleteAsync(id);
