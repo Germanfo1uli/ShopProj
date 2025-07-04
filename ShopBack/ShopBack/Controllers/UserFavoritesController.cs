@@ -10,7 +10,7 @@ using System.Security.Claims;
 
 namespace ShopBack.Controllers
 {
-    [Route("api/[controller]")] //api/userfavorites
+    [Route("api/[controller]")] //api/userfavorites 
     [ApiController]
     public class UserFavoritesController(FavoriteService favoritesService) : ControllerBase
     {
@@ -40,11 +40,7 @@ namespace ShopBack.Controllers
             };
 
             await _favoritesService.AddAsync(favorite);
-            return CreatedAtAction(
-                actionName: nameof(GetAllByUserId),
-                routeValues: new { id = favorite.UserId },
-                value: favorite
-            );
+            return Ok();
         }
 
         [HttpDelete]

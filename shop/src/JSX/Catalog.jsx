@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import styles from '../CSS/Catalog.module.css';
 import sb from '../CSS/Breadcrumbs.module.css';
 import {
@@ -9,13 +9,13 @@ import {
 import Footer from "./Components/Footer";
 import { Link } from "react-router-dom";
 import { apiRequest } from './Api/ApiRequest';
+import { useAuth } from './Hooks/UseAuth.js';
 
 const Catalog = () => {
     const [activeCategory, setActiveCategory] = useState('Все товары');
     const [activeSubcategory, setActiveSubcategory] = useState(null);
     const [expandedFilterCategory, setExpandedFilterCategory] = useState(null);
     const [expandedMainCategory, setExpandedMainCategory] = useState(null);
-    const [favorites, setFavorites] = useState([2]);
     const [priceRange, setPriceRange] = useState([0, 12000]);
     const [selectedSizes, setSelectedSizes] = useState([]);
     const [selectedColors, setSelectedColors] = useState([]);
@@ -25,13 +25,24 @@ const Catalog = () => {
     const [products, setProducts] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { userId, isAuthenticated, logout } = useAuth();
+    const [favorites, setFavorites] = useState([]);
 
     useEffect(() => {
-        const fetchCategories = async () => {
+        const fetchData = async () => {
             try {
                 setIsLoading(true);
                 const allCategories = await apiRequest('/api/categories');
                 const parentCategories = await apiRequest('/api/categories/parents');
+                if (userId) {
+                const userFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
+                    authenticated: isAuthenticated  
+                });
+                setFavorites(userFavorites.map(fav => fav.productId));
+                } 
+                else {
+                    setFavorites([]);
+                }
                 const categoriesStructure = parentCategories.map(parent => {
                     const children = allCategories.filter(
                         cat => cat.parentCategoryId === parent.id
@@ -44,7 +55,6 @@ const Catalog = () => {
                             id: child.id,
                             name: child.name
                         })),
-                        // Добавляем свойства для специальных категорий
                         icon: null,
                         buttonStyle: styles.defaultCategoryButton,
                         isPopular: parent.name === 'Популярные товары',
@@ -53,7 +63,6 @@ const Catalog = () => {
                     };
                 });
 
-                // Добавляем специальные категории в начало
                 const specialCategories = [
                     {
                         id: 0,
@@ -89,62 +98,71 @@ const Catalog = () => {
                 ];
 
                 setCategories([...specialCategories, ...categoriesStructure]);
+                const productsData = await apiRequest('/api/products');
+                setProducts(productsData);
                 
             } catch (err) {
-                console.error('Ошибка загрузки категорий:', err);
-                setError('Не удалось загрузить категории');
+                console.error('Ошибка загрузки данных:', err);
+                setError('Не удалось загрузить данные');
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchCategories();
-    }, []);
-
+        fetchData();
+    }, [userId,  isAuthenticated]);
 
     useEffect(() => {
-        if (products.length === 0) return;
+    if (products.length === 0 || categories.length === 0) return;
 
-        let result = [...products];
+    let result = [...products];
 
-        if (activeCategory !== 'Все товары') {
-            const category = categories.find(cat => cat.name === activeCategory);
-            if (category) {
-                if (category.isPopular) {
-                    result = result.filter(product => product.isPopular);
-                } else if (category.isRecommended) {
-                    result = result.filter(product => product.isRecommended);
-                } else if (category.isSpecial) {
-                    result = result.filter(product => product.isSpecial);
-                } else if (category.type) {
-                    result = result.filter(product => product.type === category.type);
-                }
-            }
+    if (activeCategory !== 'Все товары') {
+        const category = categories.find(cat => cat.name === activeCategory);
+        if (category) {
+        if (category.isPopular) {
+            result = result.filter(product => product.isPopular);
+        } 
+        else if (category.isRecommended) {
+            result = result.filter(product => product.isRecommended);
+        } 
+        else if (category.isSpecial) {
+            result = result.filter(product => product.isSpecial);
+        } 
+        else {
+            const categoryIds = [category.id, ...category.subcategories?.map(sub => sub.id) || []];
+            result = result.filter(product => categoryIds.includes(product.categoryId));
         }
-
-        if (activeSubcategory) {
-            result = result.filter(product => product.subcategory === activeSubcategory);
         }
+    }
 
+    if (activeSubcategory) {
+        const subcategory = categories
+        .flatMap(cat => cat.subcategories || [])
+        .find(sub => sub.name === activeSubcategory);
+        
+        if (subcategory) {
+        result = result.filter(product => product.categoryId === subcategory.id);
+        }
+    }
+
+    result = result.filter(product =>
+        product.price >= priceRange[0] && product.price <= priceRange[1]
+    );
+
+    if (selectedSizes.length > 0) {
         result = result.filter(product =>
-            product.price >= priceRange[0] && product.price <= priceRange[1]
+        product.sizes && product.sizes.some(size => selectedSizes.includes(size))
         );
+    }
 
-        if (selectedSizes.length > 0) {
-            result = result.filter(product =>
-                product.sizes && product.sizes.some(size => selectedSizes.includes(size))
-            );
-        }
-
-        if (selectedColors.length > 0) {
-            result = result.filter(product =>
-                selectedColors.includes(product.color)
-            );
-        }
-
-        result = sortProducts(result, sortOption);
-
-        setFilteredProducts(result);
+    if (selectedColors.length > 0) {
+        result = result.filter(product =>
+        product.color && selectedColors.includes(product.color)
+        );
+    }
+    result = sortProducts(result, sortOption);
+    setFilteredProducts(result);
     }, [activeCategory, activeSubcategory, priceRange, selectedSizes, selectedColors, sortOption, products, categories]);
 
     const sortProducts = (products, option) => {
@@ -155,35 +173,87 @@ const Catalog = () => {
             case 'price-desc':
                 return sorted.sort((a, b) => b.price - a.price);
             case 'newest':
-                return sorted.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+                return sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             case 'popularity':
             default:
-                return sorted.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
+                return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0) || (b.reviews || 0) - (a.reviews || 0));
         }
     };
 
-    const toggleCategory = (categoryName, section = 'main') => {
+     const toggleCategory = (categoryName, section = 'main') => {
         if (section === 'filter') {
-            setExpandedFilterCategory(expandedFilterCategory === categoryName ? null : categoryName);
+            setExpandedFilterCategory(prev => 
+                prev === categoryName ? null : categoryName
+            );
         } else {
-            setExpandedMainCategory(expandedMainCategory === categoryName ? null : categoryName);
+            setExpandedMainCategory(prev => 
+                prev === categoryName ? null : categoryName
+            );
         }
     };
 
-    const selectCategory = (categoryName, subcategory = null) => {
+     const selectCategory = (categoryName, subcategory = null) => {
         setActiveCategory(categoryName);
         setActiveSubcategory(subcategory);
         setExpandedFilterCategory(null);
         setExpandedMainCategory(null);
     };
 
-    const toggleFavorite = (productId) => {
-        if (favorites.includes(productId)) {
-            setFavorites(favorites.filter(id => id !== productId));
+    const handleCategoryClick = (category) => {
+        if (category.subcategories.length > 0) {
+            toggleCategory(category.name, 'main');
         } else {
-            setFavorites([...favorites, productId]);
+            selectCategory(category.name);
         }
     };
+
+    const handleFilterCategoryClick = (categoryName) => {
+        selectCategory(categoryName);
+        setExpandedFilterCategory(null);
+    };
+
+
+    const toggleFavorite = async (productId) => {
+  if (!userId) {
+    alert('Войдите в систему, чтобы добавлять товары в избранное');
+    return;
+  }
+
+  try {
+    const favoriteData = {
+      UserId: userId,
+      ProductId: productId
+    };
+
+    const newFavorites = favorites.includes(productId)
+      ? favorites.filter(id => id !== productId)
+      : [...favorites, productId];
+    setFavorites(newFavorites);
+
+    if (favorites.includes(productId)) {
+      await apiRequest('/api/userfavorites', {
+        method: 'DELETE',
+        body: favoriteData,
+        authenticated: isAuthenticated
+      });
+    } else {
+      await apiRequest('/api/userfavorites', {
+        method: 'POST',
+        body: favoriteData,
+        authenticated: isAuthenticated
+      });
+    }
+
+    const updatedFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
+      authenticated: isAuthenticated
+    });
+    setFavorites(updatedFavorites?.map(fav => fav.productId) || []);
+  } catch (error) {
+    console.error('Ошибка при обновлении избранного:', error);
+    setFavorites(favorites);
+    alert('Не удалось обновить избранное: ' + error.message);
+  }
+};
 
     const handlePriceChange = (e, index) => {
         const newValue = parseInt(e.target.value) || 0;
@@ -220,9 +290,11 @@ const Catalog = () => {
         for (let i = 1; i <= 5; i++) {
             if (i <= fullStars) {
                 stars.push(<FaStar key={i} className={styles.star} />);
-            } else if (i === fullStars + 1 && hasHalfStar) {
+            } 
+            else if (i === fullStars + 1 && hasHalfStar) {
                 stars.push(<FaStarHalfAlt key={i} className={styles.star} />);
-            } else {
+            } 
+            else {
                 stars.push(<FaRegStar key={i} className={styles.star} />);
             }
         }
@@ -291,10 +363,7 @@ const Catalog = () => {
                                             }`}
                                             onMouseEnter={() => category.subcategories.length > 0 && setExpandedFilterCategory(category.name)}
                                             onMouseLeave={() => setExpandedFilterCategory(null)}
-                                            onClick={() => {
-                                                selectCategory(category.name);
-                                                setExpandedFilterCategory(null);
-                                            }}
+                                            onClick={() => handleFilterCategoryClick(category.name)}
                                         >
                                             <span>{category.name}</span>
                                             {category.subcategories.length > 0 && (
@@ -423,13 +492,7 @@ const Catalog = () => {
                                         className={`${styles.categoryButton} ${
                                             activeCategory === category.name ? styles.activeCategory : ''
                                         } ${category.buttonStyle || ''}`}
-                                        onClick={() => {
-                                            if (category.subcategories.length > 0) {
-                                                toggleCategory(category.name, 'main');
-                                            } else {
-                                                selectCategory(category.name);
-                                            }
-                                        }}
+                                        onClick={() => handleCategoryClick(category)}
                                     >
                                         <span className={styles.categoryName}>
                                             {category.icon && (
@@ -469,18 +532,28 @@ const Catalog = () => {
                             {filteredProducts.length > 0 ? (
                                 filteredProducts.map((product) => (
                                     <div key={product.id} className={styles.productCard}>
-                                        <div
-                                            className={styles.productImage}
-                                            style={{ backgroundColor: product.bgColor || '#f5f5f5' }}
-                                        >
+                                        <div className={styles.productImage}>
+                                            {/* Основное изображение продукта */}
+                                            {product.mainImage && (
+                                                <img 
+                                                    src={`${process.env.REACT_APP_API_URL}${product.mainImage.url}`} 
+                                                    alt={product.name}
+                                                />
+                                            )}
+                                            
+                                            {/* Бейдж, если есть */}
                                             {product.badge && (
                                                 <span className={`${styles.badge} ${styles[product.badgeColor || 'blue']}`}>
                                                     {product.badge}
                                                 </span>
                                             )}
+                                            
+                                            {/* Кнопка избранного */}
                                             <button
                                                 className={styles.favoriteButton}
                                                 onClick={() => toggleFavorite(product.id)}
+                                                disabled={!userId} 
+                                                title={!userId ? "Войдите, чтобы добавить в избранное" : ""}
                                             >
                                                 {favorites.includes(product.id) ? (
                                                     <FaHeart className={styles.favoriteIconActive} />
@@ -489,14 +562,20 @@ const Catalog = () => {
                                                 )}
                                             </button>
                                         </div>
+                                        
                                         <div className={styles.productInfo}>
                                             <h3 className={styles.productName}>{product.name}</h3>
-                                            <div className={styles.productPrice}>
-                                                <span className={styles.currentPrice}>{product.price.toLocaleString()} ₽</span>
-                                                {product.oldPrice && (
-                                                    <del className={styles.oldPrice}>{product.oldPrice.toLocaleString()} ₽</del>
+                                             <div className={styles.productPrice}>
+                                                <span className={styles.currentPrice}>
+                                                    {product.price.toLocaleString('ru-RU')} ₽
+                                                </span>
+                                                {/* Исправленная проверка на oldPrice */}
+                                                {product.oldPrice && product.oldPrice > 0 && (
+                                                    <del className={styles.oldPrice}>
+                                                    {product.oldPrice.toLocaleString('ru-RU')} ₽
+                                                    </del>
                                                 )}
-                                            </div>
+                                                </div>
                                             <div className={styles.productRating}>
                                                 {renderStars(product.rating || 0)}
                                                 <span className={styles.reviews}>({product.reviews || 0})</span>
