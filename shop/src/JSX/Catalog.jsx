@@ -337,7 +337,6 @@ const Catalog = () => {
     if (error) {
         return <div className={styles.error}>{error}</div>;
     }
-    console.log(products)
     const colors = ['white', 'black', 'blue', 'gray', 'red', 'green', 'yellow', 'purple', 'pink'];
     const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
     return (

@@ -59,11 +59,12 @@ namespace ShopBack.Repositories
         public async Task<IEnumerable<Orders>> GetUserOrdersAsync(int userId)
         {
             return await _context.Orders
-                .Where(o => o.UserId == userId)
+                 .Where(o => o.UserId == userId)
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.Payment)
                 .OrderByDescending(o => o.OrderTime)
+                .AsNoTracking() 
                 .ToListAsync();
         }
 
