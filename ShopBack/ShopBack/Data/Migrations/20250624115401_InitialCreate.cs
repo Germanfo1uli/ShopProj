@@ -99,7 +99,7 @@ namespace ShopBack.Data.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<int>(type: "integer", nullable: false),
-                    OrderTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    OrderTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     TotalAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     ShippingAddress = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
