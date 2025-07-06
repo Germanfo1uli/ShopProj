@@ -23,7 +23,7 @@ const CartPage = () => {
 
             try {
                 setIsLoading(true);
-                const orders = await apiRequest(`/api/orders/user/${userId}`, {
+                const orders = await apiRequest(`/api/orders/${userId}/cart`, {
                     authenticated: isAuthenticated
                 });
                 
