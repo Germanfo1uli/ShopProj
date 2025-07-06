@@ -67,14 +67,16 @@ namespace ShopBack.Repositories
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.Payment)
-                .FirstOrDefaultAsync(o => o.UserId == userId);
+                .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "Cart");
         }
 
-        public async Task<IEnumerable<OrderItems>> GetOrderItemsAsync(int orderId)
+        public async Task<IEnumerable<Orders>> GetUserOrdersAsync(int userId)
         {
-            return await _context.OrderItems
-                .Where(oi => oi.OrderId == orderId)
-                .Include(oi => oi.Product)
+            return await _context.Orders
+                .Where(o => o.UserId == userId && o.Status != "Cart")
+                .Include(o => o.OrderItem)
+                    .ThenInclude(oi => oi.Product)
+                .Include(o => o.Payment)
                 .ToListAsync();
         }
 

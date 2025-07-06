@@ -21,9 +21,10 @@ namespace ShopBack.Services
             return cart;
         }
 
-        public async Task<IEnumerable<OrderItems>> GetOrderItemsAsync(int orderId)
+        public async Task<IEnumerable<Orders>> GetUserOrdersAsync(int userId)
         {
-            return await _ordersRepository.GetOrderItemsAsync(orderId);
+            var cart = await _ordersRepository.GetUserOrdersAsync(userId);
+            return cart;
         }
 
         public async Task<Payments?> GetOrderPaymentAsync(int orderId)

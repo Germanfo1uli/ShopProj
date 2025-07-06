@@ -106,7 +106,7 @@ namespace ShopBack.Controllers
         [Authorize(Policy = "AdminOrModerAccess")]
         public async Task<IActionResult> Approve(int id, [FromBody] ModerateReview moderateDto)
         {
-            await _reviewsService.ApproveReviewAsync(id, moderateDto.ModeratorId, moderateDto.Comment);
+            await _reviewsService.ApproveReviewAsync(id, moderateDto.ModeratorId, moderateDto.ModeratorComment);
             return Ok();
         }
 
@@ -114,7 +114,7 @@ namespace ShopBack.Controllers
         [Authorize(Policy = "AdminOrModerAccess")]
         public async Task<IActionResult> Reject(int id, [FromBody] ModerateReview moderateDto)
         {
-            await _reviewsService.RejectReviewAsync(id, moderateDto.ModeratorId, moderateDto.Comment);
+            await _reviewsService.RejectReviewAsync(id, moderateDto.ModeratorId, moderateDto.ModeratorComment);
             return Ok();
         }
     }
@@ -143,6 +143,6 @@ namespace ShopBack.Controllers
     {
         public int ModeratorId { get; set; }
 
-        public string? Comment { get; set; }
+        public string? ModeratorComment { get; set; }
     }
 }

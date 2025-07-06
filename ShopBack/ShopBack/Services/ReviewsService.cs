@@ -13,12 +13,12 @@ namespace ShopBack.Services
 
         public async Task<IEnumerable<ProductReviews>> GetProductReviewsAsync(int productId, bool onlyApproved = true)
         {
-            return await _reviewsRepository.GetProductReviewsAsync(productId, onlyApproved);
+            return await _reviewsRepository.GetProductReviewsAsync(productId, onlyApproved) ?? throw new ArgumentException("Reviews not found");
         }
 
         public async Task<IEnumerable<ProductReviews>> GetUserReviewsAsync(int userId)
         {
-            return await _reviewsRepository.GetUserReviewsAsync(userId);
+            return await _reviewsRepository.GetUserReviewsAsync(userId) ?? throw new ArgumentException("Reviews not found");
         }
 
         public async Task ApproveReviewAsync(int reviewId, int moderatorId, string? comment = null)
@@ -27,7 +27,7 @@ namespace ShopBack.Services
 
             review.Approved = true;
             review.ModeratorId = moderatorId;
-            review.Comment = comment;
+            review.ModeratorComment = comment;
             review.ModeratedAt = DateTime.UtcNow;
 
             await UpdateAsync(review);
@@ -39,7 +39,7 @@ namespace ShopBack.Services
 
             review.Approved = false;
             review.ModeratorId = moderatorId;
-            review.Comment = comment;
+            review.ModeratorComment = comment;
             review.ModeratedAt = DateTime.UtcNow;
 
             await RecalculateRating(review.ProductId);

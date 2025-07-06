@@ -90,53 +90,54 @@ namespace ShopBack.Controllers
 
         [HttpGet("{userId}/cart")]
         [Authorize(Policy = "SelfOrAdminAccess")]
-        public async Task<ActionResult<IEnumerable<Orders>>> GetUserCartOrder(int userId)
+        public async Task<ActionResult<Orders>> GetUserCartOrder(int userId)
         {
             var orders = await _ordersService.GetUserCartOrderAsync(userId);
             return Ok(orders);
         }
 
-        [HttpGet("{orderId}/items")]
-        public async Task<ActionResult<IEnumerable<OrderItems>>> GetOrderItems(int orderId)
+        [HttpGet("{userId}/orders")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
+        public async Task<ActionResult<IEnumerable<Orders>>> GetUserOrders(int userId)
         {
-            try
-            {
-                var items = await _ordersService.GetOrderItemsAsync(orderId);
-                return Ok(items);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ошибка сервера при получении позиций заказа");
-            }
+            var orders = await _ordersService.GetUserOrdersAsync(userId);
+            return Ok(orders);
         }
 
         [HttpGet("{orderId}/payment")]
         public async Task<ActionResult<Payments>> GetOrderPayment(int orderId)
         {
-            try
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            bool isAdmin = User.IsInRole("Admin");
+
+            var order = await _ordersService.GetByIdAsync(orderId);
+
+            if (order.UserId != currentUserId && !isAdmin)
             {
-                var payment = await _ordersService.GetOrderPaymentAsync(orderId);
-                if (payment == null) return NotFound("Платеж по заказу не найден");
-                return Ok(payment);
+                return Forbid();
             }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ошибка сервера при получении платежа по заказу");
-            }
+
+            var payment = await _ordersService.GetOrderPaymentAsync(orderId);
+            return Ok(payment);
         }
 
         [HttpPatch("{orderId}/status")]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, [FromBody] string status)
         {
-            try
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            bool isAdmin = User.IsInRole("Admin");
+
+            var order = await _ordersService.GetByIdAsync(orderId);
+
+            if (order.UserId != currentUserId && !isAdmin)
             {
-                await _ordersService.UpdateOrderStatusAsync(orderId, status);
-                return NoContent();
+                return Forbid();
             }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ошибка сервера при обновлении статуса заказа");
-            }
+
+            await _ordersService.UpdateOrderStatusAsync(orderId, status);
+            return Ok(status);
         }
     }
 
