@@ -1,20 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React, { useState, useCallback } from 'react';
+import {Link, useNavigate} from 'react-router-dom';
+import { FaHome, FaShoppingCart, FaBoxOpen, FaStar, FaSearch, FaUser, FaBars, FaTimes } from 'react-icons/fa';
 import st from '../CSS/NavBar.module.css';
 import AuthModal from './Components/AuthModal';
 import { useAuth } from './Hooks/UseAuth.js';
-
 
 const NavBar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const navigate = useNavigate();
-    const location = useLocation();
 
-    const { 
-        isAuthenticated, 
-        login, 
-        isLoading: authLoading 
+    const {
+        isAuthenticated,
+        login,
+        isLoading: authLoading
     } = useAuth();
 
     const toggleMenu = useCallback(() => {
@@ -30,70 +29,76 @@ const NavBar = () => {
     }, [isAuthModalOpen]);
 
     const handleLoginSuccess = useCallback((token, refreshToken, userId) => {
-        login(token, refreshToken, userId); 
+        login(token, refreshToken, userId);
         setIsAuthModalOpen(false);
         navigate('/profile');
     }, [login, navigate]);
 
-   
     const closeMenu = useCallback(() => {
         setIsMenuOpen(false);
         document.body.style.overflow = 'auto';
     }, []);
-    const userAvatar = isAuthenticated 
-        ? 'https://randomuser.me/api/portraits/men/32.jpg' 
+
+    const userAvatar = isAuthenticated
+        ? 'https://randomuser.me/api/portraits/men/32.jpg'
         : '';
-    console.log(isAuthenticated)
+
     return (
         <>
             <nav className={st.navPage}>
                 <div className={st.burger} onClick={toggleMenu}>
-                    {[1, 2, 3].map((i) => (
-                        <div 
-                            key={i}
-                            className={`${st.burgerLine} ${isMenuOpen ? st.active : ''}`}
-                        />
-                    ))}
+                    {isMenuOpen ? <FaTimes className={st.burgerIcon} /> : <FaBars className={st.burgerIcon} />}
                 </div>
 
-                <div className={st.navigation}>
-                    <Link to="/home" className={st.logo}><h2>TempName</h2></Link>
-                    {['catalog', 'cart', 'new'].map((path) => (
-                        <Link 
-                            key={path}
-                            to={`/${path}`} 
-                            className={st.navLink}
-                        >
-                            {path === 'cart' ? 'Корзина' : path === 'new' ? 'Новинки' : 'Каталог'}
-                        </Link>
-                    ))}
+                <Link to="/home" className={st.logo}><h2>TempName</h2></Link>
+
+                <div className={st.searchContainer}>
+                    <FaSearch className={st.searchIcon} />
+                    <input
+                        type="text"
+                        placeholder="Поиск..."
+                        className={st.Input}
+                    />
                 </div>
 
-                <div className={st.searchInput}>
-                    <div className={st.searchContainer}>
-                        <input 
-                            type="text" 
-                            placeholder="Поиск..." 
-                            className={st.Input}
-                        />
+                <div className={st.navSection}>
+                    <div className={st.navButtons}>
+                        {[
+                            { path: '/home', icon: <FaHome />, label: 'Главная' },
+                            { path: '/catalog', icon: <FaBoxOpen />, label: 'Каталог' },
+                            { path: '/cart', icon: <FaShoppingCart />, label: 'Корзина' }
+                        ].map((item) => (
+                            <button
+                                key={item.path}
+                                className={st.navButton}
+                                onClick={() => navigate(item.path)}
+                            >
+                                <span className={st.navIcon}>{item.icon}</span>
+                                <span className={st.navLabel}>{item.label}</span>
+                            </button>
+                        ))}
                     </div>
-                    
+
                     {!authLoading && isAuthenticated ? (
-                        <div className={st.userAvatarContainer}>
+                        <button
+                            className={st.profileButton}
+                            onClick={() => navigate('/profile')}
+                        >
                             <img
                                 src={userAvatar}
                                 alt="User avatar"
                                 className={st.userAvatar}
-                                onClick={() => navigate('/profile')}
                             />
-                        </div>
+                            <span className={st.profileText}>Профиль</span>
+                        </button>
                     ) : (
-                        <button 
-                            className={st.loginButton} 
+                        <button
+                            className={st.loginButton}
                             onClick={toggleAuthModal}
                             disabled={authLoading}
                         >
-                            {authLoading ? 'Загрузка...' : 'Войти'}
+                            <FaUser className={st.loginIcon} />
+                            <span>{authLoading ? 'Загрузка...' : 'Войти'}</span>
                         </button>
                     )}
                 </div>
@@ -101,44 +106,67 @@ const NavBar = () => {
 
             {isMenuOpen && (
                 <div className={st.mobileMenu}>
-                    <span className={st.closeButton} onClick={closeMenu}>&times;</span>
-                    <ul className={st.mobileNavList}>
-                        {['', 'catalog', 'popular', 'new'].map((path) => (
-                            <li key={path} className={st.mobileNavItem}>
-                                <Link 
-                                    to={`/${path}`} 
-                                    className={st.mobileNavLink} 
-                                    onClick={closeMenu}
-                                >
-                                    {!path ? 'Главная' : path === 'new' ? 'Новинки' : path === 'popular' ? 'Популярное' : 'Каталог'}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
+                    <div className={st.mobileHeader}>
+                        <Link to="/home" className={st.mobileLogo} onClick={closeMenu}>
+                            <h2>TempName</h2>
+                        </Link>
+                        <FaTimes className={st.closeButton} onClick={closeMenu} />
+                    </div>
 
                     <div className={st.mobileSearchContainer}>
-                        <input 
-                            type="text" 
-                            placeholder="Поиск..." 
+                        <FaSearch className={st.mobileSearchIcon} />
+                        <input
+                            type="text"
+                            placeholder="Поиск..."
                             className={st.mobileInput}
                         />
+                    </div>
+
+                    <div className={st.mobileNavButtons}>
+                        {[
+                            { path: '/home', icon: <FaHome />, label: 'Главная' },
+                            { path: '/catalog', icon: <FaBoxOpen />, label: 'Каталог' },
+                            { path: '/new', icon: <FaStar />, label: 'Новинки' },
+                            { path: '/cart', icon: <FaShoppingCart />, label: 'Корзина' }
+                        ].map((item) => (
+                            <button
+                                key={item.path}
+                                className={st.mobileNavButton}
+                                onClick={() => {
+                                    navigate(item.path);
+                                    closeMenu();
+                                }}
+                            >
+                                <span className={st.mobileNavIcon}>{item.icon}</span>
+                                <span className={st.mobileNavLabel}>{item.label}</span>
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className={st.mobileAuthButton}>
                         {!authLoading && isAuthenticated ? (
-                            <div className={st.mobileUserInfo}>
+                            <button
+                                className={st.mobileProfileButton}
+                                onClick={() => {
+                                    navigate('/profile');
+                                    closeMenu();
+                                }}
+                            >
                                 <img
                                     src={userAvatar}
                                     alt="User avatar"
                                     className={st.mobileUserAvatar}
-                                    onClick={() => navigate('/profile')}
                                 />
-                                
-                            </div>
+                                <span>Мой профиль</span>
+                            </button>
                         ) : (
-                            <button 
-                                className={st.mobileLoginButton} 
+                            <button
+                                className={st.mobileLoginButton}
                                 onClick={toggleAuthModal}
                                 disabled={authLoading}
                             >
-                                {authLoading ? 'Загрузка...' : 'Войти'}
+                                <FaUser className={st.mobileLoginIcon} />
+                                <span>{authLoading ? 'Загрузка...' : 'Войти в аккаунт'}</span>
                             </button>
                         )}
                     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, use } from 'react';
 import styles from '../CSS/Catalog.module.css';
 import sb from '../CSS/Breadcrumbs.module.css';
+import { useLocation } from "react-router-dom";
 import {
     FaHeart, FaRegHeart, FaStar, FaRegStar, FaStarHalfAlt,
     FaChevronLeft, FaChevronRight, FaStore, FaSearch,
@@ -12,6 +13,7 @@ import { apiRequest } from './Api/ApiRequest';
 import { useAuth } from './Hooks/UseAuth.js';
 
 const Catalog = () => {
+    const location = useLocation();
     const [activeCategory, setActiveCategory] = useState('Все товары');
     const [activeSubcategory, setActiveSubcategory] = useState(null);
     const [expandedFilterCategory, setExpandedFilterCategory] = useState(null);
@@ -166,6 +168,25 @@ const Catalog = () => {
     result = sortProducts(result, sortOption);
     setFilteredProducts(result);
     }, [activeCategory, activeSubcategory, priceRange, selectedSizes, selectedColors, sortOption, products, categories]);
+
+    useEffect(() => {
+        // Обработка перехода с фильтром
+        if (location.state?.filter) {
+            switch(location.state.filter) {
+                case 'popular':
+                    setActiveCategory('Популярные товары');
+                    break;
+                case 'recommended':
+                    setActiveCategory('Рекомендации для вас');
+                    break;
+                case 'special':
+                    setActiveCategory('Спецпредложения');
+                    break;
+                default:
+                    setActiveCategory('Все товары');
+            }
+        }
+    }, [location.state]);
 
     const sortProducts = (products, option) => {
         const sorted = [...products];
