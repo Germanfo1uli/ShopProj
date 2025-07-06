@@ -11,11 +11,6 @@ namespace ShopBack.Services
         {
             return await _categoriesRepository.GetParentCategoriesAsync();
         }
-
-        public async Task<IEnumerable<Categories>> GetChildCategoriesAsync(int parentId)
-        {
-            return await _categoriesRepository.GetChildCategoriesAsync(parentId);
-        }
     }
 }
 

@@ -72,13 +72,6 @@ namespace ShopBack.Controllers
             var parentCategories = await _categoriesService.GetParentCategoriesAsync();
             return Ok(parentCategories);
         }
-
-        [HttpGet("children/{parentId}")]
-        public async Task<ActionResult<IEnumerable<Categories>>> GetChildCategories(int parentId)
-        {
-            var childCategories = await _categoriesService.GetChildCategoriesAsync(parentId);
-            return Ok(childCategories);
-        }
     }
 
     public class CategoryCreate

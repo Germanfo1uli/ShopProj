@@ -25,5 +25,8 @@ namespace ShopBack.Models
         public Categories? ParentCategory { get; set; }
 
         public ICollection<Categories> ChildCategories { get; set; } = new List<Categories>();
+
+        [JsonIgnore]
+        public ICollection<Products> Products { get; set; } = new List<Products>();
     }
 }

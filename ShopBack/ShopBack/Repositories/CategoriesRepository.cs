@@ -13,7 +13,9 @@ namespace ShopBack.Repositories
             return await _context.Categories
                 .Include(c => c.ParentCategory)
                 .Include(c => c.ChildCategories)
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id) ??
+                throw new KeyNotFoundException($"Категория с ID {id} не найдена");
         }
 
         public async Task<IEnumerable<Categories>> GetAllAsync()
@@ -21,6 +23,7 @@ namespace ShopBack.Repositories
             return await _context.Categories
                 .Include(c => c.ParentCategory)
                 .Include(c => c.ChildCategories)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -36,12 +39,11 @@ namespace ShopBack.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id) // Измененная сигнатура
+        public async Task DeleteAsync(int id)
         {
-            var entity = await _context.Categories.FindAsync(id);
+            var entity = await _context.Categories.FindAsync(id) ?? throw new KeyNotFoundException($"Категория с ID {id} не найдена");
             _context.Categories.Remove(entity);
             await _context.SaveChangesAsync();
-           
         }
 
         public async Task<IEnumerable<Categories>> GetParentCategoriesAsync()
@@ -50,15 +52,7 @@ namespace ShopBack.Repositories
                 .Where(c => c.ParentCategoryId == null)
                 .Include(c => c.ChildCategories)
                 .OrderBy(c => c.Name)
-                .ToListAsync();
-        }
-
-        public async Task<IEnumerable<Categories>> GetChildCategoriesAsync(int parentId)
-        {
-            return await _context.Categories
-                .Where(c => c.ParentCategoryId == parentId)
-                .Include(c => c.ParentCategory)
-                .OrderBy(c => c.Name)
+                .AsNoTracking()
                 .ToListAsync();
         }
     }

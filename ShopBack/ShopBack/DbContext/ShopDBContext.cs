@@ -31,6 +31,7 @@ namespace ShopBack.Data
         public DbSet<Orders> Orders { get; set; }
         public DbSet<OrderItems> OrderItems { get; set; }
         public DbSet<Payments> Payments { get; set; }
+        public DbSet<PayMethods> PayMethods { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -83,7 +84,7 @@ namespace ShopBack.Data
 
             modelBuilder.Entity<Products>()
                 .HasOne(p => p.Category)
-                .WithMany()
+                .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -169,7 +170,7 @@ namespace ShopBack.Data
 
             modelBuilder.Entity<OrderItems>()
                 .HasOne(oi => oi.Product)
-                .WithMany()
+                .WithMany(p => p.OrderItems)
                 .HasForeignKey(oi => oi.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 

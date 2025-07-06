@@ -16,7 +16,9 @@ namespace ShopBack.Repositories
 
         public async Task DeleteAsync(int userId, int productId)
         {
-            var favorite = await _context.UserFavorites.FindAsync(userId, productId) ?? throw new KeyNotFoundException($"Сущность не найдена");
+            var favorite = await _context.UserFavorites
+                .FindAsync(userId, productId)
+                ?? throw new KeyNotFoundException($"Сущность не найдена");
             _context.UserFavorites.Remove(favorite);
             await _context.SaveChangesAsync();
         }
