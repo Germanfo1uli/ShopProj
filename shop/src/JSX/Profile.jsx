@@ -12,6 +12,7 @@ import ReturnsTab from './ProfileComponents/ReturnsTab';
 import SubscriptionsTab from './ProfileComponents/SubscriptionsTab';
 import FavoritesTab from './ProfileComponents/FavoritesTab';
 import {useNavigate} from "react-router-dom";
+import AdminPanel from "./ProfileComponents/AdminPanel";
 
 const Profile = () => {
     const { isAuthenticated, userId, token, logout,  isLoading: authLoading } = useAuth();
@@ -147,6 +148,8 @@ const Profile = () => {
                 return <ReturnsTab />;
             case 'subscriptions':
                 return <SubscriptionsTab />;
+            case 'admin':
+                return <AdminPanel />;
             default:
                 return <OrdersTab />;
         }
@@ -343,6 +346,8 @@ const renderProfileInfo = () => {
                 return <Payments />;
             case 'settings':
                 return <Settings />;
+            case 'admin':
+                return <AdminPanel />;
             default:
                 return (
                     <>
@@ -521,6 +526,18 @@ const renderProfileInfo = () => {
                                     <i className="fas fa-cog"></i>
                                     <span>Настройки</span>
                                 </button>
+
+
+                                {/*{userRole === 'admin' && (*/}
+                                    <button
+                                        className={`${styles.navLink} ${activeMenu === 'admin' ? styles.activeLink : ''}`}
+                                        onClick={() => setActiveMenu('admin')}
+                                    >
+                                        <i className="fas fa-user-shield"></i>
+                                        <span>Админ панель</span>
+                                    </button>
+
+
                                 <button
                                     className={styles.navLink}
                                     onClick={handleLogout}
