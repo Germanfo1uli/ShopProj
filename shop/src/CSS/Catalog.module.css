@@ -408,40 +408,51 @@
 }
 /* Новые стили для меню категорий */
 .categoryMenu {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
-  position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+
+    z-index: 1000;
 }
 
 .categoryItem {
-  position: relative;
+    position: relative;
+    min-width: 200px;
 }
 
 .categoryButton {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 8px 15px;
-  background-color: #f5f5f5;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    background-color: var(--tab-bg, #f5f5f5);
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-color, #333);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    box-sizing: border-box;
+    text-align: left;
 }
 
 .categoryButton:hover {
-  background-color: #e0e0e0;
+    background-color: var(--tab-hover, #e0e0e0);
 }
 
 .activeCategory {
-  background-color: #333;
-  color: white;
+    background-color: var(--price-color, #1a56db) !important;
+    color: white !important;
 }
 
 .categoryArrow {
-  font-size: 12px;
+    margin-left: 0.5rem;
+    font-size: 0.7rem;
+    transition: transform 0.2s;
 }
 /* Добавьте эти стили в Catalog.module.css */
 
@@ -465,6 +476,18 @@
 /* Для активных категорий с иконками */
 .activeCategory .categoryIcon {
     color: white !important;
+}
+.subcategories {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
 }
 
 /* Яркие кнопки для специальных категорий */
@@ -672,46 +695,66 @@
     background: linear-gradient(135deg, #C2185B 0%, #E91E63 100%) !important;
 }
 
-
+/* Базовые стили (светлая тема) */
 .subcategories {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 100;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  min-width: 200px;
-  padding: 5px 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.subcategories.visible {
-    max-height: 500px;
-    border: 1px solid var(--card-border, #eee);
-    border-top: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 100;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    padding: 5px 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .subcategoryButton {
-  padding: 8px 15px;
-  text-align: left;
-  border: none;
-  background: none;
-  cursor: pointer;
-  transition: background-color 0.2s;
+    padding: 8px 15px;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    color: #333;
 }
 
 .subcategoryButton:hover {
-  background-color: #f5f5f5;
+    background-color: #f5f5f5;
 }
 
 .activeSubcategory {
-  background-color: #f0f0f0;
-  font-weight: bold;
+    background-color: #f0f0f0;
+    font-weight: bold;
 }
 
+
+[data-theme="dark"] .subcategories {
+    background-color: #1a1a1a; /* Почти чёрный фон */
+    border-color: #333; /* Тёмная граница */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); /* Более насыщенная тень */
+}
+
+[data-theme="dark"] .subcategoryButton {
+    color: #e0e0e0; /* Светло-серый текст */
+}
+
+[data-theme="dark"] .subcategoryButton:hover {
+    background-color: #2d2d2d; /* Тёмный hover */
+}
+
+[data-theme="dark"] .activeSubcategory {
+    background-color: #3a3a3a; /* Чуть светлее фона */
+    color: white;
+    font-weight: bold;
+}
+
+/* Иконки в чёрной теме */
+[data-theme="dark"] .subcategoryButton .categoryIcon {
+    color: #e0e0e0;
+}
 .productPrice {
     display: flex;
     justify-content: space-between;
