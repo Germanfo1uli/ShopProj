@@ -28,7 +28,7 @@ const CartPage = () => {
                 });
                 
                 if (orders && orders.length > 0) {
-                    const activeOrder = orders.find(order => order.status === 'InCart') || orders[0];
+                    const activeOrder = orders.find(order => order.status === 'Cart') || orders[0];
                     const items = await apiRequest(`/api/orders/${activeOrder.id}/items`, {
                         authenticated: isAuthenticated
                     });
