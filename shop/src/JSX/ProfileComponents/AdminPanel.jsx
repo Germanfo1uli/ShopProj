@@ -3,15 +3,33 @@ import styles from '../../CSS/ProfileCSS/AdminPanel.module.css';
 
 const AdminPanel = () => {
     const [activeTab, setActiveTab] = useState('products');
+
+    // Данные пользователей
     const [users, setUsers] = useState([
         { id: 1, name: 'Иван Иванов', email: 'ivan@example.com', role: 'user' },
         { id: 2, name: 'Петр Петров', email: 'petr@example.com', role: 'admin' }
     ]);
     const [editingUser, setEditingUser] = useState(null);
+    const [replyingTo, setReplyingTo] = useState(null);
+    const [replyText, setReplyText] = useState('');
+
+    // Отзывы
     const [reviews, setReviews] = useState([
         { id: 1, product: 'Телефон', user: 'Иван Иванов', rating: 5, text: 'Отличный товар!' },
         { id: 2, product: 'Ноутбук', user: 'Петр Петров', rating: 3, text: 'Нормально, но могло быть лучше' }
     ]);
+
+
+    const handleReplySubmit = (reviewId) => {
+        // Логика сохранения ответа
+        setReplyingTo(null);
+        setReplyText('');
+    };
+
+    const handleReviewApprove = (reviewId) => {
+        // Логика одобрения/снятия одобрения отзыва
+    };
+    // Данные товара
     const [newProduct, setNewProduct] = useState({
         name: '',
         description: '',
@@ -20,11 +38,72 @@ const AdminPanel = () => {
         quantityInStock: '',
         categoryId: '',
         isActive: true,
-        rating: '',
-        image: null
+        rating: ''
     });
-    const [previewImage, setPreviewImage] = useState(null);
 
+    // Изображения товара
+    const [productImages, setProductImages] = useState([]);
+    const [mainImageIndex, setMainImageIndex] = useState(0);
+    const [imageUrl, setImageUrl] = useState('');
+    const [isUrlValid, setIsUrlValid] = useState(true);
+
+    // Валидация URL изображения
+    const validateImageUrl = (url) => {
+        const pattern = /^(https?:\/\/).*\.(jpg|jpeg|png|gif|webp)$/i;
+        return pattern.test(url);
+    };
+
+    // Добавление изображения по ссылке
+    const handleAddImageByUrl = () => {
+        if (!imageUrl.trim()) return;
+
+        const isValid = validateImageUrl(imageUrl);
+        setIsUrlValid(isValid);
+
+        if (!isValid) return;
+
+        const newImage = {
+            url: imageUrl,
+            isMain: productImages.length === 0
+        };
+
+        setProductImages(prev => [...prev, newImage]);
+
+        if (productImages.length === 0) {
+            setMainImageIndex(0);
+        }
+
+        setImageUrl('');
+    };
+
+    // Удаление изображения
+    const handleRemoveImage = (index) => {
+        const newImages = productImages.filter((_, i) => i !== index);
+        setProductImages(newImages);
+
+        if (index === mainImageIndex) {
+            if (newImages.length > 0) {
+                setMainImageIndex(0);
+                newImages[0].isMain = true;
+            } else {
+                setMainImageIndex(0);
+            }
+        } else if (index < mainImageIndex) {
+            setMainImageIndex(mainImageIndex - 1);
+        }
+    };
+
+    // Установка основного изображения
+    const handleSetMainImage = (index) => {
+        const newImages = productImages.map((img, i) => ({
+            ...img,
+            isMain: i === index
+        }));
+        setProductImages(newImages);
+        setMainImageIndex(index);
+    };
+
+    // Управление пользователями
     const handleUserEdit = (user) => {
         setEditingUser({ ...user });
     };
@@ -38,31 +117,19 @@ const AdminPanel = () => {
         setUsers(users.filter(u => u.id !== userId));
     };
 
+    // Управление отзывами
     const handleReviewDelete = (reviewId) => {
         setReviews(reviews.filter(r => r.id !== reviewId));
     };
 
+    // Изменение данных товара
     const handleProductInputChange = (e) => {
         const { name, value } = e.target;
         setNewProduct(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleImageUpload = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setNewProduct(prev => ({ ...prev, image: file }));
-
-            // Создаем превью изображения
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewImage(reader.result);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
+    // Добавление товара
     const handleAddProduct = () => {
-        // Здесь должна быть логика добавления товара
         const productData = {
             ...newProduct,
             price: parseFloat(newProduct.price),
@@ -70,7 +137,9 @@ const AdminPanel = () => {
             quantityInStock: parseInt(newProduct.quantityInStock),
             categoryId: parseInt(newProduct.categoryId),
             rating: parseFloat(newProduct.rating),
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            images: productImages,
+            mainImageIndex
         };
 
         console.log('Добавляемый товар:', productData);
@@ -85,10 +154,11 @@ const AdminPanel = () => {
             quantityInStock: '',
             categoryId: '',
             isActive: true,
-            rating: '',
-            image: null
+            rating: ''
         });
-        setPreviewImage(null);
+        setProductImages([]);
+        setMainImageIndex(0);
+        setImageUrl('');
     };
 
     return (
@@ -220,48 +290,66 @@ const AdminPanel = () => {
                                 </div>
 
                                 <div className={styles.formGroup}>
-                                    <label>Активен</label>
-                                    <div className={styles.toggleSwitch}>
-                                        <input
-                                            type="checkbox"
-                                            name="isActive"
-                                            checked={newProduct.isActive}
-                                            onChange={(e) => setNewProduct(prev => ({ ...prev, isActive: e.target.checked }))}
-                                            id="isActiveToggle"
-                                        />
-                                        <label htmlFor="isActiveToggle" className={styles.slider}></label>
-                                    </div>
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label>Изображение товара</label>
+                                    <label>Изображения товара</label>
                                     <div className={styles.imageUploadContainer}>
-                                        {previewImage ? (
-                                            <div className={styles.imagePreview}>
-                                                <img src={previewImage} alt="Превью" className={styles.previewImage} />
-                                                <button
-                                                    onClick={() => {
-                                                        setNewProduct(prev => ({ ...prev, image: null }));
-                                                        setPreviewImage(null);
-                                                    }}
-                                                    className={styles.removeImageButton}
-                                                >
-                                                    Удалить
-                                                </button>
+                                        {/* Форма для добавления по ссылке */}
+                                        <div className={styles.addByUrlContainer}>
+                                            <input
+                                                type="text"
+                                                value={imageUrl}
+                                                onChange={(e) => {
+                                                    setImageUrl(e.target.value);
+                                                    setIsUrlValid(true);
+                                                }}
+                                                placeholder="Введите URL изображения (jpg, png, gif)"
+                                                className={`${styles.urlInput} ${!isUrlValid ? styles.invalid : ''}`}
+                                                onKeyPress={(e) => e.key === 'Enter' && handleAddImageByUrl()}
+                                            />
+                                            <button
+                                                onClick={handleAddImageByUrl}
+                                                className={styles.addUrlButton}
+                                                disabled={!imageUrl.trim()}
+                                            >
+                                                Добавить по ссылке
+                                            </button>
+                                            {!isUrlValid && (
+                                                <p className={styles.errorText}>Введите корректный URL изображения</p>
+                                            )}
+                                        </div>
+
+                                        {/* Список добавленных изображений */}
+                                        {productImages.length > 0 && (
+                                            <div className={styles.imagesGrid}>
+                                                {productImages.map((image, index) => (
+                                                    <div key={index} className={styles.imagePreviewWrapper}>
+                                                        <div
+                                                            className={`${styles.imagePreview} ${image.isMain ? styles.mainImage : ''}`}
+                                                            onClick={() => handleSetMainImage(index)}
+                                                        >
+                                                            <img
+                                                                src={image.url}
+                                                                alt={`Превью ${index + 1}`}
+                                                                className={styles.previewImage}
+                                                                onError={(e) => {
+                                                                    e.target.src = 'https://via.placeholder.com/150?text=Image+not+found';
+                                                                }}
+                                                            />
+                                                            {image.isMain && (
+                                                                <div className={styles.mainImageBadge}>Основное</div>
+                                                            )}
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleRemoveImage(index);
+                                                                }}
+                                                                className={styles.removeImageButton}
+                                                            >
+                                                                <i className="fas fa-times"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ) : (
-                                            <label className={styles.uploadArea}>
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleImageUpload}
-                                                    className={styles.fileInput}
-                                                />
-                                                <div className={styles.uploadText}>
-                                                    <i className="fas fa-cloud-upload-alt"></i>
-                                                    <span>Перетащите или выберите изображение</span>
-                                                </div>
-                                            </label>
                                         )}
                                     </div>
                                 </div>
@@ -360,21 +448,72 @@ const AdminPanel = () => {
                         <h2 className={styles.settingsTitle}>Управление отзывами</h2>
                         <div className={styles.reviewsList}>
                             {reviews.map(review => (
-                                <div key={review.id} className={styles.reviewItem}>
+                                <div key={review.id} className={`${styles.reviewItem} ${review.approved ? styles.approved : ''} ${review.reply ? styles.hasReply : ''}`}>
                                     <div className={styles.reviewHeader}>
                                         <span className={styles.reviewProduct}>{review.product}</span>
                                         <span className={styles.reviewUser}>{review.user}</span>
                                         <span className={styles.reviewRating}>Оценка: {review.rating}/5</span>
+                                        {review.approved && <span className={styles.approvedBadge}>✓ Одобрен</span>}
                                     </div>
                                     <div className={styles.reviewText}>{review.text}</div>
+
+                                    {review.reply && (
+                                        <div className={styles.reviewReply}>
+                                            <div className={styles.replyHeader}>Ответ администратора:</div>
+                                            <div className={styles.replyText}>{review.reply}</div>
+                                        </div>
+                                    )}
+
                                     <div className={styles.reviewActions}>
+                                        {!review.reply && (
+                                            <button
+                                                onClick={() => setReplyingTo(review.id)}
+                                                className={styles.smallButtonSecondary}
+                                            >
+                                                Ответить
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => handleReviewApprove(review.id)}
+                                            className={styles.smallButtonPrimary}
+                                        >
+                                            {review.approved ? 'Снять одобрение' : 'Одобрить'}
+                                        </button>
                                         <button
                                             onClick={() => handleReviewDelete(review.id)}
                                             className={styles.smallButtonDanger}
                                         >
-                                            Удалить отзыв
+                                            Удалить
                                         </button>
                                     </div>
+
+                                    {replyingTo === review.id && (
+                                        <div className={styles.replyForm}>
+                            <textarea
+                                value={replyText}
+                                onChange={(e) => setReplyText(e.target.value)}
+                                className={styles.replyTextarea}
+                                placeholder="Введите ваш ответ на отзыв"
+                            />
+                                            <div className={styles.replyFormActions}>
+                                                <button
+                                                    onClick={() => handleReplySubmit(review.id)}
+                                                    className={styles.smallButton}
+                                                >
+                                                    Отправить ответ
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setReplyingTo(null);
+                                                        setReplyText('');
+                                                    }}
+                                                    className={styles.smallButtonCancel}
+                                                >
+                                                    Отмена
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
