@@ -29,6 +29,40 @@ const Catalog = () => {
     const [error, setError] = useState(null);
     const {userId, isAuthenticated, logout } = useAuth();
     const [favorites, setFavorites] = useState([]);
+    const [hoverTimeout, setHoverTimeout] = useState(null);
+
+    const handleMouseEnterCategory = (categoryName) => {
+        // Очищаем предыдущий таймер, если он есть
+        if (hoverTimeout) {
+            clearTimeout(hoverTimeout);
+            setHoverTimeout(null);
+        }
+        setExpandedMainCategory(categoryName);
+    };
+
+    const handleMouseLeaveCategory = () => {
+        // Устанавливаем таймер на закрытие через 300мс
+        const timer = setTimeout(() => {
+            setExpandedMainCategory(null);
+        }, 300);
+        setHoverTimeout(timer);
+    };
+
+    const handleMouseEnterSubmenu = () => {
+        // Отменяем закрытие при наведении на подменю
+        if (hoverTimeout) {
+            clearTimeout(hoverTimeout);
+            setHoverTimeout(null);
+        }
+    };
+
+    const handleMouseLeaveSubmenu = () => {
+        // Закрываем подменю через небольшой промежуток времени
+        const timer = setTimeout(() => {
+            setExpandedMainCategory(null);
+        }, 300);
+        setHoverTimeout(timer);
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -524,23 +558,23 @@ const Catalog = () => {
                                 <div
                                     key={category.id}
                                     className={styles.categoryItem}
-                                    onMouseEnter={() => category.subcategories.length > 0 && setExpandedMainCategory(category.name)}
-                                    onMouseLeave={() => setExpandedMainCategory(null)}
                                 >
                                     <button
                                         className={`${styles.categoryButton} ${
                                             activeCategory === category.name ? styles.activeCategory : ''
                                         } ${category.buttonStyle || ''}`}
                                         onClick={() => handleCategoryClick(category)}
+                                        onMouseEnter={() => category.subcategories.length > 0 && handleMouseEnterCategory(category.name)}
+                                        onMouseLeave={handleMouseLeaveCategory}
                                     >
-                                        <span className={styles.categoryName}>
-                                            {category.icon && (
-                                                <span className={styles.iconWrapper}>
-                                                    {category.icon}
-                                                </span>
-                                            )}
-                                            {category.name}
-                                        </span>
+                                     <span className={styles.categoryName}>
+                                        {category.icon && (
+                                            <span className={styles.iconWrapper}>
+                                            {category.icon}
+                                            </span>
+                                              )}
+                                                {category.name}
+                                            </span>
                                         {category.subcategories.length > 0 && (
                                             expandedMainCategory === category.name ?
                                                 <FaChevronUp className={styles.categoryArrow} /> :
@@ -549,7 +583,11 @@ const Catalog = () => {
                                     </button>
 
                                     {category.subcategories.length > 0 && expandedMainCategory === category.name && (
-                                        <div className={styles.subcategories}>
+                                        <div
+                                            className={styles.subcategories}
+                                            onMouseEnter={handleMouseEnterSubmenu}
+                                            onMouseLeave={handleMouseLeaveSubmenu}
+                                        >
                                             {category.subcategories.map((subcategory) => (
                                                 <button
                                                     key={subcategory.id}
@@ -566,7 +604,6 @@ const Catalog = () => {
                                 </div>
                             ))}
                         </div>
-
                         <div className={styles.products}>
                             {filteredProducts.length > 0 ? (
                                 filteredProducts.map((product) => (
