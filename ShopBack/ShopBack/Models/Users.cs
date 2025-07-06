@@ -46,6 +46,8 @@ namespace ShopBack.Models
         public ICollection<ProductReviews> ModeratedReview { get; set; } = new List<ProductReviews>();
         public ICollection<UserFavorites> UserFavorite { get; set; } = new List<UserFavorites>();
         public ICollection<ProductViewsHistory> ProductViewHistory { get; set; } = new List<ProductViewsHistory>();
+        public ICollection<PayMethods> PayMethods { get; set; } = new List<PayMethods>();
+        public ICollection<Orders> Orders { get; set; } = new List<Orders>();
         public UserRoles UserRole { get; set; }
     }
 }
