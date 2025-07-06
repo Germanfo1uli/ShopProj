@@ -65,6 +65,7 @@ builder.Services.AddScoped<IReviewsRepository, ReviewsRepository>();
 builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
 builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
 builder.Services.AddScoped<ITokensRepository, TokensRepository>();
+builder.Services.AddScoped<IPayMethodsRepository, PayMethodsRepository>();
 
 //Подключение сервисов 
 builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
@@ -76,6 +77,7 @@ builder.Services.AddScoped<ProductsService>();
 builder.Services.AddScoped<ReviewsService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<PayMethodsRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

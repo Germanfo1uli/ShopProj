@@ -31,6 +31,7 @@ namespace ShopBack.Data
         public DbSet<Orders> Orders { get; set; }
         public DbSet<OrderItems> OrderItems { get; set; }
         public DbSet<Payments> Payments { get; set; }
+        public DbSet<PayMethods> PayMethods { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
