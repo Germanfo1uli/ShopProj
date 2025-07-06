@@ -1,66 +1,60 @@
+import axios from 'axios';
+
 const API_BASE_URL = 'http://localhost:5000';
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
 
 export const apiRequest = async (endpoint, options = {}) => {
   const {
     method = 'GET',
-    body = null,
-    headers = {},
-    authenticated = false
+    data = null,
+    params = null,
+    authenticated = false,
+    headers = {}
   } = options;
 
-  const url = `${API_BASE_URL}${endpoint}`;
-
-  const config = {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...headers
-    }
-  };
-
-  if (authenticated) {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
+  try {
+    if (authenticated && !localStorage.getItem('authToken')) {
       console.warn('Запрос требует аутентификации, но токен не найден');
       throw new ApiError(401, 'Требуется аутентификация');
     }
-  }
 
-  if (body && method !== 'GET' && method !== 'HEAD') {
-    config.body = JSON.stringify(body);
-  }
+    const response = await api({
+      url: endpoint,
+      method,
+      data,
+      params,
+      headers
+    });
 
-  try {
-    const response = await fetch(url, config);
+    return response.data;
 
-    if (response.status === 204 || response.headers.get('content-length') === '0') {
-      return null;
-    }
-
-    if (!response.ok) {
-      let errorData = {};
-      try {
-        errorData = await response.json();
-      } catch (e) {
-        throw new ApiError(response.status, response.statusText);
-      }
-      throw new ApiError(response.status, errorData.message || 'Request failed');
-    }
-
-    try {
-      return await response.json();
-    } catch (e) {
-      return response;
-    }
   } catch (error) {
-    if (error instanceof ApiError) {
-      console.error(`Ошибка API ${error.status}: ${error.message}`);
-      throw error;
+    if (error.response) {
+      // Ошибка от сервера
+      const message = error.response.data?.message || 'Request failed';
+      throw new ApiError(error.response.status, message);
+    } else if (error.request) {
+      // Запрос был сделан, но ответ не получен
+      throw new ApiError(0, 'Ошибка сети: нет ответа от сервера');
     } else {
-      console.error('Ошибка сети:', error);
-      throw new ApiError(0, 'Ошибка сети');
+      // Ошибка при настройке запроса
+      throw new ApiError(0, 'Ошибка при выполнении запроса');
     }
   }
 };
@@ -72,3 +66,5 @@ class ApiError extends Error {
     this.name = 'Ошибка API';
   }
 }
+
+export default api;
