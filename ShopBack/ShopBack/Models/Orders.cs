@@ -43,14 +43,14 @@ namespace ShopBack.Models
         [Required]
         public DateTime UpdatedAt { get; set; }
 
-        [JsonIgnore]
+        
         public virtual ICollection<OrderItems> OrderItem { get; set; } = new List<OrderItems>();
 
-        [JsonIgnore]
+        
         public virtual ICollection<Payments> Payment { get; set; } = new List<Payments>();
 
         [ForeignKey("UserId")]
-        [JsonIgnore]
+        
         public virtual Users? User { get; set; }
     }
 }
