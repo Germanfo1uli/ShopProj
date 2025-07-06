@@ -1,7 +1,7 @@
 @host = https://localhost:7008
 @contentType = application/json
 @adminToken = 
-@userToken = "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJ1c2VyQG1haWwuY29tIiwiZXhwIjoxNzUxMjA2MzU3fQ.ogL7YejD1oMtyZpdScWV5YGbSHS8Mk5yyBF8ymVGly0",
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjYiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJOaWtpdGFhIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsImV4cCI6MTc1MTgxMDUwMX0.FYPSCeATa3_2oW-vrRQJEtXn_cb7bCfz2mgVaEuT-1U
 
 @refreshToken = "bOD8A0eWZRi7xU7oV2wwvxcpkuIdBA4zViFeLm3yhfIzHNNTdJJYReu78TEjAFc/vgA3Bgjkh4lLZCD1gBAPXA=="
 
@@ -136,3 +136,7 @@ Authorization: Bearer {{adminToken}}
 ### Удалить назначение роли
 DELETE {{host}}/api/userroles/1
 Authorization: Bearer {{adminToken}}
+
+### Получить корзину пользователя
+GET {{host}}/api/orders/6/cart
+Authorization: Bearer {{userToken}}
