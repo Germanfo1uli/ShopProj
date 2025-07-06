@@ -27,22 +27,18 @@ namespace ShopBack.Controllers
         [Authorize]
         public async Task<ActionResult<Payments>> GetById(int id)
         {
-            var isAdmin = User.IsInRole("Admin");
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-            {
-                throw new SecurityException("Неверный формат идентификатора пользователя");
-            }
+            bool isAdmin = User.IsInRole("Admin");
 
             var payment = await _paymentsService.GetByIdAsync(id);
             var order = await _ordersService.GetByIdAsync(payment.OrderId);
 
-            if (!isAdmin && userId != order.UserId)
+            if (order.UserId != currentUserId && !isAdmin)
             {
-                return Forbid("Вы можете просматривать только свои оплаты");
+                return Forbid();
             }
-            
+
             return Ok(payment);
         }
 
@@ -50,12 +46,15 @@ namespace ShopBack.Controllers
         [Authorize]
         public async Task<ActionResult<Payments>> Create([FromBody] PaymentsCreate createDto)
         {
-            var isAdmin = User.IsInRole("Admin");
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            bool isAdmin = User.IsInRole("Admin");
+
+            var order = await _ordersService.GetByIdAsync(createDto.OrderId);
+
+            if (order.UserId != currentUserId && !isAdmin)
             {
-                throw new SecurityException("Неверный формат идентификатора пользователя");
+                return Forbid();
             }
 
             var payment = new Payments
@@ -77,45 +76,24 @@ namespace ShopBack.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Payments>> Update(int id, [FromBody] PaymentsUpdate updateDto)
         {
-            if (!ModelState.IsValid) return BadRequest("Некорректные данные для обновления платежа");
+            var payment = await _paymentsService.GetByIdAsync(id);
 
-            try
-            {
-                var payment = await _paymentsService.GetByIdAsync(id);
-                if (payment == null) return NotFound("Платеж не найден");
+            payment.Status = updateDto.Status ?? payment.Status;
+            payment.TransactionId = updateDto.TransactionId ?? payment.TransactionId;
 
-                if (updateDto.Status != null)
-                    payment.Status = updateDto.Status;
-
-                if (updateDto.TransactionId != null)
-                    payment.TransactionId = updateDto.TransactionId;
-
-                await _paymentsService.UpdateAsync(payment);
-                return Ok(payment);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Внутренняя ошибка сервера при обновлении платежа");
-            }
+            await _paymentsService.UpdateAsync(payment);
+            return Ok(payment);
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var payment = await _paymentsService.GetByIdAsync(id);
-                if (payment == null) return NotFound("Платеж не найден");
-
-                await _paymentsService.DeleteAsync(id);
-                return NoContent();
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Внутренняя ошибка сервера при удалении платежа");
-            }
+            await _paymentsService.DeleteAsync(id);
+            return NoContent();
         }
     }
 

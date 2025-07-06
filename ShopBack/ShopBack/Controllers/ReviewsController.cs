@@ -39,7 +39,7 @@ namespace ShopBack.Controllers
 
         [HttpGet("user/{userId}")]
         [Authorize(Policy = "SelfOrAdminAccess")]
-        public async Task<ActionResult<IEnumerable<ProductReviews>>> GetByUser(int userId)
+        public async Task<ActionResult<IEnumerable<ProductReviews>>> GetByUserId(int userId)
         {
             var reviews = await _reviewsService.GetUserReviewsAsync(userId);
             return Ok(reviews);
@@ -83,22 +83,18 @@ namespace ShopBack.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = "SelfOrAdminAccess")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            var isAdmin = User.IsInRole("Admin");
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-            {
-                throw new SecurityException("Неверный формат идентификатора пользователя");
-            }
+            bool isAdmin = User.IsInRole("Admin");
 
             var review = await _reviewsService.GetByIdAsync(id);
 
-            if (!isAdmin && userId != review.UserId)
+            if (review.UserId != currentUserId && !isAdmin)
             {
-                return Forbid("Вы можете удалять только свои отзывы");
+                return Forbid();
             }
 
             await _reviewsService.DeleteAsync(id);
@@ -110,7 +106,7 @@ namespace ShopBack.Controllers
         [Authorize(Policy = "AdminOrModerAccess")]
         public async Task<IActionResult> Approve(int id, [FromBody] ModerateReview moderateDto)
         {
-            await _reviewsService.ApproveReviewAsync(id, moderateDto.ModeratorId, moderateDto.Comment);
+            await _reviewsService.ApproveReviewAsync(id, moderateDto.ModeratorId, moderateDto.ModeratorComment);
             return Ok();
         }
 
@@ -118,7 +114,7 @@ namespace ShopBack.Controllers
         [Authorize(Policy = "AdminOrModerAccess")]
         public async Task<IActionResult> Reject(int id, [FromBody] ModerateReview moderateDto)
         {
-            await _reviewsService.RejectReviewAsync(id, moderateDto.ModeratorId, moderateDto.Comment);
+            await _reviewsService.RejectReviewAsync(id, moderateDto.ModeratorId, moderateDto.ModeratorComment);
             return Ok();
         }
     }
@@ -147,6 +143,6 @@ namespace ShopBack.Controllers
     {
         public int ModeratorId { get; set; }
 
-        public string? Comment { get; set; }
+        public string? ModeratorComment { get; set; }
     }
 }

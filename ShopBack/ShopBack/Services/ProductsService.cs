@@ -44,5 +44,10 @@ namespace ShopBack.Services
             product.ReviewsNumber = numReviews;
             await UpdateAsync(product);
         }
+
+        public async Task<Products> DecoratedGetByIdAsync(int productId)
+        {
+            return await _productsRepository.DecoratedGetByIdAsync(productId);
+        }
     }
 }

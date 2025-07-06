@@ -14,7 +14,6 @@ namespace ShopBack.Models
         [ForeignKey("User")]
         public int UserId { get; set; }
 
-        [Required]
         public DateTime? OrderTime { get; set; }
 
         [Required]
@@ -25,20 +24,17 @@ namespace ShopBack.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalAmount { get; set; } = 0;
 
-        [Required]
         [MaxLength(500)]
         public string? ShippingAddress { get; set; }
 
-        [Required]
         [MaxLength(20)]
         public string? ContactPhone { get; set; }
 
-        [Required]
         [MaxLength(1000)]
         public string? Notes { get; set; }
 
         [Required]
-        public DateTime? CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [Required]
         public DateTime UpdatedAt { get; set; }
