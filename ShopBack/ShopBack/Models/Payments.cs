@@ -21,8 +21,8 @@ namespace ShopBack.Models
         public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
 
         [Required]
-        [MaxLength(50)]
-        public string PaymentMethod { get; set; } 
+        [ForeignKey("PayMethod")]
+        public int PaymentMethodId { get; set; } 
 
         [Required]
         [MaxLength(50)]
@@ -33,5 +33,8 @@ namespace ShopBack.Models
 
         [ForeignKey("OrderId")]
         public virtual Orders? Order { get; set; }
+
+        [ForeignKey("PaymentMethodId")]
+        public virtual PayMethods? PayMethod { get; set; }
     }
 }

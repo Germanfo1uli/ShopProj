@@ -61,7 +61,7 @@ namespace ShopBack.Controllers
             {
                 OrderId = createDto.OrderId,
                 Amount = createDto.Amount,
-                PaymentMethod = createDto.PaymentMethod,
+                PaymentMethodId = createDto.PaymentMethodId,
                 Status = createDto.Status,
                 TransactionId = createDto.TransactionId,
                 PaymentDate = DateTime.UtcNow
@@ -101,7 +101,7 @@ namespace ShopBack.Controllers
     {
         public int OrderId { get; set; }
         public decimal Amount { get; set; }
-        public string PaymentMethod { get; set; }
+        public int PaymentMethodId { get; set; }
         public string Status { get; set; }
         public string? TransactionId { get; set; }
     }

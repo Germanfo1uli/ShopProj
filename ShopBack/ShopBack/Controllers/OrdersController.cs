@@ -44,7 +44,6 @@ namespace ShopBack.Controllers
             var order = new Orders
             {
                 UserId = createDto.UserId,
-                OrderTime = createDto.OrderTime ?? DateTime.UtcNow,
                 Status = createDto.Status,
                 TotalAmount = createDto.TotalAmount,
                 ShippingAddress = createDto.ShippingAddress,
@@ -144,7 +143,6 @@ namespace ShopBack.Controllers
     public class OrdersCreate
     {
         public int UserId { get; set; }
-        public DateTime? OrderTime { get; set; }
         public string Status { get; set; }
         public decimal TotalAmount { get; set; }
         public string? ShippingAddress { get; set; }

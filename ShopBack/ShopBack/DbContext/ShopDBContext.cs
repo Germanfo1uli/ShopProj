@@ -150,15 +150,17 @@ namespace ShopBack.Data
 
         private void ConfigureOrdersAndPayments(ModelBuilder modelBuilder)
         {
+            // Конфигурация Orders
             modelBuilder.Entity<Orders>()
                 .HasOne(o => o.User)
-                .WithMany()
+                .WithMany(u => u.Orders) // Добавляем навигацию в Users
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Orders>()
                 .HasIndex(o => o.Status);
 
+            // Конфигурация OrderItems
             modelBuilder.Entity<OrderItems>()
                 .HasOne(oi => oi.Order)
                 .WithMany(o => o.OrderItem)
@@ -171,11 +173,25 @@ namespace ShopBack.Data
                 .HasForeignKey(oi => oi.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Конфигурация Payments
             modelBuilder.Entity<Payments>()
                 .HasOne(p => p.Order)
                 .WithMany(o => o.Payment)
                 .HasForeignKey(p => p.OrderId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payments>()
+                .HasOne(p => p.PayMethod)
+                .WithMany(pm => pm.Payments) // Навигация из PayMethods
+                .HasForeignKey(p => p.PaymentMethodId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Конфигурация PayMethods
+            modelBuilder.Entity<PayMethods>()
+                .HasOne(pm => pm.User)
+                .WithMany(u => u.PayMethods) // Навигация из Users
+                .HasForeignKey(pm => pm.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
