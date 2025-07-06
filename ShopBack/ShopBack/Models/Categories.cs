@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace ShopBack.Models
 {
@@ -23,5 +24,8 @@ namespace ShopBack.Models
         public Categories? ParentCategory { get; set; }
 
         public ICollection<Categories> ChildCategories { get; set; } = new List<Categories>();
+
+        [JsonIgnore]
+        public ICollection<Products> Products { get; set; } = new List<Products>();
     }
 }

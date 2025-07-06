@@ -34,17 +34,17 @@ namespace ShopBack.Controllers
         [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<OrderItems>> Create([FromBody] OrderItemsCreate createDto)
         {
-            var order = await _ordersService.GetUserCartOrderAsync(createDto.UserId);
+            var orderId = await _ordersService.GetUserCartOrderIdAsync(createDto.UserId);
 
             var item = new OrderItems
             {
-                OrderId = order.Id,
+                OrderId = orderId,
                 ProductId = createDto.ProductId,
                 Quantity = createDto.Quantity,
             };
 
             await _orderItemsService.AddAsync(item);
-            await _ordersService.RecalculateTotalAmountAsync(order.Id);
+            await _ordersService.RecalculateTotalAmountAsync(orderId);
             return CreatedAtAction(
                actionName: nameof(GetById),
                routeValues: new { id = item.Id },

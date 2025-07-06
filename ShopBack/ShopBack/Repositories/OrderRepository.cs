@@ -13,7 +13,16 @@ namespace ShopBack.Repositories
             return await _context.Orders
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
+                    .AsNoTracking()
                 .Include(o => o.Payment)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(o => o.Id == id)
+                ?? throw new KeyNotFoundException($"Заказ с ID {id} не найден");
+        }
+
+        public async Task<Orders> GetByIdNoTrackingAsync(int id)
+        {
+            return await _context.Orders
                 .FirstOrDefaultAsync(o => o.Id == id)
                 ?? throw new KeyNotFoundException($"Заказ с ID {id} не найден");
         }
@@ -24,6 +33,7 @@ namespace ShopBack.Repositories
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.Payment)
+                .AsNoTracking()
                 .OrderByDescending(o => o.OrderTime)
                 .ToListAsync();
         }
@@ -46,7 +56,7 @@ namespace ShopBack.Repositories
 
         public async Task DeleteAsync(int id)
         {
-            var entity = await _context.Orders.FindAsync(id);
+            var entity = await _context.Orders.FindAsync(id) ?? throw new KeyNotFoundException($"Заказ с ID {id} не найден");
             _context.Orders.Remove(entity);
             await _context.SaveChangesAsync();
         }
@@ -63,11 +73,31 @@ namespace ShopBack.Repositories
 
         public async Task<Orders> GetUserCartOrderAsync(int userId)
         {
-            return await _context.Orders
+            var order = await _context.Orders
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.Payment)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "Cart");
+            if (order == null)
+            {
+                await CreateCart(userId);
+                return await GetUserCartOrderAsync(userId);
+            }
+            return order;
+        }
+
+        public async Task<int> GetUserCartOrderIdAsync(int userId)
+        {
+            var order = await _context.Orders
+                .AsNoTracking()
+                .FirstOrDefaultAsync(o => o.UserId == userId);
+            if (order == null)
+            {
+                await CreateCart(userId);
+                return await GetUserCartOrderIdAsync(userId);
+            }
+            return order.Id;
         }
 
         public async Task<IEnumerable<Orders>> GetUserOrdersAsync(int userId)
@@ -77,34 +107,50 @@ namespace ShopBack.Repositories
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.Payment)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<Payments> GetOrderPaymentAsync(int orderId)
         {
             return await _context.Payments
-                .FirstOrDefaultAsync(p => p.OrderId == orderId);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.OrderId == orderId)
+                ?? throw new KeyNotFoundException($"Оплата с ID {orderId} не найдена");
         }
 
         public async Task UpdateOrderStatusAsync(int orderId, string status)
         {
-            var order = await _context.Orders.FindAsync(orderId);
+            var order = await _context.Orders.FindAsync(orderId) ?? throw new KeyNotFoundException($"Заказ с ID {orderId} не найден");
             order.Status = status;
             order.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
         }
-
-        public async Task<(decimal saleSum, decimal sum)> GetOrderSumsAsync(int orderId)
+        public async Task<decimal> GetOrderSumSaleAsync(int orderId)
         {
-            var saleSum = await _context.OrderItems
+            return await _context.OrderItems
                 .Where(oi => oi.OrderId == orderId)
+                .AsNoTracking()
                 .SumAsync(oi => oi.Quantity * oi.Product.Price);
+        }
 
-            var originalSum = await _context.OrderItems
+        public async Task<decimal> GetOrderSumAsync(int orderId)
+        {
+            return await _context.OrderItems
                 .Where(oi => oi.OrderId == orderId)
+                .AsNoTracking()
                 .SumAsync(oi => oi.Quantity * (oi.Product.OldPrice ?? oi.Product.Price));
+        }
 
-            return (saleSum, originalSum);
+        public async Task AssignmentOrderPrice(int orderId, decimal saleSum, decimal sum)
+        {
+            var order = await GetByIdNoTrackingAsync(orderId);
+
+            order.TotalAmount = saleSum;
+            order.AmountWOSale = sum;
+            order.UpdatedAt = DateTime.UtcNow;
+
+            await UpdateAsync(order);
         }
     }
 }

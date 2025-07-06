@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ShopBack.Data;
@@ -11,9 +12,11 @@ using ShopBack.Data;
 namespace ShopBack.Data.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    partial class ShopDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250706120504_OrderRecalculationAdded")]
+    partial class OrderRecalculationAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,6 +66,9 @@ namespace ShopBack.Data.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("ProductsId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
@@ -71,6 +77,8 @@ namespace ShopBack.Data.Migrations
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductsId");
 
                     b.ToTable("OrderItems");
                 });
@@ -552,10 +560,14 @@ namespace ShopBack.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("ShopBack.Models.Products", "Product")
-                        .WithMany("OrderItems")
+                        .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("ShopBack.Models.Products", null)
+                        .WithMany("OrderItems")
+                        .HasForeignKey("ProductsId");
 
                     b.Navigation("Order");
 
@@ -673,7 +685,7 @@ namespace ShopBack.Data.Migrations
             modelBuilder.Entity("ShopBack.Models.Products", b =>
                 {
                     b.HasOne("ShopBack.Models.Categories", "Category")
-                        .WithMany("Products")
+                        .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -733,8 +745,6 @@ namespace ShopBack.Data.Migrations
             modelBuilder.Entity("ShopBack.Models.Categories", b =>
                 {
                     b.Navigation("ChildCategories");
-
-                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("ShopBack.Models.Orders", b =>
