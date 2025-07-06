@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import styles from '../CSS/Home.module.css';
 import Footer from "./Components/Footer";
 import { FaGift, FaGem, FaFire } from 'react-icons/fa';
+import { Link } from "react-router-dom";
 
 const Home = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -177,9 +178,13 @@ const Home = () => {
                     <h2 className={styles.sectionTitle}>
                         <span className={styles.titleAccent}><FaFire /></span> Популярные товары
                     </h2>
-                    <a href="#" className={styles.showAllLink}>
+                    <Link
+                        to="/catalog"
+                        state={{ filter: 'popular' }} // Для популярных товаров
+                        className={styles.showAllLink}
+                    >
                         Смотреть все <span className={styles.arrow}>→</span>
-                    </a>
+                    </Link>
                 </div>
                 <div className={styles.productGrid}>
                     {products.slice(0, 8).map(product => (
@@ -225,9 +230,13 @@ const Home = () => {
                     <h2 className={styles.sectionTitle}>
                         <span className={styles.titleAccent}><FaGem /></span> Рекомендации для вас
                     </h2>
-                    <a href="#" className={styles.showAllLink}>
+                    <Link
+                        to="/catalog"
+                        state={{ filter: 'recommended' }}
+                        className={styles.showAllLink}
+                    >
                         Смотреть все <span className={styles.arrow}>→</span>
-                    </a>
+                    </Link>
                 </div>
                 <div className={styles.productGrid}>
                     {recommendedProducts.map(product => (
@@ -273,9 +282,13 @@ const Home = () => {
                     <h2 className={styles.sectionTitle}>
                         <span className={styles.titleAccent}><FaGift /></span> Спецпредложения
                     </h2>
-                    <a href="#" className={styles.showAllLinkHot}>
+                    <Link
+                        to="/catalog"
+                        state={{ filter: 'special' }}
+                        className={styles.showAllLinkHot}
+                    >
                         Смотреть все <span className={styles.arrow}>→</span>
-                    </a>
+                    </Link>
                 </div>
                 <div className={styles.productGrid}>
                     {specialOffers.map(product => (
