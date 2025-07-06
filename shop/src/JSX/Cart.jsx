@@ -15,39 +15,40 @@ const CartPage = () => {
     const { userId, isAuthenticated } = useAuth();
 
     useEffect(() => {
-        const fetchOrderItems = async () => {
-            if (!isAuthenticated || !userId) {
-                setIsLoading(false);
-                return;
-            }
+    const fetchOrderItems = async () => {
+        if (!isAuthenticated || !userId) {
+            setIsLoading(false);
+            return;
+        }
 
-            try {
-                setIsLoading(true);
-                const orders = await apiRequest(`/api/orders/${userId}/cart`, {
+        try {
+            setIsLoading(true);
+            const cartOrder = await apiRequest(`/api/orders/${userId}/cart`, {
+                authenticated: isAuthenticated
+            });
+            
+            console.log('Cart order:', cartOrder);
+
+            if (cartOrder && cartOrder.id) {
+                const items = await apiRequest(`/api/orders/${cartOrder.id}/orders`, {
                     authenticated: isAuthenticated
                 });
                 
-                if (orders && orders.length > 0) {
-                    const activeOrder = orders.find(order => order.status === 'Cart') || orders[0];
-                    const items = await apiRequest(`/api/orders/${activeOrder.id}/items`, {
-                        authenticated: isAuthenticated
-                    });
-                    console.log(items)
-                    setOrderItems(items || []);
-                } else {
-                    setOrderItems([]);
-                }
-            } catch (err) {
-                console.error('Error fetching order items:', err);
-                setError('Не удалось загрузить данные корзины');
-            } finally {
-                setIsLoading(false);
+                console.log('Order items:', items);
+                setOrderItems(Array.isArray(items) ? items : []);
+            } else {
+                setOrderItems([]);
             }
-        };
+        } catch (err) {
+            console.error('Error fetching order items:', err);
+            setError('Не удалось загрузить данные корзины');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-        fetchOrderItems();
-    }, [userId, isAuthenticated]);
-
+    fetchOrderItems();
+}, [userId, isAuthenticated]);
     const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0);
     const subtotal = orderItems.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
     const discount = 590; 
@@ -88,7 +89,6 @@ const CartPage = () => {
 
     const clearCart = async () => {
         try {
-            // Delete all items in the cart
             await Promise.all(
                 orderItems.map(item => 
                     apiRequest(`/api/orderitems/${item.id}`, {

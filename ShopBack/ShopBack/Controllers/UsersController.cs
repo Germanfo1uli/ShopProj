@@ -79,9 +79,9 @@ namespace ShopBack.Controllers
         }
 
         [HttpPost("generatetokens")]
-        public async Task<ActionResult<Users>> GenerateTokens([FromBody] string token)
+        public async Task<ActionResult<Users>> GenerateTokens([FromBody] TokenDto TokenDto)
         {
-            var result = await _userService.GetNewTokensAsync(token);
+            var result = await _userService.GetNewTokensAsync(TokenDto.Token);
             return Ok(result);
         }
 
@@ -123,6 +123,11 @@ namespace ShopBack.Controllers
     {
         public string OldPassword { get; set; }
         public string NewPassword { get; set; }
+        public string Token { get; set; }
+    }
+
+    public class TokenDto
+    { 
         public string Token { get; set; }
     }
 }

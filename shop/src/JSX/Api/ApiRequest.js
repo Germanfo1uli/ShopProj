@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5070';
+const API_BASE_URL = 'http://localhost:5000';
 
 export const apiRequest = async (endpoint, options = {}) => {
   const {
@@ -35,7 +35,6 @@ export const apiRequest = async (endpoint, options = {}) => {
   try {
     const response = await fetch(url, config);
 
-    // Проверяем специальные случаи ответов без тела
     if (response.status === 204 || response.headers.get('content-length') === '0') {
       return null;
     }
@@ -45,7 +44,6 @@ export const apiRequest = async (endpoint, options = {}) => {
       try {
         errorData = await response.json();
       } catch (e) {
-        // Если не удалось распарсить JSON, используем статус и текст ответа
         throw new ApiError(response.status, response.statusText);
       }
       throw new ApiError(response.status, errorData.message || 'Request failed');
@@ -54,7 +52,6 @@ export const apiRequest = async (endpoint, options = {}) => {
     try {
       return await response.json();
     } catch (e) {
-      // Если ответ успешный, но не JSON, возвращаем как есть
       return response;
     }
   } catch (error) {

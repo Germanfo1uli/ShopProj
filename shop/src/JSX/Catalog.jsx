@@ -10,7 +10,7 @@ import {
 import Footer from "./Components/Footer";
 import { Link } from "react-router-dom";
 import { apiRequest } from './Api/ApiRequest';
-import { useAuth } from './Hooks/UseAuth.js';
+import { useAuth} from './Hooks/UseAuth.js';
 
 const Catalog = () => {
     const location = useLocation();
@@ -70,6 +70,7 @@ const Catalog = () => {
                 setIsLoading(true);
                 const allCategories = await apiRequest('/api/categories');
                 const parentCategories = await apiRequest('/api/categories/parents');
+
                 if (userId) {
                     const userFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
                         authenticated: isAuthenticated  
@@ -204,7 +205,6 @@ const Catalog = () => {
     }, [activeCategory, activeSubcategory, priceRange, selectedSizes, selectedColors, sortOption, products, categories]);
 
     useEffect(() => {
-        // Обработка перехода с фильтром
         if (location.state?.filter) {
             switch(location.state.filter) {
                 case 'popular':

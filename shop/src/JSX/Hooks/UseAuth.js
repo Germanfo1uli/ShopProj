@@ -35,7 +35,7 @@ const useToken = () => {
             console.error('Ошибка декодирования токена:', error);
         }
     }, []);
-
+    
     const logout = useCallback(() => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('refreshToken');
@@ -63,13 +63,12 @@ const useToken = () => {
             console.log('Attempting to refresh tokens...');
             const response = await apiRequest('/api/users/generatetokens', {
                 method: 'POST',
-                body: { refreshToken }
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: { token: refreshToken }
             });
 
-            // Добавим логирование ответа для отладки
-            console.log('Token refresh response:', response);
-
-            // Проверяем разные возможные форматы ответа
             const newToken = response.token || response.jwtToken || response?.message?.jwtToken;
             const newRefreshToken = response.refreshToken || response?.message?.refreshToken;
 
@@ -103,8 +102,6 @@ const useToken = () => {
             try {
                 const decoded = jwtDecode(token);
                 const expiresIn = (decoded.exp * 1000) - Date.now();
-                
-                // Если токен истекает менее чем через минуту или уже истёк
                 if (expiresIn < 60000) {
                     const newTokens = await refreshTokens();
                     if (newTokens) {
@@ -119,19 +116,19 @@ const useToken = () => {
                             roleId: Number(newDecoded.roleId || newDecoded.role || 0)
                         }));
                         
-                        // Перезапускаем таймер с новым токеном
                         const newExpiresIn = (newDecoded.exp * 1000) - Date.now();
                         timer = setTimeout(checkTokenExpiration, newExpiresIn - 60000);
                         return;
-                    } else {
-                        // Не удалось обновить - разлогиниваем
+                    } 
+                    else {
                         logout();
                     }
-                } else {
-                    // Запускаем проверку за минуту до истечения
+                } 
+                else {
                     timer = setTimeout(checkTokenExpiration, expiresIn - 60000);
                 }
-            } catch (error) {
+            } 
+            catch (error) {
                 console.error('Ошибка проверки токена:', error);
                 logout();
             }
@@ -144,7 +141,6 @@ const useToken = () => {
         return () => clearTimeout(timer);
     }, [auth.token, refreshTokens, logout]);
 
-    // Инициализация аутентификации
     useEffect(() => {
         const initAuth = async () => {
             const token = localStorage.getItem('authToken');
@@ -168,13 +164,14 @@ const useToken = () => {
                         refreshToken,
                         isLoading: false
                     });
-                } catch (error) {
+                } 
+                catch (error) {
                     console.error('Ошибка декодирования токена:', error);
-                    // Пробуем обновить токен при неудачной декодировке
                     const newTokens = await refreshTokens();
                     if (!newTokens) logout();
                 }
-            } else {
+            } 
+            else {
                 setAuth(prev => ({ ...prev, isLoading: false }));
             }
         };
