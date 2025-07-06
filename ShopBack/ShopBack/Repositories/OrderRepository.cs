@@ -94,5 +94,17 @@ namespace ShopBack.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<(decimal saleSum, decimal sum)> GetOrderSumsAsync(int orderId)
+        {
+            var saleSum = await _context.OrderItems
+                .Where(oi => oi.OrderId == orderId)
+                .SumAsync(oi => oi.Quantity * oi.Product.Price);
+
+            var originalSum = await _context.OrderItems
+                .Where(oi => oi.OrderId == orderId)
+                .SumAsync(oi => oi.Quantity * (oi.Product.OldPrice ?? oi.Product.Price));
+
+            return (saleSum, originalSum);
+        }
     }
 }

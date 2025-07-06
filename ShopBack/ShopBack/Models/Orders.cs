@@ -23,6 +23,10 @@ namespace ShopBack.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalAmount { get; set; } = 0;
 
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal AmountWOSale { get; set; } = 0;
+
         [MaxLength(500)]
         public string? ShippingAddress { get; set; }
 

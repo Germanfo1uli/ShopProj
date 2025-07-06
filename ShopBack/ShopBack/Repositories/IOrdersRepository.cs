@@ -12,6 +12,8 @@ namespace ShopBack.Repositories
 
         Task<Payments> GetOrderPaymentAsync(int orderId);  // Получает информацию об оплате заказа
 
+        Task<(decimal saleSum, decimal sum)> GetOrderSumsAsync(int orderId);
+
         Task UpdateOrderStatusAsync(int orderId, string status); // Изменяет статус заказа ("Processing" → "Completed")
     }
 }

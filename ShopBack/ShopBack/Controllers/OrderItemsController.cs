@@ -44,6 +44,7 @@ namespace ShopBack.Controllers
             };
 
             await _orderItemsService.AddAsync(item);
+            await _ordersService.RecalculateTotalAmountAsync(order.Id);
             return CreatedAtAction(
                actionName: nameof(GetById),
                routeValues: new { id = item.Id },
@@ -61,6 +62,7 @@ namespace ShopBack.Controllers
                 item.Quantity = updateDto.Quantity.Value;
 
             await _orderItemsService.UpdateAsync(item);
+            await _ordersService.RecalculateTotalAmountAsync(item.OrderId);
             return Ok(item);
         }
 
@@ -68,7 +70,9 @@ namespace ShopBack.Controllers
         [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<IActionResult> Delete(int id)
         {
+            var order = await _orderItemsService.GetByIdAsync(id);
             await _orderItemsService.DeleteAsync(id);
+            await _ordersService.RecalculateTotalAmountAsync(order.OrderId);
             return NoContent();
         }
     }
