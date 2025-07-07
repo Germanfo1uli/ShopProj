@@ -4,9 +4,14 @@ import Footer from "./Components/Footer";
 import sb from "../CSS/Breadcrumbs.module.css";
 import { apiRequest } from './Api/ApiRequest';
 import { useAuth } from './Hooks/UseAuth';
-
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { FaShoppingCart, FaTrashAlt, FaTimes, FaMinus, FaPlus, FaCreditCard, FaGift } from 'react-icons/fa';
 import { FaApplePay, FaGooglePay, FaCcPaypal } from 'react-icons/fa';
+
+const stripePromise = loadStripe('your_publishable_key_here');
+
+
 
 const CartPage = () => {
     const [cart, setCart] = useState(null);

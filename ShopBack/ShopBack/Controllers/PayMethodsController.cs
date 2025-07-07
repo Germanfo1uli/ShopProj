@@ -90,25 +90,36 @@ namespace ShopBack.Controllers
             return Ok(payMethod);
         }
 
-        [HttpPut("{id}/setdefault")]
+        [HttpGet("user/{userId}")]
         [Authorize]
-        public async Task<ActionResult<PayMethods>> SetDefault(int id)
+        public async Task<ActionResult<IEnumerable<PayMethods>>> GetByUser(int userId)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-
-            bool isAdmin = User.IsInRole("Admin");
-
-            var payMethod = await _payMethodsService.GetByIdAsync(id);
-            if (payMethod.UserId != currentUserId && !isAdmin)
+            if (userId != currentUserId && !User.IsInRole("Admin"))
             {
                 return Forbid();
             }
 
-            payMethod.IsDefault = true;
-
-            await _payMethodsService.UpdateAsync(payMethod);
-            return Ok(payMethod);
+            var methods = await _payMethodsService.GetByUserIdAsync(userId);
+            return Ok(methods);
         }
+
+        [HttpPut("{id}/default")]
+        [Authorize]
+        public async Task<ActionResult> SetDefault(int id)
+        {
+            var method = await _payMethodsService.GetByIdAsync(id);
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            if (method.UserId != currentUserId && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
+            await _payMethodsService.SetDefaultAsync(id);
+            return NoContent();
+        }
+
     }
 
     public class PMCreate
