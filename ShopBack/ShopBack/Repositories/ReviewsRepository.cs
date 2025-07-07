@@ -12,11 +12,20 @@ namespace ShopBack.Repositories
 
         public async Task<IEnumerable<ProductReviews>> GetProductReviewsAsync(int productId, bool onlyApproved)
         {
-            return await _context.ProductReviews
+            var result = await _context.ProductReviews
                 .Where(pr => pr.ProductId == productId)
                 .Where(pr => pr.Approved == onlyApproved)
+                .Include(pr => pr.User)
                 .AsNoTracking()
                 .ToListAsync();
+
+            result.ForEach(pr => pr.User = new Users
+            {
+                FirstName = pr.User.FirstName,
+                LastName = pr.User.LastName
+            });
+
+            return result;
         }
 
         public async Task<IEnumerable<ProductReviews>> GetUserReviewsAsync(int userId)

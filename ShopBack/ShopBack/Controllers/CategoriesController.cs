@@ -39,12 +39,9 @@ namespace ShopBack.Controllers
         {
             var category = await _categoriesService.GetByIdAsync(id);
 
-            if (updateDto.Name != null)
-                category.Name = updateDto.Name;
-            if (updateDto.Description != null)
-                category.Description = updateDto.Description;
-            if (updateDto.ParentCategoryId.HasValue)
-                category.ParentCategoryId = updateDto.ParentCategoryId;
+            category.Name = updateDto.Name ?? category.Name;
+            category.Description = updateDto.Description ?? category.Description;
+            category.ParentCategoryId = updateDto.ParentCategoryId ?? category.ParentCategoryId;
 
             await _categoriesService.UpdateAsync(category);
             return Ok(category);
