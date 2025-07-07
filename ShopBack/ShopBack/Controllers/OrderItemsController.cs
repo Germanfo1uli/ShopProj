@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
-using System.Security.Claims;
 
 namespace ShopBack.Controllers
 {

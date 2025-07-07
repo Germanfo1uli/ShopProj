@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
 
-
 namespace ShopBack.Controllers
 { 
     [Route("api/[controller]")] //api/categories

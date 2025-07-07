@@ -23,6 +23,7 @@ namespace ShopBack.Repositories
         public async Task<Orders> GetByIdNoTrackingAsync(int id)
         {
             return await _context.Orders
+                .AsNoTracking()
                 .FirstOrDefaultAsync(o => o.Id == id)
                 ?? throw new KeyNotFoundException($"Заказ с ID {id} не найден");
         }
@@ -56,7 +57,8 @@ namespace ShopBack.Repositories
 
         public async Task DeleteAsync(int id)
         {
-            var entity = await _context.Orders.FindAsync(id) ?? throw new KeyNotFoundException($"Заказ с ID {id} не найден");
+            var entity = await _context.Orders.FindAsync(id)
+                ?? throw new KeyNotFoundException($"Заказ с ID {id} не найден");
             _context.Orders.Remove(entity);
             await _context.SaveChangesAsync();
         }
@@ -106,6 +108,7 @@ namespace ShopBack.Repositories
                 .Where(o => o.UserId == userId && o.Status != "Cart")
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
+                    .AsNoTracking()
                 .Include(o => o.Payment)
                 .AsNoTracking()
                 .ToListAsync();
@@ -121,7 +124,8 @@ namespace ShopBack.Repositories
 
         public async Task UpdateOrderStatusAsync(int orderId, string status)
         {
-            var order = await _context.Orders.FindAsync(orderId) ?? throw new KeyNotFoundException($"Заказ с ID {orderId} не найден");
+            var order = await _context.Orders.FindAsync(orderId)
+                ?? throw new KeyNotFoundException($"Заказ с ID {orderId} не найден");
             order.Status = status;
             order.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();

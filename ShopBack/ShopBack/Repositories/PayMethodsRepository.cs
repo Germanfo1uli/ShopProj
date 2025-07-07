@@ -14,6 +14,7 @@ namespace ShopBack.Repositories
         {
             return await _context.PayMethods
                 .Where(x => x.UserId == userId)
+                .AsNoTracking()
                 .ToListAsync();
         }
     }

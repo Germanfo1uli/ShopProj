@@ -10,7 +10,7 @@ namespace ShopBack.Repositories
         {
         }
 
-        public async Task<Users> GetByEmailAsync(string email)
+        public async Task<Users?> GetByEmailAsync(string email)
         {
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == email);
@@ -20,7 +20,8 @@ namespace ShopBack.Repositories
         {
             return await _context.UserRoles
                 .Include(ur => ur.Role)
-                .FirstOrDefaultAsync(ur => ur.UserId == userId);
+                .FirstOrDefaultAsync(ur => ur.UserId == userId)
+                ?? throw new KeyNotFoundException($"Пользователь с ID {userId} не найден");
         }
     }
 }

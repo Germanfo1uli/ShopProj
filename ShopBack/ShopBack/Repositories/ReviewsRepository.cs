@@ -15,6 +15,7 @@ namespace ShopBack.Repositories
             return await _context.ProductReviews
                 .Where(pr => pr.ProductId == productId)
                 .Where(pr => pr.Approved == onlyApproved)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -22,6 +23,7 @@ namespace ShopBack.Repositories
         {
             return await _context.ProductReviews
                 .Where(pr => pr.UserId == userId)
+                .AsNoTracking()
                 .ToListAsync();
         }
     }
