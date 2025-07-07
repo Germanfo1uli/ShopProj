@@ -75,3 +75,32 @@ class ApiError extends Error {
     this.name = 'Ошибка API';
   }
 }
+export const fetchProducts = async (filter = 'all') => {
+  try {
+    const response = await apiRequest(`/api/products?filter=${filter}`);
+    return response;
+  } catch (error) {
+    console.error('Ошибка при загрузке товаров:', error);
+    throw error;
+  }
+};
+
+export const fetchRecommendedProducts = async () => {
+  try {
+    const response = await apiRequest('/api/products/recommended');
+    return response;
+  } catch (error) {
+    console.error('Ошибка при загрузке рекомендуемых товаров:', error);
+    throw error;
+  }
+};
+
+export const fetchSpecialOffers = async () => {
+  try {
+    const response = await apiRequest('/api/products/special-offers');
+    return response;
+  } catch (error) {
+    console.error('Ошибка при загрузке спецпредложений:', error);
+    throw error;
+  }
+};

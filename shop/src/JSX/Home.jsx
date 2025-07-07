@@ -1,13 +1,17 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styles from '../CSS/Home.module.css';
 import Footer from "./Components/Footer";
 import { FaGift, FaGem, FaFire } from 'react-icons/fa';
 import { Link } from "react-router-dom";
+import { apiRequest } from '../JSX/Api/ApiRequest';
 
 const Home = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const sliderRef = useRef(null);
     const [isSwitching, setIsSwitching] = useState(false);
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const slides = [
         {
@@ -24,94 +28,34 @@ const Home = () => {
         }
     ];
 
-    const products = [
-        {
-            id: 1,
-            name: 'Смартфон Xiaomi Redmi Note 12 Pro',
-            price: '24 990 ₽',
-            oldPrice: '27 990 ₽',
-            discount: '11',
-            specs: '8/256GB, AMOLED, 120Hz',
-            rating: 4.8,
-            reviews: 125,
-            image: 'https://ir-5.ozone.ru/s3/multimedia-1-4/wc300/7569975388.jpg'
-        },
-        {
-            id: 2,
-            name: 'Наушники Sony WH-CH720N',
-            price: '12 990 ₽',
-            oldPrice: '15 990 ₽',
-            discount: '19',
-            specs: 'Беспроводные, ANC, 35ч',
-            rating: 4.7,
-            reviews: 89,
-            image: 'https://sonycenter.ru/upload/resize_cache/iblock/7e3/520_520_1/7e3b0b9c8c5d5f5a5c5b5d5f5a5c5b5d.jpg'
-        },
-        {
-            id: 3,
-            name: 'Ноутбук ASUS VivoBook 15',
-            price: '54 990 ₽',
-            specs: '15.6", i5-1235U, 16GB, 512GB',
-            rating: 4.9,
-            reviews: 42,
-            image: 'https://asusstore.ru/upload/iblock/3e8/3e8f8c8c5d5f5a5c5b5d5f5a5c5b5d5f.jpg'
-        },
-        {
-            id: 4,
-            name: 'Умные часы Amazfit GTS 4',
-            price: '14 990 ₽',
-            oldPrice: '16 990 ₽',
-            discount: '12',
-            specs: 'AMOLED, GPS, NFC',
-            rating: 4.6,
-            reviews: 67,
-            image: 'https://amazfit.ru/upload/iblock/7e3/7e3b0b9c8c5d5f5a5c5b5d5f5a5c5b5d.jpg'
-        },
-        {
-            id: 5,
-            name: 'Планшет Samsung Galaxy Tab S9',
-            price: '64 990 ₽',
-            specs: '11", 8GB/128GB, S-Pen',
-            rating: 5.0,
-            reviews: 31,
-            image: 'https://samsungstore.ru/upload/iblock/7e3/7e3b0b9c8c5d5f5a5c5b5d5f5a5c5b5d.jpg'
-        },
-        {
-            id: 6,
-            name: 'Фитнес-браслет Huawei Band 8',
-            price: '3 990 ₽',
-            oldPrice: '4 990 ₽',
-            discount: '20',
-            specs: '1.47", трекинг сна',
-            rating: 4.5,
-            reviews: 112,
-            image: 'https://huaweistore.ru/upload/iblock/7e3/7e3b0b9c8c5d5f5a5c5b5d5f5a5c5b5d.jpg'
-        },
-        {
-            id: 7,
-            name: 'Колонка JBL Flip 6',
-            price: '8 990 ₽',
-            specs: 'IP67, 12ч работы',
-            rating: 4.8,
-            reviews: 56,
-            image: 'https://jblstore.ru/upload/iblock/7e3/7e3b0b9c8c5d5f5a5c5b5d5f5a5c5b5d.jpg'
-        },
-        {
-            id: 8,
-            name: 'Игровая консоль PlayStation 5',
-            price: '59 990 ₽',
-            specs: '825GB SSD, 4K',
-            rating: 5.0,
-            reviews: 203,
-            image: 'https://sonycenter.ru/upload/resize_cache/iblock/7e3/520_520_1/7e3b0b9c8c5d5f5a5c5b5d5f5a5c5b5d.jpg'
-        }
-    ];
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const data = await apiRequest('/api/products');
+                const formattedProducts = data.map(product => ({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price.toLocaleString('ru-RU') + ' ₽',
+                    oldPrice: product.oldPrice ? product.oldPrice.toLocaleString('ru-RU') + ' ₽' : null,
+                    discount: product.oldPrice
+                        ? Math.round((1 - product.price / product.oldPrice) * 100).toString()
+                        : null,
+                    specs: product.description ? product.description.substring(0, 50) + '...' : 'Нет описания',
+                    rating: 4.5 + Math.random() * 0.5,
+                    reviews: Math.floor(Math.random() * 200),
+                    image: 'https://via.placeholder.com/300'
+                }));
+                setProducts(formattedProducts);
+                setLoading(false);
+            } catch (err) {
+                console.error('Ошибка при загрузке товаров:', err);
+                setError('Не удалось загрузить товары');
+                setLoading(false);
+            }
+        };
 
-    const recommendedProducts = [...products].sort(() => 0.5 - Math.random()).slice(0, 8);
-    const specialOffers = [...products]
-        .filter(product => product.discount)
-        .sort((a, b) => parseFloat(b.discount) - parseFloat(a.discount))
-        .slice(0, 8);
+        fetchProducts();
+    }, []);
 
     const handleTransitionEnd = () => {
         setIsSwitching(false);
@@ -134,6 +78,24 @@ const Home = () => {
         setIsSwitching(true);
         setCurrentSlide(prev => (prev === slides.length - 1 ? 0 : prev + 1));
     };
+
+    if (loading) {
+        return <div className={styles.loading}>Загрузка...</div>;
+    }
+
+    if (error) {
+        return <div className={styles.error}>{error}</div>;
+    }
+
+    if (products.length === 0) {
+        return <div className={styles.empty}>Товары не найдены</div>;
+    }
+
+    const recommendedProducts = [...products].sort(() => 0.5 - Math.random()).slice(0, 8);
+    const specialOffers = [...products]
+        .filter(product => product.discount)
+        .sort((a, b) => parseFloat(b.discount) - parseFloat(a.discount))
+        .slice(0, 8);
 
     return (
         <div className={styles.container}>
@@ -180,7 +142,7 @@ const Home = () => {
                     </h2>
                     <Link
                         to="/catalog"
-                        state={{ filter: 'popular' }} // Для популярных товаров
+                        state={{ filter: 'popular' }}
                         className={styles.showAllLink}
                     >
                         Смотреть все <span className={styles.arrow}>→</span>
@@ -188,38 +150,33 @@ const Home = () => {
                 </div>
                 <div className={styles.productGrid}>
                     {products.slice(0, 8).map(product => (
-                        <div key={`popular-${product.id}`} className={styles.productCard}>
-                            {product.discount && (
-                                <div className={styles.discountContainer}>
-                                    <span className={styles.discountBadge}>-{product.discount}%</span>
-                                </div>
-                            )}
-                            <img src={product.image} alt={product.name} className={styles.productImage} />
-                            <div className={styles.productInfo}>
-                                <h3 className={styles.productName}>{product.name}</h3>
-                                <p className={styles.productSpecs}>{product.specs}</p>
-                                <div className={styles.priceContainer}>
-                                    <span className={styles.productPrice}>{product.price}</span>
-                                    {product.oldPrice && (
-                                        <span className={styles.oldPrice}>{product.oldPrice}</span>
-                                    )}
-                                </div>
-                                <div className={styles.ratingContainer}>
-                                    <div className={styles.stars}>
-                                        {[...Array(5)].map((_, i) => (
-                                            <span
-                                                key={i}
-                                                className={i < Math.floor(product.rating) ? styles.starFilled : styles.starEmpty}
-                                            >
-                                                ★
-                                            </span>
-                                        ))}
+                        <Link
+                            to={`/product/${product.id}`}
+                            key={`popular-${product.id}`}
+                            className={styles.productCardLink}
+                        >
+                            <div className={styles.productCard}>
+                                {product.discount && (
+                                    <div className={styles.discountContainer}>
+                                        <span className={styles.discountBadge}>-{product.discount}%</span>
                                     </div>
-                                    <span className={styles.ratingValue}>{product.rating.toFixed(1)}</span>
-                                    <span className={styles.reviews}>({product.reviews})</span>
+                                )}
+                                <img src={product.image} alt={product.name} className={styles.productImage} />
+                                <div className={styles.productInfo}>
+                                    <h3 className={styles.productName}>{product.name}</h3>
+                                    <p className={styles.productSpecs}>{product.specs}</p>
+                                    <div className={styles.priceContainer}>
+                                        <span className={styles.productPrice}>{product.price}</span>
+                                        {product.oldPrice && (
+                                            <span className={styles.oldPrice}>{product.oldPrice}</span>
+                                        )}
+                                    </div>
+                                    <div className={styles.ratingContainer}>
+                                        {/* ... */}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>
@@ -240,38 +197,44 @@ const Home = () => {
                 </div>
                 <div className={styles.productGrid}>
                     {recommendedProducts.map(product => (
-                        <div key={`rec-${product.id}`} className={styles.productCard}>
-                            {product.discount && (
-                                <div className={styles.discountContainer}>
-                                    <span className={styles.discountBadge}>-{product.discount}%</span>
-                                </div>
-                            )}
-                            <img src={product.image} alt={product.name} className={styles.productImage} />
-                            <div className={styles.productInfo}>
-                                <h3 className={styles.productName}>{product.name}</h3>
-                                <p className={styles.productSpecs}>{product.specs}</p>
-                                <div className={styles.priceContainer}>
-                                    <span className={styles.productPrice}>{product.price}</span>
-                                    {product.oldPrice && (
-                                        <span className={styles.oldPrice}>{product.oldPrice}</span>
-                                    )}
-                                </div>
-                                <div className={styles.ratingContainer}>
-                                    <div className={styles.stars}>
-                                        {[...Array(5)].map((_, i) => (
-                                            <span
-                                                key={i}
-                                                className={i < Math.floor(product.rating) ? styles.starFilled : styles.starEmpty}
-                                            >
-                                                ★
-                                            </span>
-                                        ))}
+                        <Link
+                            to={`/product/${product.id}`}
+                            key={`rec-${product.id}`}
+                            className={styles.productCardLink}
+                        >
+                            <div className={styles.productCard}>
+                                {product.discount && (
+                                    <div className={styles.discountContainer}>
+                                        <span className={styles.discountBadge}>-{product.discount}%</span>
                                     </div>
-                                    <span className={styles.ratingValue}>{product.rating.toFixed(1)}</span>
-                                    <span className={styles.reviews}>({product.reviews})</span>
+                                )}
+                                <img src={product.image} alt={product.name} className={styles.productImage} />
+                                <div className={styles.productInfo}>
+                                    <h3 className={styles.productName}>{product.name}</h3>
+                                    <p className={styles.productSpecs}>{product.specs}</p>
+                                    <div className={styles.priceContainer}>
+                                        <span className={styles.productPrice}>{product.price}</span>
+                                        {product.oldPrice && (
+                                            <span className={styles.oldPrice}>{product.oldPrice}</span>
+                                        )}
+                                    </div>
+                                    <div className={styles.ratingContainer}>
+                                        <div className={styles.stars}>
+                                            {[...Array(5)].map((_, i) => (
+                                                <span
+                                                    key={i}
+                                                    className={i < Math.floor(product.rating) ? styles.starFilled : styles.starEmpty}
+                                                >
+                  ★
+                </span>
+                                            ))}
+                                        </div>
+                                        <span className={styles.ratingValue}>{product.rating.toFixed(1)}</span>
+                                        <span className={styles.reviews}>({product.reviews})</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>
@@ -292,39 +255,45 @@ const Home = () => {
                 </div>
                 <div className={styles.productGrid}>
                     {specialOffers.map(product => (
-                        <div key={`spec-${product.id}`} className={styles.productCardHot}>
-                            <div className={styles.specialOfferBadge}>Горящее предложение</div>
-                            {product.discount && (
-                                <div className={styles.discountContainer}>
-                                    <span className={styles.discountBadge}>-{product.discount}%</span>
-                                </div>
-                            )}
-                            <img src={product.image} alt={product.name} className={styles.productImage} />
-                            <div className={styles.productInfo}>
-                                <h3 className={styles.productName}>{product.name}</h3>
-                                <p className={styles.productSpecs}>{product.specs}</p>
-                                <div className={styles.priceContainer}>
-                                    <span className={styles.productPriceHot}>{product.price}</span>
-                                    {product.oldPrice && (
-                                        <span className={styles.oldPrice}>{product.oldPrice}</span>
-                                    )}
-                                </div>
-                                <div className={styles.ratingContainer}>
-                                    <div className={styles.stars}>
-                                        {[...Array(5)].map((_, i) => (
-                                            <span
-                                                key={i}
-                                                className={i < Math.floor(product.rating) ? styles.starFilled : styles.starEmpty}
-                                            >
-                                                ★
-                                            </span>
-                                        ))}
+                        <Link
+                            to={`/product/${product.id}`}
+                            key={`spec-${product.id}`}
+                            className={styles.productCardLink}
+                        >
+                            <div className={styles.productCardHot}>
+                                <div className={styles.specialOfferBadge}>Горящее предложение</div>
+                                {product.discount && (
+                                    <div className={styles.discountContainer}>
+                                        <span className={styles.discountBadge}>-{product.discount}%</span>
                                     </div>
-                                    <span className={styles.ratingValue}>{product.rating.toFixed(1)}</span>
-                                    <span className={styles.reviews}>({product.reviews})</span>
+                                )}
+                                <img src={product.image} alt={product.name} className={styles.productImage} />
+                                <div className={styles.productInfo}>
+                                    <h3 className={styles.productName}>{product.name}</h3>
+                                    <p className={styles.productSpecs}>{product.specs}</p>
+                                    <div className={styles.priceContainer}>
+                                        <span className={styles.productPriceHot}>{product.price}</span>
+                                        {product.oldPrice && (
+                                            <span className={styles.oldPrice}>{product.oldPrice}</span>
+                                        )}
+                                    </div>
+                                    <div className={styles.ratingContainer}>
+                                        <div className={styles.stars}>
+                                            {[...Array(5)].map((_, i) => (
+                                                <span
+                                                    key={i}
+                                                    className={i < Math.floor(product.rating) ? styles.starFilled : styles.starEmpty}
+                                                >
+                    ★
+                  </span>
+                                            ))}
+                                        </div>
+                                        <span className={styles.ratingValue}>{product.rating.toFixed(1)}</span>
+                                        <span className={styles.reviews}>({product.reviews})</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>
