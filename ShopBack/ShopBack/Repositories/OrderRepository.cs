@@ -12,8 +12,6 @@ namespace ShopBack.Repositories
         {
             return await _context.Orders
                 .Include(o => o.OrderItem)
-                    .ThenInclude(oi => oi.Product)
-                    .AsNoTracking()
                 .Include(o => o.Payment)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(o => o.Id == id)
@@ -33,6 +31,7 @@ namespace ShopBack.Repositories
             return await _context.Orders
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
+                    .AsNoTracking()
                 .Include(o => o.Payment)
                 .AsNoTracking()
                 .OrderByDescending(o => o.OrderTime)
@@ -93,7 +92,7 @@ namespace ShopBack.Repositories
         {
             var order = await _context.Orders
                 .AsNoTracking()
-                .FirstOrDefaultAsync(o => o.UserId == userId);
+                .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "Cart");
             if (order == null)
             {
                 await CreateCart(userId);
