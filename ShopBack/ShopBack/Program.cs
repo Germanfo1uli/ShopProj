@@ -7,9 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Diagnostics;
-using Newtonsoft.Json.Linq;
 using ShopBack.Authorization;
 using System.Text.Json.Serialization;
 
@@ -84,6 +82,8 @@ builder.Services.AddScoped<ReviewsService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<PayMethodsRepository>();
+builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<IPaymentGateway, StripePaymentGateway>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

@@ -62,6 +62,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<PayMethods>> GetById(int id)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
@@ -78,12 +79,32 @@ namespace ShopBack.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Policy = "SelfOrAdminAccess")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<PayMethods>> Update(int id, [FromBody] PMUpdate updateDto)
         {
             var payMethod = await _payMethodsService.GetByIdAsync(id);
 
             payMethod.IsDefault = updateDto.IsDefault;
+
+            await _payMethodsService.UpdateAsync(payMethod);
+            return Ok(payMethod);
+        }
+
+        [HttpPut("{id}/setdefault")]
+        [Authorize]
+        public async Task<ActionResult<PayMethods>> SetDefault(int id)
+        {
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            bool isAdmin = User.IsInRole("Admin");
+
+            var payMethod = await _payMethodsService.GetByIdAsync(id);
+            if (payMethod.UserId != currentUserId && !isAdmin)
+            {
+                return Forbid();
+            }
+
+            payMethod.IsDefault = true;
 
             await _payMethodsService.UpdateAsync(payMethod);
             return Ok(payMethod);
