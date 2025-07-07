@@ -5,6 +5,7 @@ using ShopBack.Services;
 using System.Security.Claims;
 using System.Security;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Reflection.PortableExecutable;
 
 namespace ShopBack.Controllers
 {
@@ -54,6 +55,7 @@ namespace ShopBack.Controllers
                 ProductId = createDto.ProductId,
                 UserId = createDto.UserId,
                 Rating = createDto.Rating,
+                Header = createDto.Header,
                 Comment = createDto.Comment,
                 CreatedAt = DateTime.UtcNow,
                 Approved = true 
@@ -75,7 +77,9 @@ namespace ShopBack.Controllers
             var review = await _reviewsService.GetByIdAsync(id);
 
             review.Rating = updateDto.Rating != null ? updateDto.Rating.Value : review.Rating;
+            review.Header = updateDto.Header ?? review.Header;
             review.Comment = updateDto.Comment;
+            
 
             await _reviewsService.UpdateAsync(review);
             await _reviewsService.RecalculateRating(review.ProductId);
@@ -127,6 +131,8 @@ namespace ShopBack.Controllers
 
         public int Rating { get; set; }
 
+        public string Header { get; set; }
+
         public string? Comment { get; set; }
     }
 
@@ -135,6 +141,8 @@ namespace ShopBack.Controllers
         public int UserId { get; set; }
 
         public int? Rating { get; set; }
+
+        public string? Header { get; set; }
 
         public string? Comment { get; set; }
     }

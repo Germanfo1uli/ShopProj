@@ -14,6 +14,7 @@ namespace ShopBack.Repositories
         {
             return await _context.Products
                 .Where(p => p.CategoryId == categoryId)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -25,6 +26,7 @@ namespace ShopBack.Repositories
             return await _context.Products
                 .Where(p => p.Name.Contains(searchTerm) ||
                            (p.Description != null && p.Description.Contains(searchTerm)))
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -32,6 +34,7 @@ namespace ShopBack.Repositories
         {
             return await _context.ProductImages
                 .Where(img => img.ProductId == productId)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -39,12 +42,14 @@ namespace ShopBack.Repositories
         {
             return await _context.ProductSpecifications
                 .Where(spec => spec.ProductId == productId)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task<ProductImages> GetProductMainImageAsync(int productId)
         {
             return await _context.ProductImages
+                .AsNoTracking()
                 .FirstOrDefaultAsync(img => img.ProductId == productId && img.IsMain)
                 ?? throw new KeyNotFoundException($"Главное изображение товара с ID {productId} не найдено"); ;
 
@@ -54,6 +59,7 @@ namespace ShopBack.Repositories
         {
             return await _context.Products
                 .Where(p => !p.IsActive)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
