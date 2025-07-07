@@ -23,6 +23,11 @@ const ProductPage = () => {
     const [mainImage, setMainImage] = useState('');
     const [showImageModal, setShowImageModal] = useState(false);
     const [favorites, setFavorites] = useState([]);
+    const [reviewForm, setReviewForm] = useState({
+        header: '',
+        comment: '',
+        rating: 0
+    });
 
     
 
@@ -59,7 +64,7 @@ const ProductPage = () => {
             try {
                 setReviewsLoading(true);
                 const response = await apiRequest(`/api/reviews/product/${id}`);
-                
+                console.log(response)
                 const reviews = response || [];
                 const totalReviews = reviews.length;
                 const averageRating = totalReviews > 0 
@@ -172,6 +177,10 @@ const ProductPage = () => {
 
     const handleRatingClick = (value) => {
         setRating(value);
+        setReviewForm(prev => ({
+            ...prev,
+            rating: value
+        }));
     };
 
     const handleRatingHover = (value) => {
@@ -205,6 +214,88 @@ const ProductPage = () => {
         }
         return stars;
     };
+
+    const handleReviewSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!isAuthenticated) {
+            alert('Войдите в систему, чтобы оставить отзыв');
+            return;
+        }
+
+        if (!reviewForm.rating) {
+            alert('Пожалуйста, поставьте оценку товару');
+            return;
+        }
+
+        try {
+            const response = await apiRequest('/api/reviews', {
+                method: 'POST',
+                body: {
+                    productId: Number(id),
+                    userId: userId,
+                    rating: reviewForm.rating,
+                    header: reviewForm.header,
+                    comment: reviewForm.comment
+                },
+                authenticated: isAuthenticated
+            });
+
+            if (response) {
+                alert('Ваш отзыв успешно отправлен!');
+                setReviewForm({
+                    header: '',
+                    comment: '',
+                    rating: 0
+                });
+                setRating(0);
+                const reviewsResponse = await apiRequest(`/api/reviews/product/${id}`);
+                const reviews = reviewsResponse || [];
+                const totalReviews = reviews.length;
+                const averageRating = totalReviews > 0 
+                    ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
+                    : 0;
+                
+                const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+                reviews.forEach(review => {
+                    const roundedRating = Math.round(review.rating);
+                    if (roundedRating >= 1 && roundedRating <= 5) {
+                        ratingCounts[roundedRating]++;
+                    }
+                });
+                
+                setReviewsData({
+                    reviews,
+                    averageRating,
+                    ratingCounts,
+                    totalReviews
+                });
+
+                const updatedProduct = await apiRequest(`/api/products/${id}`);
+                setProductData(prev => ({
+                    ...prev,
+                    product: {
+                        ...prev.product,
+                        rating: updatedProduct.product.rating,
+                        reviews: updatedProduct.product.reviews
+                    }
+                }));
+            }
+        } catch (error) {
+            console.error('Ошибка при отправке отзыва:', error);
+            alert('Не удалось отправить отзыв: ' + error.message);
+        }
+    };
+
+    const handleReviewChange = (e) => {
+        const { name, value } = e.target;
+        setReviewForm(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    
 
     if (isLoading) {
         return <div className={styles.loading}>Загрузка...</div>;
@@ -270,7 +361,7 @@ const ProductPage = () => {
                             <div className={styles.stars}>
                                 {renderStars(Math.floor(product.rating || 0), (product.rating || 0) % 1 !== 0)}
                             </div>
-                            <span className={styles.ratingText}>{product.rating?.toFixed(1) || 0} ({product.reviews || 0} отзывов)</span>
+                            <span className={styles.ratingText}>{product.rating?.toFixed(1) || 0} ({product.reviewsNumber || 0} отзывов)</span>
                         </div>
 
                         <div className={styles.features}>
@@ -455,10 +546,6 @@ const ProductPage = () => {
                                 </div>
                             ))}
                         </div>
-
-                        <button className={styles.reviewButton}>
-                            Оставить отзыв
-                        </button>
                     </div>
 
                     {reviewsLoading ? (
@@ -471,7 +558,7 @@ const ProductPage = () => {
                                         <div className={styles.reviewHeader}>
                                             <div>
                                                 <div className={styles.reviewAuthor}>
-                                                    {review.userName || `Пользователь ${review.userId}`}
+                                                    {review.user.firstName || `Аноним`} {review.user.lastName.charAt(0) + "." || ` `}
                                                 </div>
                                                 <div className={styles.reviewDate}>
                                                     {new Date(review.createdAt || review.date).toLocaleDateString('ru-RU', {
@@ -513,7 +600,7 @@ const ProductPage = () => {
                 <h2 className={styles.sectionTitle}>Оставить отзыв</h2>
                 <p className={styles.formDescription}>Расскажите о вашем опыте использования этого товара</p>
 
-                <form>
+                <form onSubmit={handleReviewSubmit}>
                     <div className={styles.formGroup}>
                         <label className={styles.formLabel}>Ваша оценка</label>
                         <div className={styles.ratingInput}>
@@ -521,8 +608,8 @@ const ProductPage = () => {
                                 <button
                                     key={star}
                                     type="button"
-                                    className={`${styles.starButton} ${star <= (hoverRating || rating) ? styles.starButtonActive : ''}`}
-                                    onClick={() => setRating(star)}
+                                    className={`${styles.starButton} ${star <= (hoverRating || reviewForm.rating) ? styles.starButtonActive : ''}`}
+                                    onClick={() => handleRatingClick(star)}
                                     onMouseEnter={() => setHoverRating(star)}
                                     onMouseLeave={() => setHoverRating(0)}
                                 >
@@ -532,48 +619,32 @@ const ProductPage = () => {
                         </div>
                     </div>
 
-                    <div className={styles.formGrid}>
-                        <div className={styles.formGroup}>
-                            <label htmlFor="name" className={styles.formLabel}>Имя</label>
-                            <input type="text" id="name" className={styles.formInput} />
-                        </div>
-                        <div className={styles.formGroup}>
-                            <label htmlFor="email" className={styles.formLabel}>Email (не будет опубликован)</label>
-                            <input type="email" id="email" className={styles.formInput} />
-                        </div>
-                    </div>
-
                     <div className={styles.formGroup}>
-                        <label htmlFor="title" className={styles.formLabel}>Заголовок отзыва</label>
+                        <label htmlFor="header" className={styles.formLabel}>Заголовок отзыва</label>
                         <input
                             type="text"
-                            id="title"
+                            id="header"
+                            name="header"
                             className={styles.formInput2}
                             placeholder="Например: 'Отличное качество'"
+                            value={reviewForm.header}
+                            onChange={handleReviewChange}
+                            required
                         />
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="review" className={styles.formLabel}>Ваш отзыв</label>
+                        <label htmlFor="comment" className={styles.formLabel}>Ваш отзыв</label>
                         <textarea
-                            id="review"
+                            id="comment"
+                            name="comment"
                             rows="5"
                             className={styles.formTextarea}
                             placeholder="Расскажите о ваших впечатлениях"
+                            value={reviewForm.comment}
+                            onChange={handleReviewChange}
+                            required
                         ></textarea>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Добавить фото (по желанию)</label>
-                        <div className={styles.uploadContainer}>
-                            <label htmlFor="dropzone-file" className={styles.uploadLabel}>
-                                <div className={styles.uploadContent}>
-                                    <FaCloudUploadAlt className={styles.uploadIcon} />
-                                    <p className={styles.uploadText}>Перетащите фото сюда или нажмите для выбора</p>
-                                </div>
-                                <input id="dropzone-file" type="file" className={styles.uploadInput} />
-                            </label>
-                        </div>
                     </div>
 
                     <button type="submit" className={styles.submitButton}>
