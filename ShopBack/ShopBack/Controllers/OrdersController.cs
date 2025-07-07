@@ -121,7 +121,26 @@ namespace ShopBack.Controllers
             return Ok(payment);
         }
 
-        [HttpPatch("{orderId}/status")]
+        [HttpPut("{orderId}/book")]
+        public async Task<IActionResult> BookOrder(int orderId)
+        {
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            bool isAdmin = User.IsInRole("Admin");
+
+            var order = await _ordersService.GetByIdAsync(orderId);
+
+            if (order.UserId != currentUserId && !isAdmin)
+            {
+                return Forbid();
+            }
+
+
+
+            return Ok();
+        }
+
+        [HttpPut("{orderId}/status")]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, [FromBody] string status)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
