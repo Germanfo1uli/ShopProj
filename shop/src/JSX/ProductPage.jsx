@@ -1,7 +1,7 @@
-import React, { useState, useEffect  } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import styles from '../CSS/ProductPage.module.css';
-import { FaStar, FaStarHalfAlt, FaHeart, FaShoppingCart, FaMinus, FaPlus, FaBoxOpen, FaShippingFast, FaCheckCircle, FaInfoCircle, FaCloudUploadAlt } from 'react-icons/fa';
+import { FaStar, FaStarHalfAlt, FaHeart, FaShoppingCart, FaMinus, FaPlus, FaBoxOpen, FaShippingFast, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
 import Footer from "./Components/Footer";
 import sb from "../CSS/Breadcrumbs.module.css";
 import { apiRequest } from './Api/ApiRequest';
@@ -28,8 +28,8 @@ const ProductPage = () => {
         comment: '',
         rating: 0
     });
-
-    
+    const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+    const [showCartNotification, setShowCartNotification] = useState(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -37,21 +37,21 @@ const ProductPage = () => {
                 setIsLoading(true);
                 const response = await apiRequest(`/api/products/${id}`);
                 setProductData(response);
-                
+
                 if (response.product?.productImage && response.product.productImage.length > 0) {
                     setMainImage(`${process.env.REACT_APP_API_URL}${response.product.productImage[0].url}`);
                 }
-                
+
                 if (userId) {
                     const userFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
-                        authenticated: isAuthenticated  
+                        authenticated: isAuthenticated
                     });
-                    
-                    const favoriteIds = userFavorites.map(fav => Number(fav.id)); 
+
+                    const favoriteIds = userFavorites.map(fav => Number(fav.id));
                     setFavorites(favoriteIds);
                     setIsFavorite(favoriteIds.includes(Number(id)));
                 }
-                
+
             } catch (err) {
                 console.error('Ошибка загрузки данных товара:', err);
                 setError('Не удалось загрузить данные товара');
@@ -67,10 +67,10 @@ const ProductPage = () => {
                 console.log(response)
                 const reviews = response || [];
                 const totalReviews = reviews.length;
-                const averageRating = totalReviews > 0 
-                    ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
+                const averageRating = totalReviews > 0
+                    ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
                     : 0;
-                
+
                 const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
                 reviews.forEach(review => {
                     const roundedRating = Math.round(review.rating);
@@ -78,14 +78,14 @@ const ProductPage = () => {
                         ratingCounts[roundedRating]++;
                     }
                 });
-                
+
                 setReviewsData({
                     reviews,
                     averageRating,
                     ratingCounts,
                     totalReviews
                 });
-                
+
             } catch (err) {
                 console.error('Ошибка загрузки отзывов:', err);
                 setReviewsData({
@@ -118,7 +118,7 @@ const ProductPage = () => {
 
         try {
             setIsFavorite(prev => !prev);
-            
+
             const response = await apiRequest('/api/userfavorites', {
                 method: isFavorite ? 'DELETE' : 'POST',
                 body: {
@@ -132,13 +132,13 @@ const ProductPage = () => {
                 const updatedFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
                     authenticated: isAuthenticated
                 });
-                
+
                 const favoriteIds = updatedFavorites.map(item => {
                     if (item.id) return Number(item.id);
                     if (item.productId) return Number(item.productId);
                     return null;
                 }).filter(id => id !== null);
-                
+
                 setFavorites(favoriteIds);
                 setIsFavorite(favoriteIds.includes(Number(id)));
             }
@@ -167,7 +167,10 @@ const ProductPage = () => {
             });
 
             if (response) {
-                alert('Товар успешно добавлен в корзину!');
+                setShowCartNotification(true);
+                setTimeout(() => {
+                    setShowCartNotification(false);
+                }, 3000);
             }
         } catch (error) {
             console.error('Ошибка при добавлении в корзину:', error);
@@ -217,7 +220,7 @@ const ProductPage = () => {
 
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!isAuthenticated) {
             alert('Войдите в систему, чтобы оставить отзыв');
             return;
@@ -242,20 +245,26 @@ const ProductPage = () => {
             });
 
             if (response) {
-                alert('Ваш отзыв успешно отправлен!');
+                setShowSuccessAnimation(true);
+
                 setReviewForm({
                     header: '',
                     comment: '',
                     rating: 0
                 });
                 setRating(0);
+
+                setTimeout(() => {
+                    setShowSuccessAnimation(false);
+                }, 3000);
+
                 const reviewsResponse = await apiRequest(`/api/reviews/product/${id}`);
                 const reviews = reviewsResponse || [];
                 const totalReviews = reviews.length;
-                const averageRating = totalReviews > 0 
-                    ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
+                const averageRating = totalReviews > 0
+                    ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews
                     : 0;
-                
+
                 const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
                 reviews.forEach(review => {
                     const roundedRating = Math.round(review.rating);
@@ -263,7 +272,7 @@ const ProductPage = () => {
                         ratingCounts[roundedRating]++;
                     }
                 });
-                
+
                 setReviewsData({
                     reviews,
                     averageRating,
@@ -295,8 +304,6 @@ const ProductPage = () => {
         }));
     };
 
-    
-
     if (isLoading) {
         return <div className={styles.loading}>Загрузка...</div>;
     }
@@ -308,6 +315,7 @@ const ProductPage = () => {
     if (!productData?.product) {
         return <div className={styles.error}>Товар не найден</div>;
     }
+
     const { product } = productData;
     const reviews = reviewsData?.reviews || [];
     const averageRating = reviewsData?.averageRating || 0;
@@ -316,7 +324,33 @@ const ProductPage = () => {
 
     return (
         <>
-        <div className={styles.container}>
+            <div className={styles.container}>
+                {showSuccessAnimation && (
+                    <div className={styles.successAnimation}>
+                        <div className={styles.successCheckmark}>
+                            <div className={styles.checkIcon}>
+                                <span className={`${styles.iconLine} ${styles.lineTip}`}></span>
+                                <span className={`${styles.iconLine} ${styles.lineLong}`}></span>
+                                <div className={styles.iconCircle}></div>
+                                <div className={styles.iconFix}></div>
+                            </div>
+                        </div>
+                        <div className={styles.successText}>Отзыв успешно отправлен!</div>
+                    </div>
+                )}
+
+                {showCartNotification && (
+                    <div className={styles.cartNotification}>
+                        <div className={styles.cartNotificationContent}>
+                            <FaShoppingCart className={styles.cartNotificationIcon} />
+                            <div className={styles.cartNotificationText}>
+                                <span className={styles.cartNotificationTitle}>Товар добавлен в корзину</span>
+                                <span className={styles.cartNotificationProduct}>{product.name}</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <nav className={sb.breadcrumbs}>
                     <a href="/home" className={sb.breadcrumbLink}>Главная</a>
                     <span className={sb.breadcrumbSeparator}>/</span>
@@ -420,14 +454,14 @@ const ProductPage = () => {
                                     <FaPlus />
                                 </button>
                             </div>
-                            <button 
-                                className={styles.addToCart} 
+                            <button
+                                className={styles.addToCart}
                                 onClick={addToCart}
                                 disabled={!product.quantityInStock || product.quantityInStock <= 0}
                             >
                                 <FaShoppingCart className={styles.cartIcon} />
-                                {product.quantityInStock && product.quantityInStock > 0 
-                                    ? 'Добавить в корзину' 
+                                {product.quantityInStock && product.quantityInStock > 0
+                                    ? 'Добавить в корзину'
                                     : 'Нет в наличии'}
                             </button>
                         </div>
@@ -460,7 +494,6 @@ const ProductPage = () => {
                         {activeTab === 'description' && (
                             <>
                                 <h2 className={styles.tabTitle}>{product.name}</h2>
-                                <p className={styles.tabText}>{product.description}</p>
 
                                 {product.benefits && (
                                     <>
@@ -514,7 +547,6 @@ const ProductPage = () => {
                     </div>
                 </div>
 
-
                 <div className={styles.reviewsSection}>
                     <h2 className={styles.sectionTitle}>Отзывы покупателей</h2>
 
@@ -535,9 +567,9 @@ const ProductPage = () => {
                                     <div className={styles.barContainer}>
                                         <div
                                             className={styles.barFill}
-                                            style={{ 
-                                                width: totalReviews > 0 
-                                                    ? `${(ratingCounts[star] / totalReviews) * 100}%` 
+                                            style={{
+                                                width: totalReviews > 0
+                                                    ? `${(ratingCounts[star] / totalReviews) * 100}%`
                                                     : '0%'
                                             }}
                                         ></div>
@@ -558,7 +590,7 @@ const ProductPage = () => {
                                         <div className={styles.reviewHeader}>
                                             <div>
                                                 <div className={styles.reviewAuthor}>
-                                                    {review.user.firstName || `Аноним`} {review.user.lastName.charAt(0) + "." || ` `}
+                                                    {review.user.firstName || `Аноним`} {review.user.lastName?.charAt(0) + "." || ` `}
                                                 </div>
                                                 <div className={styles.reviewDate}>
                                                     {new Date(review.createdAt || review.date).toLocaleDateString('ru-RU', {
@@ -574,15 +606,14 @@ const ProductPage = () => {
                                         </div>
                                         <h3 className={styles.reviewTitle}>{review.header || 'Без заголовка'}</h3>
                                         <p className={styles.reviewText}>{review.text || review.comment || 'Нет текста отзыва'}</p>
-                                        {/* Если есть изображения в отзыве */}
                                         {review.images && review.images.length > 0 && (
                                             <div className={styles.reviewImages}>
                                                 {review.images.map((image, imgIndex) => (
-                                                    <img 
-                                                        key={imgIndex} 
-                                                        src={`${process.env.REACT_APP_API_URL}${image.url}`} 
-                                                        alt="Фото из отзыва" 
-                                                        className={styles.reviewImage} 
+                                                    <img
+                                                        key={imgIndex}
+                                                        src={`${process.env.REACT_APP_API_URL}${image.url}`}
+                                                        alt="Фото из отзыва"
+                                                        className={styles.reviewImage}
                                                     />
                                                 ))}
                                             </div>
@@ -596,70 +627,70 @@ const ProductPage = () => {
                     )}
                 </div>
 
-            <div className={styles.reviewForm}>
-                <h2 className={styles.sectionTitle}>Оставить отзыв</h2>
-                <p className={styles.formDescription}>Расскажите о вашем опыте использования этого товара</p>
+                <div className={styles.reviewForm}>
+                    <h2 className={styles.sectionTitle}>Оставить отзыв</h2>
+                    <p className={styles.formDescription}>Расскажите о вашем опыте использования этого товара</p>
 
-                <form onSubmit={handleReviewSubmit}>
-                    <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Ваша оценка</label>
-                        <div className={styles.ratingInput}>
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                    key={star}
-                                    type="button"
-                                    className={`${styles.starButton} ${star <= (hoverRating || reviewForm.rating) ? styles.starButtonActive : ''}`}
-                                    onClick={() => handleRatingClick(star)}
-                                    onMouseEnter={() => setHoverRating(star)}
-                                    onMouseLeave={() => setHoverRating(0)}
-                                >
-                                    <FaStar className={styles.starIcon} />
-                                </button>
-                            ))}
+                    <form onSubmit={handleReviewSubmit}>
+                        <div className={styles.formGroup}>
+                            <label className={styles.formLabel}>Ваша оценка</label>
+                            <div className={styles.ratingInput}>
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                        key={star}
+                                        type="button"
+                                        className={`${styles.starButton} ${star <= (hoverRating || reviewForm.rating) ? styles.starButtonActive : ''}`}
+                                        onClick={() => handleRatingClick(star)}
+                                        onMouseEnter={() => setHoverRating(star)}
+                                        onMouseLeave={() => setHoverRating(0)}
+                                    >
+                                        <FaStar className={styles.starIcon} />
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
 
-                    <div className={styles.formGroup}>
-                        <label htmlFor="header" className={styles.formLabel}>Заголовок отзыва</label>
-                        <input
-                            type="text"
-                            id="header"
-                            name="header"
-                            className={styles.formInput2}
-                            placeholder="Например: 'Отличное качество'"
-                            value={reviewForm.header}
-                            onChange={handleReviewChange}
-                            required
-                        />
-                    </div>
+                        <div className={styles.formGroup}>
+                            <label htmlFor="header" className={styles.formLabel}>Заголовок отзыва</label>
+                            <input
+                                type="text"
+                                id="header"
+                                name="header"
+                                className={styles.formInput2}
+                                placeholder="Например: 'Отличное качество'"
+                                value={reviewForm.header}
+                                onChange={handleReviewChange}
+                                required
+                            />
+                        </div>
 
-                    <div className={styles.formGroup}>
-                        <label htmlFor="comment" className={styles.formLabel}>Ваш отзыв</label>
-                        <textarea
-                            id="comment"
-                            name="comment"
-                            rows="5"
-                            className={styles.formTextarea}
-                            placeholder="Расскажите о ваших впечатлениях"
-                            value={reviewForm.comment}
-                            onChange={handleReviewChange}
-                            required
-                        ></textarea>
-                    </div>
+                        <div className={styles.formGroup}>
+                            <label htmlFor="comment" className={styles.formLabel}>Ваш отзыв</label>
+                            <textarea
+                                id="comment"
+                                name="comment"
+                                rows="5"
+                                className={styles.formTextarea}
+                                placeholder="Расскажите о ваших впечатлениях"
+                                value={reviewForm.comment}
+                                onChange={handleReviewChange}
+                                required
+                            ></textarea>
+                        </div>
 
-                    <button type="submit" className={styles.submitButton}>
-                        Опубликовать отзыв
-                    </button>
-                </form>
-            </div>
-
-            {showImageModal && (
-                <div className={styles.imageModal} onClick={() => setShowImageModal(false)}>
-                    <img src={mainImage} alt="Увеличенное изображение" className={styles.modalImage} />
+                        <button type="submit" className={styles.submitButton}>
+                            Опубликовать отзыв
+                        </button>
+                    </form>
                 </div>
-            )}
-        </div>
-    <Footer/>
+
+                {showImageModal && (
+                    <div className={styles.imageModal} onClick={() => setShowImageModal(false)}>
+                        <img src={mainImage} alt="Увеличенное изображение" className={styles.modalImage} />
+                    </div>
+                )}
+            </div>
+            <Footer/>
         </>
     );
 };

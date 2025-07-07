@@ -195,14 +195,11 @@ const CartPage = () => {
                                                     <div className={styles.productHeader}>
                                                         <div>
                                                             <h3 className={styles.productName}>{item.product?.name || 'Товар'}</h3>
-                                                            <p className={styles.productDescription}>
-                                                                Цена: {item.product.price} ₽
-                                                                {item.product.oldPrice && (
-                                                                    <span className={styles.oldPrice}>
-                                                                        {item.product.oldPrice} ₽ {/*СДЕЛАТЬ СТИЛЬ ЗАЧЁРНУТОГО ТЕКСТА*/}
-                                                                    </span>
-                                                                )}
-                                                            </p>
+                                                            {item.product?.description && (
+                                                                <p className={styles.productDescription}>
+                                                                    {item.product.description}
+                                                                </p>
+                                                            )}
                                                         </div>
                                                         <button
                                                             className={styles.removeButton}
@@ -230,6 +227,11 @@ const CartPage = () => {
                                                         </div>
 
                                                         <div className={styles.priceContainer}>
+                                                            {item.product.oldPrice && (
+                                                                <span className={styles.oldPrice}>
+                            {item.product.oldPrice.toLocaleString('ru-RU')} ₽
+                        </span>
+                                                            )}
                                                             <p className={styles.price}>
                                                                 {(item.product.price * item.quantity).toLocaleString('ru-RU')} ₽
                                                             </p>
