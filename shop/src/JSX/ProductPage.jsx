@@ -10,9 +10,10 @@ import { useAuth } from './Hooks/UseAuth';
 const ProductPage = () => {
     const { id } = useParams();
     const { userId, isAuthenticated } = useAuth();
-    
-    const [productData, setProductData] = useState(null); // переименовали для ясности
+    const [productData, setProductData] = useState(null);
+    const [reviewsData, setReviewsData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [reviewsLoading, setReviewsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [isFavorite, setIsFavorite] = useState(false);
@@ -23,30 +24,14 @@ const ProductPage = () => {
     const [showImageModal, setShowImageModal] = useState(false);
     const [favorites, setFavorites] = useState([]);
 
-    const reviews = [
-        {
-            name: "Анна К.",
-            date: "21 мая 2025",
-            rating: 5,
-            title: "Лучшее масло лаванды!",
-            text: "Покупаю уже второй флакон. Аромат просто волшебный - натуральный, нежный, без химических примесей. Добавляю в ванну вечером и засыпаю как младенец. Также заметила, что помогает снять тревожность.",
-            avatar: "https://i.pravatar.cc/150?img=1"
-        },
-        {
-            name: "Игорь С.",
-            date: "14 апреля 2025",
-            rating: 4.5,
-            title: "Качественный продукт",
-            text: "Использую для ароматизации квартиры и добавления в массажное масло. Аромат держится долго, не вызывает аллергии (у меня чувствительная кожа). Единственное - хотелось бы чуть большего объема флакона, но это совсем не критично."
-        }
-    ];
+    
 
-    useEffect(() => {
+        useEffect(() => {
         const fetchProduct = async () => {
             try {
                 setIsLoading(true);
                 const response = await apiRequest(`/api/products/${id}`);
-                setProductData(response); 
+                setProductData(response);
                 
                 if (response.product?.images && response.product.images.length > 0) {
                     setMainImage(`${process.env.REACT_APP_API_URL}${response.product.images[0].url}`);
@@ -70,7 +55,21 @@ const ProductPage = () => {
             }
         };
 
+        const fetchReviews = async () => {
+            try {
+                setReviewsLoading(true);
+                const response = await apiRequest(`/api/reviews/product/${id}`);
+                setReviewsData(response);
+                console.log(response)
+            } catch (err) {
+                console.error('Ошибка загрузки отзывов:', err);
+            } finally {
+                setReviewsLoading(false);
+            }
+        };
+
         fetchProduct();
+        fetchReviews();
     }, [id, userId, isAuthenticated]);
 
     const handleQuantityChange = (amount) => {
@@ -193,6 +192,11 @@ const ProductPage = () => {
         return <div className={styles.error}>Товар не найден</div>;
     }
     const { product } = productData;
+    const reviews = reviewsData?.reviews || [];
+    const averageRating = reviewsData?.averageRating || 0;
+    const ratingCounts = reviewsData?.ratingCounts || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    const totalReviews = reviewsData?.totalReviews || 0;
+
     return (
         <>
         <div className={styles.container}>
@@ -394,68 +398,94 @@ const ProductPage = () => {
                 </div>
 
 
-            <div className={styles.reviewsSection}>
-                <h2 className={styles.sectionTitle}>Отзывы покупателей</h2>
+                <div className={styles.reviewsSection}>
+                    <h2 className={styles.sectionTitle}>Отзывы покупателей</h2>
 
-                <div className={styles.overallRating}>
-                    <div className={styles.ratingSummary}>
-                        <div className={styles.averageRating}>4.7</div>
-                        <div className={styles.stars}>
-                            {renderStars(4)}
-                            <FaStarHalfAlt className={`${styles.star} ${styles.starActive}`} />
+                    <div className={styles.overallRating}>
+                        <div className={styles.ratingSummary}>
+                            <div className={styles.averageRating}>{averageRating.toFixed(1)}</div>
+                            <div className={styles.stars}>
+                                {renderStars(Math.floor(averageRating), averageRating % 1 !== 0)}
+                            </div>
+                            <div className={styles.ratingCount}>на основе {totalReviews} отзывов</div>
                         </div>
-                        <div className={styles.ratingCount}>на основе 128 отзывов</div>
+
+                        <div className={styles.ratingBars}>
+                            {[5, 4, 3, 2, 1].map((star) => (
+                                <div key={star} className={styles.ratingBar}>
+                                    <span className={styles.ratingLabel}>{star}</span>
+                                    <FaStar className={`${styles.star} ${styles.starActive} ${styles.smallStar}`} />
+                                    <div className={styles.barContainer}>
+                                        <div
+                                            className={styles.barFill}
+                                            style={{ 
+                                                width: totalReviews > 0 
+                                                    ? `${(ratingCounts[star] / totalReviews) * 100}%` 
+                                                    : '0%'
+                                            }}
+                                        ></div>
+                                    </div>
+                                    <span className={styles.ratingCount}>{ratingCounts[star]}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <button className={styles.reviewButton}>
+                            Оставить отзыв
+                        </button>
                     </div>
 
-                    <div className={styles.ratingBars}>
-                        {[5, 4, 3, 2, 1].map((star) => (
-                            <div key={star} className={styles.ratingBar}>
-                                <span className={styles.ratingLabel}>{star}</span>
-                                <FaStar className={`${styles.star} ${styles.starActive} ${styles.smallStar}`} />
-                                <div className={styles.barContainer}>
-                                    <div
-                                        className={styles.barFill}
-                                        style={{ width: `${[70, 20, 5, 3, 2][5-star]}%` }}
-                                    ></div>
-                                </div>
-                                <span className={styles.ratingCount}>{[89, 25, 8, 4, 2][5-star]}</span>
+                    {reviewsLoading ? (
+                        <div className={styles.loading}>Загрузка отзывов...</div>
+                    ) : reviews.length > 0 ? (
+                        <>
+                            <div className={styles.reviewsList}>
+                                {reviews.map((review, index) => (
+                                    <div key={index} className={styles.reviewCard}>
+                                        <div className={styles.reviewHeader}>
+                                            <div>
+                                                <div className={styles.reviewAuthor}>{review.userName}</div>
+                                                <div className={styles.reviewDate}>
+                                                    {new Date(review.createdAt).toLocaleDateString('ru-RU', {
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric'
+                                                    })}
+                                                </div>
+                                            </div>
+                                            <div className={styles.stars}>
+                                                {renderStars(Math.floor(review.rating), review.rating % 1 !== 0)}
+                                            </div>
+                                        </div>
+                                        <h3 className={styles.reviewTitle}>{review.title}</h3>
+                                        <p className={styles.reviewText}>{review.text}</p>
+                                        {review.images && review.images.length > 0 && (
+                                            <div className={styles.reviewImages}>
+                                                {review.images.map((image, imgIndex) => (
+                                                    <img 
+                                                        key={imgIndex} 
+                                                        src={`${process.env.REACT_APP_API_URL}${image.url}`} 
+                                                        alt="Фото из отзыва" 
+                                                        className={styles.reviewImage} 
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
 
-                    <button className={styles.reviewButton}>
-                        Оставить отзыв
-                    </button>
-                </div>
-
-                <div className={styles.reviewsList}>
-                    {reviews.map((review, index) => (
-                        <div key={index} className={styles.reviewCard}>
-                            <div className={styles.reviewHeader}>
-                                <div>
-                                    <div className={styles.reviewAuthor}>{review.name}</div>
-                                    <div className={styles.reviewDate}>{review.date}</div>
-                                </div>
-                                <div className={styles.stars}>
-                                    {renderStars(Math.floor(review.rating), review.rating % 1 !== 0)}
-                                </div>
-                            </div>
-                            <h3 className={styles.reviewTitle}>{review.title}</h3>
-                            <p className={styles.reviewText}>{review.text}</p>
-                            {review.avatar && (
-                                <div className={styles.reviewImages}>
-                                    <img src={review.avatar} alt="Фото пользователя" className={styles.reviewImage} />
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-
+                {reviewsData?.hasMore && (
                 <div className={styles.moreReviews}>
                     <button className={styles.moreButton}>
                         Показать еще отзывы
                     </button>
                 </div>
+                )}
+                </>) 
+                : (
+                    <div className={styles.noReviews}>Пока нет отзывов. Будьте первым!</div>
+                )}
             </div>
 
             <div className={styles.reviewForm}>

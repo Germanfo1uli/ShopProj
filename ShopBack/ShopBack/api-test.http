@@ -1527,3 +1527,16 @@ Authorization: Bearer {{userToken}}
 ### Получить корзину пользователя
 GET {{host}}/api/orders/8/cart
 Authorization: Bearer {{userToken}}
+
+### Создание отзыва ###
+POST {{host}/api/reviews}
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "productId":1,
+  "userId": 6,
+  "rating": 5,
+  "header": "BEST",
+  "comment": "Лучший, просто лучший"
+}
