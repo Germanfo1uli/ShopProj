@@ -26,15 +26,15 @@ const ProductPage = () => {
 
     
 
-        useEffect(() => {
+    useEffect(() => {
         const fetchProduct = async () => {
             try {
                 setIsLoading(true);
                 const response = await apiRequest(`/api/products/${id}`);
                 setProductData(response);
                 
-                if (response.product?.images && response.product.images.length > 0) {
-                    setMainImage(`${process.env.REACT_APP_API_URL}${response.product.images[0].url}`);
+                if (response.product?.productImage && response.product.productImage.length > 0) {
+                    setMainImage(`${process.env.REACT_APP_API_URL}${response.product.productImage[0].url}`);
                 }
                 
                 if (userId) {
@@ -59,10 +59,36 @@ const ProductPage = () => {
             try {
                 setReviewsLoading(true);
                 const response = await apiRequest(`/api/reviews/product/${id}`);
-                setReviewsData(response);
-                console.log(response)
+                
+                const reviews = response || [];
+                const totalReviews = reviews.length;
+                const averageRating = totalReviews > 0 
+                    ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
+                    : 0;
+                
+                const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+                reviews.forEach(review => {
+                    const roundedRating = Math.round(review.rating);
+                    if (roundedRating >= 1 && roundedRating <= 5) {
+                        ratingCounts[roundedRating]++;
+                    }
+                });
+                
+                setReviewsData({
+                    reviews,
+                    averageRating,
+                    ratingCounts,
+                    totalReviews
+                });
+                
             } catch (err) {
                 console.error('Ошибка загрузки отзывов:', err);
+                setReviewsData({
+                    reviews: [],
+                    averageRating: 0,
+                    ratingCounts: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+                    totalReviews: 0
+                });
             } finally {
                 setReviewsLoading(false);
             }
@@ -440,13 +466,15 @@ const ProductPage = () => {
                     ) : reviews.length > 0 ? (
                         <>
                             <div className={styles.reviewsList}>
-                                {reviews.map((review, index) => (
-                                    <div key={index} className={styles.reviewCard}>
+                                {reviews.map((review) => (
+                                    <div key={review.id} className={styles.reviewCard}>
                                         <div className={styles.reviewHeader}>
                                             <div>
-                                                <div className={styles.reviewAuthor}>{review.userName}</div>
+                                                <div className={styles.reviewAuthor}>
+                                                    {review.userName || `Пользователь ${review.userId}`}
+                                                </div>
                                                 <div className={styles.reviewDate}>
-                                                    {new Date(review.createdAt).toLocaleDateString('ru-RU', {
+                                                    {new Date(review.createdAt || review.date).toLocaleDateString('ru-RU', {
                                                         year: 'numeric',
                                                         month: 'long',
                                                         day: 'numeric'
@@ -457,8 +485,9 @@ const ProductPage = () => {
                                                 {renderStars(Math.floor(review.rating), review.rating % 1 !== 0)}
                                             </div>
                                         </div>
-                                        <h3 className={styles.reviewTitle}>{review.title}</h3>
-                                        <p className={styles.reviewText}>{review.text}</p>
+                                        <h3 className={styles.reviewTitle}>{review.header || 'Без заголовка'}</h3>
+                                        <p className={styles.reviewText}>{review.text || review.comment || 'Нет текста отзыва'}</p>
+                                        {/* Если есть изображения в отзыве */}
                                         {review.images && review.images.length > 0 && (
                                             <div className={styles.reviewImages}>
                                                 {review.images.map((image, imgIndex) => (
@@ -474,19 +503,11 @@ const ProductPage = () => {
                                     </div>
                                 ))}
                             </div>
-
-                {reviewsData?.hasMore && (
-                <div className={styles.moreReviews}>
-                    <button className={styles.moreButton}>
-                        Показать еще отзывы
-                    </button>
+                        </>
+                    ) : (
+                        <div className={styles.noReviews}>Пока нет отзывов. Будьте первым!</div>
+                    )}
                 </div>
-                )}
-                </>) 
-                : (
-                    <div className={styles.noReviews}>Пока нет отзывов. Будьте первым!</div>
-                )}
-            </div>
 
             <div className={styles.reviewForm}>
                 <h2 className={styles.sectionTitle}>Оставить отзыв</h2>

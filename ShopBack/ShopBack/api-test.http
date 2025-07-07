@@ -1,8 +1,7 @@
 @host = http://localhost:5000
 @contentType = application/json
 @adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjkiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJBZG1pbiIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzUxNjIwMzc1fQ.V0BD6sJInUqjRAD1Ngdr86FxhcEe1vZGjg4AzZzXV-I
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjgiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJnZXJtYW5AbWFpbC5ydSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJleHAiOjE3NTE4MTA5NTl9.tfMmKLEp23k0aD1Sgkj5QNZsvRZTLpkToqaCVFAUfdA
-
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjgiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJnZXJtYW5AbWFpbC5ydSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJleHAiOjE3NTE4NzUwODN9.lg2pdqMTqJuoAwgxaa4JpXObmIS3gB3tyPglab1n3X0
 @refreshToken = 
 
 ### 1. Аутентификация и пользователи ###
@@ -1529,14 +1528,14 @@ GET {{host}}/api/orders/8/cart
 Authorization: Bearer {{userToken}}
 
 ### Создание отзыва ###
-POST {{host}/api/reviews}
+POST {{host}}/api/reviews
 Content-Type: {{contentType}}
 Authorization: Bearer {{userToken}}
 
 {
   "productId":1,
-  "userId": 6,
-  "rating": 5,
-  "header": "BEST",
-  "comment": "Лучший, просто лучший"
+  "userId": 8,
+  "rating": 2,
+  "header": "Bad",
+  "comment": "Плохо, очень плохо"
 }
