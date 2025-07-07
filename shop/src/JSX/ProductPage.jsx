@@ -7,6 +7,7 @@ import sb from "../CSS/Breadcrumbs.module.css";
 import { apiRequest } from './Api/ApiRequest';
 import { useAuth } from './Hooks/UseAuth';
 
+
 const ProductPage = () => {
     const { id } = useParams();
     const { userId, isAuthenticated } = useAuth();
@@ -28,7 +29,8 @@ const ProductPage = () => {
         comment: '',
         rating: 0
     });
-
+    const [specifications, setSpecifications] = useState([]);
+    const [specsLoading, setSpecsLoading] = useState(true);
     
 
     useEffect(() => {
@@ -51,11 +53,14 @@ const ProductPage = () => {
                     setFavorites(favoriteIds);
                     setIsFavorite(favoriteIds.includes(Number(id)));
                 }
-                
-            } catch (err) {
+                await fetchSpecifications(id);
+
+            } 
+            catch (err) {
                 console.error('Ошибка загрузки данных товара:', err);
                 setError('Не удалось загрузить данные товара');
-            } finally {
+            } 
+            finally {
                 setIsLoading(false);
             }
         };
@@ -172,6 +177,20 @@ const ProductPage = () => {
         } catch (error) {
             console.error('Ошибка при добавлении в корзину:', error);
             alert('Не удалось добавить товар в корзину: ' + error.message);
+        }
+    };
+
+    const fetchSpecifications = async (productId) => {
+        try {
+            setSpecsLoading(true);
+            const response = await apiRequest(`/api/productspecifications/product/${productId}`);
+            setSpecifications(response || []);
+            console.log(response)
+        } catch (err) {
+            console.error('Ошибка загрузки спецификаций:', err);
+            setSpecifications([]);
+        } finally {
+            setSpecsLoading(false);
         }
     };
 
@@ -373,17 +392,13 @@ const ProductPage = () => {
                             ))}
                         </div>
 
-                        <div className={styles.description}>
-                            <p>{product.description}</p>
-
-                            <div className={styles.specs}>
-                                {product.specifications?.map((spec, index) => (
-                                    <div key={index} className={styles.specItem}>
-                                        <span className={styles.specLabel}>{spec.label}:</span>
-                                        <span className={styles.specValue}>{spec.value}</span>
-                                    </div>
-                                ))}
-                            </div>
+                        <div className={styles.specifications}>
+                            {specifications.map((spec, index) => (
+                                <div key={index} className={styles.specItem}>
+                                    <span className={styles.specLabel}>{spec.key}:</span>
+                                    <span className={styles.specValue}>{spec.value}</span>
+                                </div>
+                            ))}
                         </div>
 
                         <div className={styles.priceContainer}>
