@@ -1,13 +1,17 @@
-import React, { useState, useCallback } from 'react';
-import {Link, useNavigate} from 'react-router-dom';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaHome, FaShoppingCart, FaBoxOpen, FaStar, FaSearch, FaUser, FaBars, FaTimes } from 'react-icons/fa';
 import st from '../CSS/NavBar.module.css';
 import AuthModal from './Components/AuthModal';
 import { useAuth } from './Hooks/UseAuth.js';
+import {API_BASE_URL, apiRequest} from './Api/ApiRequest';
 
 const NavBar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [showResults, setShowResults] = useState(false);
     const navigate = useNavigate();
 
     const {
@@ -15,6 +19,57 @@ const NavBar = () => {
         login,
         isLoading: authLoading
     } = useAuth();
+
+    // Поиск товаров
+    const searchProducts = useCallback(async (term) => {
+        if (term.trim() === '') {
+            setSearchResults([]);
+            return;
+        }
+
+        try {
+            const results = await apiRequest(`/api/products/search?term=${encodeURIComponent(term)}`);
+            setSearchResults(results);
+        } catch (error) {
+            console.error('Ошибка поиска:', error);
+            setSearchResults([]);
+        }
+    }, []);
+
+    // Обработчик изменения поискового запроса
+    const handleSearchChange = (e) => {
+        const term = e.target.value;
+        setSearchTerm(term);
+        if (term.length > 1) {
+            searchProducts(term);
+            setShowResults(true);
+        } else {
+            setSearchResults([]);
+            setShowResults(false);
+        }
+    };
+
+    // Обработчик выбора товара
+    const handleProductSelect = (productId) => {
+        navigate(`/product/${productId}`);
+        setSearchTerm('');
+        setSearchResults([]);
+        setShowResults(false);
+        closeMenu();
+    };
+
+    // Закрытие результатов при клике вне области поиска
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (e.target.closest(`.${st.searchContainer}`) === null &&
+                e.target.closest(`.${st.mobileSearchContainer}`) === null) {
+                setShowResults(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const toggleMenu = useCallback(() => {
         const newState = !isMenuOpen;
@@ -43,6 +98,44 @@ const NavBar = () => {
         ? 'https://randomuser.me/api/portraits/men/32.jpg'
         : '';
 
+    const renderSearchResults = (isMobile = false) => {
+        if (!showResults) return null;
+
+        return (
+            <div className={isMobile ? st.mobileSearchResults : st.searchResults}>
+                {searchResults.length > 0 ? (
+                    searchResults.map(product => (
+                        <div
+                            key={product.id}
+                            className={isMobile ? st.mobileSearchResultItem : st.searchResultItem}
+                            onClick={() => handleProductSelect(product.id)}
+                        >
+                            <div className={isMobile ? st.mobileSearchResultImage : st.searchResultImage}>
+                                {product.mainImage && product.mainImage.url ? (
+                                    <img
+                                        src={`${API_BASE_URL}${product.mainImage.url}`}
+                                        alt={product.name}
+                                        onError={(e) => {
+                                            e.target.style.display = 'none'; // Скрыть сломанное изображение
+                                        }}
+                                    />
+                                ) : null}
+                            </div>
+                            <div className={isMobile ? st.mobileSearchResultInfo : st.searchResultInfo}>
+                                <h4>{product.name}</h4>
+                                <p>{product.price.toLocaleString()} ₽</p>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className={st.noResults}>
+                        {searchTerm.length > 1 ? 'Ничего не найдено' : 'Введите запрос для поиска'}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     return (
         <>
             <nav className={st.navPage}>
@@ -56,9 +149,13 @@ const NavBar = () => {
                     <FaSearch className={st.searchIcon} />
                     <input
                         type="text"
-                        placeholder="Поиск..."
+                        placeholder="Поиск товара..."
                         className={st.Input}
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        onFocus={() => searchTerm.length > 1 && setShowResults(true)}
                     />
+                    {renderSearchResults()}
                 </div>
 
                 <div className={st.navSection}>
@@ -119,7 +216,11 @@ const NavBar = () => {
                             type="text"
                             placeholder="Поиск..."
                             className={st.mobileInput}
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            onFocus={() => searchTerm.length > 1 && setShowResults(true)}
                         />
+                        {renderSearchResults(true)}
                     </div>
 
                     <div className={st.mobileNavButtons}>
