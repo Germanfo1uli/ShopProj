@@ -5,19 +5,20 @@ using ShopBack.Repositories;
 
 namespace ShopBack.Services
 {
-    public class ReviewsService(IReviewsRepository reviewsRepository, ProductsService productsService) : Service<ProductReviews>(reviewsRepository)
+    public class ReviewsService(IReviewsRepository reviewsRepository, AnalyticsService analyticsService, ProductsService productsService) : Service<ProductReviews>(reviewsRepository)
     {
         private readonly IReviewsRepository _reviewsRepository = reviewsRepository;
+        private readonly AnalyticsService _analyticsService = analyticsService;
         private readonly ProductsService _productsService = productsService;
 
         public async Task<IEnumerable<ProductReviews>> GetProductReviewsAsync(int productId, bool onlyApproved = true)
         {
-            return await _reviewsRepository.GetProductReviewsAsync(productId, onlyApproved);
+            return await _reviewsRepository.GetProductReviewsAsync(productId, onlyApproved) ?? throw new ArgumentException("Reviews not found");
         }
 
         public async Task<IEnumerable<ProductReviews>> GetUserReviewsAsync(int userId)
         {
-            return await _reviewsRepository.GetUserReviewsAsync(userId);
+            return await _reviewsRepository.GetUserReviewsAsync(userId) ?? throw new ArgumentException("Reviews not found");
         }
 
         public async Task ApproveReviewAsync(int reviewId, int moderatorId, string? comment = null)
@@ -26,7 +27,7 @@ namespace ShopBack.Services
 
             review.Approved = true;
             review.ModeratorId = moderatorId;
-            review.Comment = comment;
+            review.ModeratorComment = comment;
             review.ModeratedAt = DateTime.UtcNow;
 
             await UpdateAsync(review);
@@ -38,24 +39,17 @@ namespace ShopBack.Services
 
             review.Approved = false;
             review.ModeratorId = moderatorId;
-            review.Comment = comment;
+            review.ModeratorComment = comment;
             review.ModeratedAt = DateTime.UtcNow;
 
             await RecalculateRating(review.ProductId);
-
             await UpdateAsync(review);
         }
 
         public async Task RecalculateRating(int productId)
         {
-            var reviewsByProductId = await GetProductReviewsAsync(productId, true);
-            decimal averageRating = (decimal)reviewsByProductId.Average(r => r.Rating);
-
-            averageRating = Math.Round(averageRating, 1);
-            averageRating = Math.Clamp(averageRating, 1.0m, 5.0m);
-
-            var reviewCount = reviewsByProductId.Count();
-            await _productsService.AssignmentRating(productId, averageRating, reviewCount);
+            var (averageRating, reviewCount) = await _analyticsService.GetReviewStatsAsync(productId);
+            await _productsService.AssignmentRating(productId, (decimal)averageRating, reviewCount);
         }
     }
 }

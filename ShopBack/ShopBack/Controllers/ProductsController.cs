@@ -7,9 +7,10 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] //api/products
     [ApiController]
-    public class ProductsController(ProductsService productsService) : ControllerBase, IController<Products, ProductCreate, ProductUpdate>
+    public class ProductsController(ProductsService productsService, AnalyticsService analyticsService) : ControllerBase, IController<Products, ProductCreate, ProductUpdate>
     {
         private readonly ProductsService _productsService = productsService;
+        private readonly AnalyticsService _analyticsService = analyticsService;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Products>>> GetAll()
@@ -21,11 +22,31 @@ namespace ShopBack.Controllers
             return Ok(activeProducts);
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Products>> GetById(int id)
+        async Task<ActionResult<Products>> IController<Products, ProductCreate, ProductUpdate>.GetById(int id) // Метод - пустышка
         {
-            var product = await _productsService.GetByIdAsync(id);
-            return Ok(product);
+            return BadRequest(new { Error = "памагити я так не умею" });
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ProductWithStatsDto>> GetById(int id)
+        {
+            var product = await _productsService.DecoratedGetByIdAsync(id);
+
+            if (product.IsActive == false && !User.IsInRole("Admin"))
+            {
+                return Forbid();
+            }
+
+            var (viewCount, favoriteCount) = await _analyticsService.GetProductStatsAsync(id);
+
+            var result = new ProductWithStatsDto
+            {
+                Product = product,
+                ViewCount = viewCount,
+                FavoriteCount = favoriteCount
+            };
+
+            return Ok(result);
         }
 
         [HttpPost]
@@ -120,6 +141,20 @@ namespace ShopBack.Controllers
             var inactiveProducts = await _productsService.GetInactiveProductsAsync();
             return Ok(inactiveProducts);
         }
+
+        [HttpGet("{productId}/stats")]
+        public async Task<ActionResult> GetProductStats(int productId)
+        {
+            try
+            {
+                var result = await _analyticsService.GetProductStatsAsync(productId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 
     public class ProductCreate
@@ -154,5 +189,12 @@ namespace ShopBack.Controllers
         public int? CategoryId { get; set; }
 
         public bool? IsActive { get; set; }
+    }
+
+    public class ProductWithStatsDto
+    {
+        public Products Product { get; set; }
+        public int ViewCount { get; set; }
+        public int FavoriteCount { get; set; }
     }
 }

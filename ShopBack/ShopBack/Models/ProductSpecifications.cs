@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace ShopBack.Models
 {
@@ -21,6 +22,7 @@ namespace ShopBack.Models
         public string Value { get; set; }
 
         [ForeignKey("ProductId")]
+        [JsonIgnore]
         public Products Product { get; set; }
     }
 }

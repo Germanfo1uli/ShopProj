@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace ShopBack.Models
 {
@@ -21,8 +22,8 @@ namespace ShopBack.Models
         public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
 
         [Required]
-        [MaxLength(50)]
-        public string PaymentMethod { get; set; } 
+        [ForeignKey("PayMethod")]
+        public int PaymentMethodId { get; set; } 
 
         [Required]
         [MaxLength(50)]
@@ -32,6 +33,10 @@ namespace ShopBack.Models
         public string? TransactionId { get; set; }
 
         [ForeignKey("OrderId")]
+        [JsonIgnore]
         public virtual Orders? Order { get; set; }
+
+        [ForeignKey("PaymentMethodId")]
+        public virtual PayMethods? PayMethod { get; set; }
     }
 }

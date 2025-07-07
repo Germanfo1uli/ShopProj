@@ -10,6 +10,8 @@ using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Diagnostics;
 using Newtonsoft.Json.Linq;
+using ShopBack.Authorization;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,68 +49,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("SelfOrAdminAccess", policy => // политика по запросам - или сам пользователь, или админ
-        policy.RequireAssertion(async context =>
-        {
-            var httpContext = context.Resource as HttpContext;
-            if (httpContext == null)
-                return false;
+builder.Services.AddCustomPolicies();
 
-            // Проверка роли Admin
-            if (httpContext.User.IsInRole("Admin"))
-                return true;
-
-            // Получаем userId из токена
-            var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(currentUserId))
-                return false;
-
-            // Проверяем userId из route
-            var routeData = httpContext.GetRouteData();
-            var routeUserId = routeData.Values["userId"]?.ToString();
-
-            if (routeUserId == currentUserId)
-                return true;
-
-            // Если в route нет, проверяем body
-            try
-            {
-                // Читаем body запроса
-                httpContext.Request.EnableBuffering(); // Важно для повторного чтения body
-                var body = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
-                httpContext.Request.Body.Position = 0; // Возвращаем позицию для последующего чтения
-
-                if (!string.IsNullOrEmpty(body))
-                {
-                    var json = JObject.Parse(body);
-                    var bodyUserId = json["userId"]?.ToString(); // предполагаем, что userId есть в теле
-
-                    if (bodyUserId == currentUserId)
-                        return true;
-                }
-            }
-            catch
-            {
-                // В случае ошибок парсинга просто игнорируем body
-            }
-
-            return false;
-        }));
-
-    options.AddPolicy("AdminOrModerAccess", policy => // политика по запросам - только админ или модер
-        policy.RequireAssertion(context =>
-        {
-            var httpContext = context.Resource as HttpContext;
-            if (httpContext == null)
-                return false;
-
-            return httpContext.User.IsInRole("Admin") || httpContext.User.IsInRole("Moder");
-        }));
-});
-
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
 builder.Services.AddDbContext<ShopDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
@@ -123,6 +70,7 @@ builder.Services.AddScoped<IReviewsRepository, ReviewsRepository>();
 builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
 builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
 builder.Services.AddScoped<ITokensRepository, TokensRepository>();
+builder.Services.AddScoped<IPayMethodsRepository, PayMethodsRepository>();
 
 //Подключение сервисов 
 builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
@@ -134,6 +82,7 @@ builder.Services.AddScoped<ProductsService>();
 builder.Services.AddScoped<ReviewsService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<PayMethodsRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

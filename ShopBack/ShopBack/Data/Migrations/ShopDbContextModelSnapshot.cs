@@ -66,9 +66,6 @@ namespace ShopBack.Data.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
@@ -86,8 +83,10 @@ namespace ShopBack.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("AmountWOSale")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("ContactPhone")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
@@ -95,15 +94,13 @@ namespace ShopBack.Data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
-                    b.Property<DateTime>("OrderTime")
+                    b.Property<DateTime?>("OrderTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ShippingAddress")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
@@ -130,6 +127,51 @@ namespace ShopBack.Data.Migrations
                     b.ToTable("Orders");
                 });
 
+            modelBuilder.Entity("ShopBack.Models.PayMethods", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CardBrand")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("CardLastFourDigits")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ExpiryMonth")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ExpiryYear")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PaymentProviderToken")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PayMethods");
+                });
+
             modelBuilder.Entity("ShopBack.Models.Payments", b =>
                 {
                     b.Property<int>("Id")
@@ -147,10 +189,8 @@ namespace ShopBack.Data.Migrations
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                    b.Property<int>("PaymentMethodId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -164,6 +204,8 @@ namespace ShopBack.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("PaymentMethodId");
 
                     b.ToTable("Payments");
                 });
@@ -211,6 +253,11 @@ namespace ShopBack.Data.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Header")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime?>("ModeratedAt")
                         .HasColumnType("timestamp with time zone");
@@ -505,7 +552,7 @@ namespace ShopBack.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("ShopBack.Models.Products", "Product")
-                        .WithMany()
+                        .WithMany("OrderItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -518,9 +565,20 @@ namespace ShopBack.Data.Migrations
             modelBuilder.Entity("ShopBack.Models.Orders", b =>
                 {
                     b.HasOne("ShopBack.Models.Users", "User")
-                        .WithMany()
+                        .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ShopBack.Models.PayMethods", b =>
+                {
+                    b.HasOne("ShopBack.Models.Users", "User")
+                        .WithMany("PayMethods")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -534,7 +592,15 @@ namespace ShopBack.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("ShopBack.Models.PayMethods", "PayMethod")
+                        .WithMany("Payments")
+                        .HasForeignKey("PaymentMethodId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Order");
+
+                    b.Navigation("PayMethod");
                 });
 
             modelBuilder.Entity("ShopBack.Models.ProductImages", b =>
@@ -607,7 +673,7 @@ namespace ShopBack.Data.Migrations
             modelBuilder.Entity("ShopBack.Models.Products", b =>
                 {
                     b.HasOne("ShopBack.Models.Categories", "Category")
-                        .WithMany()
+                        .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -667,6 +733,8 @@ namespace ShopBack.Data.Migrations
             modelBuilder.Entity("ShopBack.Models.Categories", b =>
                 {
                     b.Navigation("ChildCategories");
+
+                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("ShopBack.Models.Orders", b =>
@@ -676,8 +744,15 @@ namespace ShopBack.Data.Migrations
                     b.Navigation("Payment");
                 });
 
+            modelBuilder.Entity("ShopBack.Models.PayMethods", b =>
+                {
+                    b.Navigation("Payments");
+                });
+
             modelBuilder.Entity("ShopBack.Models.Products", b =>
                 {
+                    b.Navigation("OrderItems");
+
                     b.Navigation("ProductImage");
 
                     b.Navigation("ProductReview");
@@ -697,6 +772,10 @@ namespace ShopBack.Data.Migrations
             modelBuilder.Entity("ShopBack.Models.Users", b =>
                 {
                     b.Navigation("ModeratedReview");
+
+                    b.Navigation("Orders");
+
+                    b.Navigation("PayMethods");
 
                     b.Navigation("ProductReview");
 

@@ -55,37 +55,42 @@ namespace ShopBack.Repositories
             }
         }
 
-        public async Task<RefreshTokens?> GetRefreshTokenAsync(string token)
+        public async Task<RefreshTokens> GetRefreshTokenAsync(string token)
         {
             return await _context.RefreshTokens
                 .Include(rt => rt.User)
-                .FirstOrDefaultAsync(rt => rt.Token == token);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(rt => rt.Token == token)
+                ?? throw new KeyNotFoundException($"Токена не существует");
         }
 
         public async Task<ICollection<RefreshTokens>> GetRefreshTokensUserAsync(int userId)
         {
             return await _context.RefreshTokens
                 .Where(rt => rt.UserId == userId)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
         public async Task RevokeRefreshTokenAsync(string token)
         {
             var refreshToken = await GetRefreshTokenAsync(token);
-            if (refreshToken != null && refreshToken.Revoked == null)
+            if (refreshToken.Revoked != null)
             {
-                refreshToken.Revoked = DateTime.UtcNow;
-                _context.RefreshTokens.Update(refreshToken);
-                await _context.SaveChangesAsync();
+                throw new UnauthorizedAccessException($"Токен отозван");
             }
+            refreshToken.Revoked = DateTime.UtcNow;
+            _context.RefreshTokens.Update(refreshToken);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<Users> GetUserByTokenAsync(string token)
         {
-            var refreshToken = await _context.RefreshTokens
-                .FirstOrDefaultAsync(rt => rt.Token == token);
+            var refreshToken = await GetRefreshTokenAsync(token);
             return await _context.Users
-                .FirstOrDefaultAsync(u => u.Id == refreshToken.UserId);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == refreshToken.UserId)
+                ?? throw new KeyNotFoundException($"Пользователя не существует");
         }
 
         public async Task RevokeRefreshTokensUserAsync(int userId, string token)
@@ -99,6 +104,7 @@ namespace ShopBack.Repositories
                     _context.RefreshTokens.Update(item);
                 }
             }
+            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> IsRefreshTokenValidAsync(string token)

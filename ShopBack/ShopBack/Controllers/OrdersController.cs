@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using System.Security.Claims;
 
 namespace ShopBack.Controllers
 {
@@ -15,172 +16,152 @@ namespace ShopBack.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<Orders>>> GetAll()
         {
-            try
-            {
-                var orders = await _ordersService.GetAllAsync();
-                return Ok(orders);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ошибка сервера при получении списка заказов");
-            }
+            var orders = await _ordersService.GetAllAsync();
+            return Ok(orders);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Orders>> GetById(int id)
         {
-            try
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            bool isAdmin = User.IsInRole("Admin");
+
+            var order = await _ordersService.GetByIdAsync(id);
+
+            if (order.UserId != currentUserId && !isAdmin)
             {
-                var order = await _ordersService.GetByIdAsync(id);
-                if (order == null) return NotFound("Заказ не найден");
-                return Ok(order);
+                return Forbid();
             }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ошибка сервера при получении заказа");
-            }
+
+            return Ok(order);
         }
 
         [HttpPost]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<Orders>> Create([FromBody] OrdersCreate createDto)
         {
-            if (!ModelState.IsValid) return BadRequest("Некорректные данные заказа");
-
-            try
+            var order = new Orders
             {
-                var order = new Orders
-                {
-                    UserId = createDto.UserId,
-                    OrderTime = createDto.OrderTime ?? DateTime.UtcNow,
-                    Status = createDto.Status,
-                    TotalAmount = createDto.TotalAmount,
-                    ShippingAddress = createDto.ShippingAddress,
-                    ContactPhone = createDto.ContactPhone,
-                    Notes = createDto.Notes,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
+                UserId = createDto.UserId,
+                Status = createDto.Status,
+                TotalAmount = createDto.TotalAmount,
+                ShippingAddress = createDto.ShippingAddress,
+                ContactPhone = createDto.ContactPhone,
+                Notes = createDto.Notes,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
 
-                await _ordersService.AddAsync(order);
-                return CreatedAtAction(nameof(GetById), new { id = order.Id }, order);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ошибка сервера при создании заказа");
-            }
+            await _ordersService.AddAsync(order);
+            return CreatedAtAction(
+               actionName: nameof(GetById),
+               routeValues: new { id = order.Id },
+               value: order
+           );
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<Orders>> Update(int id, [FromBody] OrdersUpdate updateDto)
         {
-            if (!ModelState.IsValid) return BadRequest("Некорректные данные для обновления заказа");
+            var order = await _ordersService.GetByIdAsync(id);
 
-            try
-            {
-                var order = await _ordersService.GetByIdAsync(id);
-                if (order == null) return NotFound("Заказ не найден");
+            order.Status = updateDto.Status ?? order.Status;
+            order.ShippingAddress = updateDto.ShippingAddress ?? order.ShippingAddress;
+            order.ContactPhone = updateDto.ContactPhone ?? order.ContactPhone;
+            order.Notes = updateDto.Notes ?? order.Notes;
+            order.TotalAmount = updateDto.TotalAmount ?? order.TotalAmount;
 
-                if (updateDto.Status != null)
-                    order.Status = updateDto.Status;
-                if (updateDto.ShippingAddress != null)
-                    order.ShippingAddress = updateDto.ShippingAddress;
-                if (updateDto.ContactPhone != null)
-                    order.ContactPhone = updateDto.ContactPhone;
-                if (updateDto.Notes != null)
-                    order.Notes = updateDto.Notes;
-                if (updateDto.TotalAmount.HasValue)
-                    order.TotalAmount = updateDto.TotalAmount.Value;
+            order.UpdatedAt = DateTime.UtcNow;
 
-                order.UpdatedAt = DateTime.UtcNow;
-
-                await _ordersService.UpdateAsync(order);
-                return Ok(order);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ошибка сервера при обновлении заказа");
-            }
+            await _ordersService.UpdateAsync(order);
+            return Ok(order);
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var orderExists = await _ordersService.GetByIdAsync(id) != null;
-                if (!orderExists) return NotFound("Заказ не найден");
-
-                await _ordersService.DeleteAsync(id);
-                return NoContent();
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ошибка сервера при удалении заказа");
-            }
+            await _ordersService.DeleteAsync(id);
+            return NoContent();
         }
 
-        [HttpGet("user/{userId}")]
+        [HttpGet("{userId}/cart")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
+        public async Task<ActionResult<Orders>> GetUserCartOrder(int userId)
+        {
+            var orders = await _ordersService.GetUserCartOrderAsync(userId);
+            return Ok(orders);
+        }
+
+        [HttpGet("{userId}/orders")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<IEnumerable<Orders>>> GetUserOrders(int userId)
         {
-            try
-            {
-                var orders = await _ordersService.GetUserOrdersAsync(userId);
-                return Ok(orders);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ошибка сервера при получении заказов пользователя");
-            }
-        }
-
-        [HttpGet("{orderId}/items")]
-        public async Task<ActionResult<IEnumerable<OrderItems>>> GetOrderItems(int orderId)
-        {
-            try
-            {
-                var items = await _ordersService.GetOrderItemsAsync(orderId);
-                return Ok(items);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ошибка сервера при получении позиций заказа");
-            }
+            var orders = await _ordersService.GetUserOrdersAsync(userId);
+            return Ok(orders);
         }
 
         [HttpGet("{orderId}/payment")]
         public async Task<ActionResult<Payments>> GetOrderPayment(int orderId)
         {
-            try
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            bool isAdmin = User.IsInRole("Admin");
+
+            var order = await _ordersService.GetByIdAsync(orderId);
+
+            if (order.UserId != currentUserId && !isAdmin)
             {
-                var payment = await _ordersService.GetOrderPaymentAsync(orderId);
-                if (payment == null) return NotFound("Платеж по заказу не найден");
-                return Ok(payment);
+                return Forbid();
             }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ошибка сервера при получении платежа по заказу");
-            }
+
+            var payment = await _ordersService.GetOrderPaymentAsync(orderId);
+            return Ok(payment);
         }
 
-        [HttpPatch("{orderId}/status")]
+        [HttpPut("{orderId}/book")]
+        public async Task<IActionResult> BookOrder(int orderId)
+        {
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            bool isAdmin = User.IsInRole("Admin");
+
+            var order = await _ordersService.GetByIdAsync(orderId);
+
+            if (order.UserId != currentUserId && !isAdmin)
+            {
+                return Forbid();
+            }
+
+
+
+            return Ok();
+        }
+
+        [HttpPut("{orderId}/status")]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, [FromBody] string status)
         {
-            try
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            bool isAdmin = User.IsInRole("Admin");
+
+            var order = await _ordersService.GetByIdAsync(orderId);
+
+            if (order.UserId != currentUserId && !isAdmin)
             {
-                await _ordersService.UpdateOrderStatusAsync(orderId, status);
-                return NoContent();
+                return Forbid();
             }
-            catch (Exception)
-            {
-                return StatusCode(500, "Ошибка сервера при обновлении статуса заказа");
-            }
+
+            await _ordersService.UpdateOrderStatusAsync(orderId, status);
+            return Ok(status);
         }
     }
 
     public class OrdersCreate
     {
         public int UserId { get; set; }
-        public DateTime? OrderTime { get; set; }
         public string Status { get; set; }
         public decimal TotalAmount { get; set; }
         public string? ShippingAddress { get; set; }
@@ -190,6 +171,7 @@ namespace ShopBack.Controllers
 
     public class OrdersUpdate
     {
+        public int UserId { get; set; }
         public string? Status { get; set; }
         public decimal? TotalAmount { get; set; }
         public string? ShippingAddress { get; set; }

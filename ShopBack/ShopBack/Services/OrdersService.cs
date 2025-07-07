@@ -1,4 +1,5 @@
-﻿using ShopBack.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using ShopBack.Data;
 using ShopBack.Models;
 using ShopBack.Repositories;
 
@@ -8,15 +9,20 @@ namespace ShopBack.Services
     {
         private readonly IOrdersRepository _ordersRepository = repository;
       
+        public async Task<Orders> GetUserCartOrderAsync(int userId)
+        {
+            return await _ordersRepository.GetUserCartOrderAsync(userId); ;
+        }
+
+        public async Task<int> GetUserCartOrderIdAsync(int userId)
+        {
+            return await _ordersRepository.GetUserCartOrderIdAsync(userId);
+        }
 
         public async Task<IEnumerable<Orders>> GetUserOrdersAsync(int userId)
         {
-            return await _ordersRepository.GetUserOrdersAsync(userId);
-        }
-
-        public async Task<IEnumerable<OrderItems>> GetOrderItemsAsync(int orderId)
-        {
-            return await _ordersRepository.GetOrderItemsAsync(orderId);
+            var cart = await _ordersRepository.GetUserOrdersAsync(userId);
+            return cart;
         }
 
         public async Task<Payments?> GetOrderPaymentAsync(int orderId)
@@ -27,6 +33,13 @@ namespace ShopBack.Services
         public async Task UpdateOrderStatusAsync(int orderId, string status)
         {
             await _ordersRepository.UpdateOrderStatusAsync(orderId, status);
+        }
+
+        public async Task RecalculateTotalAmountAsync(int orderId)
+        {
+            var saleSum = await _ordersRepository.GetOrderSumSaleAsync(orderId);
+            var sum = await _ordersRepository.GetOrderSumAsync(orderId);
+            await _ordersRepository.AssignmentOrderPrice(orderId, saleSum, sum);
         }
     }
 }

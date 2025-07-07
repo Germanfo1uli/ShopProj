@@ -1,8 +1,7 @@
 @host = http://localhost:5000
 @contentType = application/json
 @adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjkiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJBZG1pbiIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzUxNjIwMzc1fQ.V0BD6sJInUqjRAD1Ngdr86FxhcEe1vZGjg4AzZzXV-I
-@userToken = 
-
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjgiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJnZXJtYW5AbWFpbC5ydSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJleHAiOjE3NTE4NzUwODN9.lg2pdqMTqJuoAwgxaa4JpXObmIS3gB3tyPglab1n3X0
 @refreshToken = 
 
 ### 1. Аутентификация и пользователи ###
@@ -27,6 +26,16 @@ Content-Type: {{contentType}}
   "email": "Admin",
   "password": "Password"
 }
+
+###
+POST {{host}}/api/users/login
+Content-Type: {{contentType}}
+
+{
+  "email": "german@mail.ru",
+  "password": "Password"
+}
+
 
 ### Получить всех пользователей (требует авторизации)
 GET {{host}}/api/users
@@ -64,11 +73,11 @@ DELETE {{host}}/api/users/1
 Authorization: Bearer {{adminToken}}
 
 ### Обновить токены
-POST {{host}}/api/users/generatetokens
+POST {{host}}/api/Users/generatetokens
 Content-Type: {{contentType}}
 
 {
-  "token": "your_refresh_token_here"
+  "token": "qrcxDeelzwrhufDWX15E8pTLsYjy7B6g47RDgl9uERHugpl67igAgIfv+d0PZRfWZzInGRNYUsGAepTk3vYuLw=="
 }
 
 ### 2. Роли ###
@@ -1360,4 +1369,173 @@ Authorization: Bearer {{adminToken}}
   "quantityInStock": 15,
   "categoryId": 35,
   "isActive": true
+}
+
+### 6. Заказы и позиции заказов ###
+
+### Создать новый заказ
+POST {{host}}/api/orders
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "userId": 8,
+  "status": "InCart",
+  "totalAmount": 0,
+  "shippingAddress": "ул. Примерная, д. 123, кв. 45",
+  "contactPhone": "+79991234567",
+  "notes": "Позвонить перед доставкой"
+}
+
+### Получить все заказы пользователя
+GET {{host}}/api/orders/user/8
+Authorization: Bearer {{userToken}}
+
+### Создать позицию заказа (order item) для заказа с ID=1
+POST {{host}}/api/orderitems
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "orderId": 1,
+  "productId": 1,
+  "quantity": 2,
+  "unitPrice": 3490
+}
+
+### Создать вторую позицию заказа для того же заказа
+POST {{host}}/api/orderitems
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "orderId": 1,
+  "productId": 3,
+  "quantity": 1,
+  "unitPrice": 2990
+}
+
+### Получить все позиции заказа с ID=1
+GET {{host}}/api/orders/1/items
+Authorization: Bearer {{userToken}}
+
+### Обновить количество товара в позиции заказа с ID=1
+PUT {{host}}/api/orderitems/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "quantity": 3
+}
+
+### Удалить позицию заказа с ID=2
+DELETE {{host}}/api/orderitems/2
+Authorization: Bearer {{userToken}}
+
+### Получить информацию о платеже по заказу (если есть)
+GET {{host}}/api/orders/1/payment
+Authorization: Bearer {{userToken}}
+
+### Получить все заказы (для администратора)
+GET {{host}}/api/orders
+Authorization: Bearer {{adminToken}}
+
+### Получить заказ по ID
+GET {{host}}/api/orders/1
+Authorization: Bearer {{userToken}}
+
+### Обновить информацию о заказе
+PUT {{host}}/api/orders/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "ул. Обновленная, д. 456, кв. 78",
+  "contactPhone": "+79997654321",
+  "notes": "Доставить после 18:00"
+}
+
+### Удалить заказ (для администратора)
+DELETE {{host}}/api/orders/1
+Authorization: Bearer {{adminToken}}
+
+### 7. Платежи (Payments) ###
+
+### Создать новый платеж (требует авторизации)
+POST {{host}}/api/payments
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "orderId": 1,
+  "amount": 9999.99,
+  "paymentMethod": "CreditCard",
+  "status": "Pending",
+  "transactionId": "txn_123456789"
+}
+
+### Получить все платежи (только для администратора)
+GET {{host}}/api/payments
+Authorization: Bearer {{adminToken}}
+
+### Получить платеж по ID (доступно владельцу или админу)
+GET {{host}}/api/payments/1
+Authorization: Bearer {{userToken}}
+
+### Обновить статус платежа
+PUT {{host}}/api/payments/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "status": "Refunded",
+  "transactionId": "txn_refund_987654"
+}
+
+### Удалить платеж
+DELETE {{host}}/api/payments/1
+Authorization: Bearer {{adminToken}}
+
+### Дополнительные тестовые данные:
+
+### Платеж для заказа 2
+POST {{host}}/api/payments
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "orderId": 2,
+  "amount": 5490.00,
+  "paymentMethod": "PayPal",
+  "status": "Pending",
+  "transactionId": "paypal_987654321"
+}
+
+### Платеж для заказа 3 (наличные)
+POST {{host}}/api/payments
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "orderId": 3,
+  "amount": 12990.00,
+  "paymentMethod": "Cash",
+  "status": "Completed",
+  "transactionId": null
+}
+### Получить корзину пользователя
+GET {{host}}/api/orders/8/cart
+Authorization: Bearer {{userToken}}
+
+### Создание отзыва ###
+POST {{host}}/api/reviews
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "productId":1,
+  "userId": 8,
+  "rating": 2,
+  "header": "Bad",
+  "comment": "Плохо, очень плохо"
 }

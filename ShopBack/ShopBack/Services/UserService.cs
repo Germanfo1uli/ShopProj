@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ShopBack.Services
 {
-    public class UserService(IUsersRepository usersRepository, TokenService tokenService) : Service<Users>(usersRepository)
+    public class UserService(IUsersRepository usersRepository, TokenService tokenService, IOrdersRepository ordersRepository) : Service<Users>(usersRepository)
     {
         private readonly IUsersRepository _usersRepository = usersRepository;
         private readonly TokenService _tokenService = tokenService;
+        private readonly IOrdersRepository _ordersRepository = ordersRepository;
 
         public async Task<AuthResult> RegisterAsync(string email, string password, string firstName, string middleName, string lastName)
         {
@@ -33,6 +34,7 @@ namespace ShopBack.Services
             };
 
             await _usersRepository.AddAsync(user);
+            await _ordersRepository.CreateCart(user.Id);
 
             var tokens = await _tokenService.GenerateTokensAsync(user);
 
@@ -48,7 +50,7 @@ namespace ShopBack.Services
 
         public async Task<AuthResult> LoginAsync(string email, string password)
         {
-            var user = await _usersRepository.GetByEmailAsync(email) ?? throw new UnauthorizedAccessException("Неверный email");
+            var user = await _usersRepository.GetByEmailAsync(email) ?? throw new UnauthorizedAccessException("Email незарегистрирован");
             if (!VerifyPassword(password, user.PasswordHash, user.Salt))
                 throw new UnauthorizedAccessException("Неверный email или пароль");
 

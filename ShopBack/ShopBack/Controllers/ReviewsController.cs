@@ -5,6 +5,7 @@ using ShopBack.Services;
 using System.Security.Claims;
 using System.Security;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Reflection.PortableExecutable;
 
 namespace ShopBack.Controllers
 {
@@ -39,7 +40,7 @@ namespace ShopBack.Controllers
 
         [HttpGet("user/{userId}")]
         [Authorize(Policy = "SelfOrAdminAccess")]
-        public async Task<ActionResult<IEnumerable<ProductReviews>>> GetByUser(int userId)
+        public async Task<ActionResult<IEnumerable<ProductReviews>>> GetByUserId(int userId)
         {
             var reviews = await _reviewsService.GetUserReviewsAsync(userId);
             return Ok(reviews);
@@ -54,6 +55,7 @@ namespace ShopBack.Controllers
                 ProductId = createDto.ProductId,
                 UserId = createDto.UserId,
                 Rating = createDto.Rating,
+                Header = createDto.Header,
                 Comment = createDto.Comment,
                 CreatedAt = DateTime.UtcNow,
                 Approved = true 
@@ -75,7 +77,9 @@ namespace ShopBack.Controllers
             var review = await _reviewsService.GetByIdAsync(id);
 
             review.Rating = updateDto.Rating != null ? updateDto.Rating.Value : review.Rating;
+            review.Header = updateDto.Header ?? review.Header;
             review.Comment = updateDto.Comment;
+            
 
             await _reviewsService.UpdateAsync(review);
             await _reviewsService.RecalculateRating(review.ProductId);
@@ -83,22 +87,18 @@ namespace ShopBack.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = "SelfOrAdminAccess")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            var isAdmin = User.IsInRole("Admin");
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
-            {
-                throw new SecurityException("Неверный формат идентификатора пользователя");
-            }
+            bool isAdmin = User.IsInRole("Admin");
 
             var review = await _reviewsService.GetByIdAsync(id);
 
-            if (!isAdmin && userId != review.UserId)
+            if (review.UserId != currentUserId && !isAdmin)
             {
-                return Forbid("Вы можете удалять только свои отзывы");
+                return Forbid();
             }
 
             await _reviewsService.DeleteAsync(id);
@@ -110,7 +110,7 @@ namespace ShopBack.Controllers
         [Authorize(Policy = "AdminOrModerAccess")]
         public async Task<IActionResult> Approve(int id, [FromBody] ModerateReview moderateDto)
         {
-            await _reviewsService.ApproveReviewAsync(id, moderateDto.ModeratorId, moderateDto.Comment);
+            await _reviewsService.ApproveReviewAsync(id, moderateDto.ModeratorId, moderateDto.ModeratorComment);
             return Ok();
         }
 
@@ -118,7 +118,7 @@ namespace ShopBack.Controllers
         [Authorize(Policy = "AdminOrModerAccess")]
         public async Task<IActionResult> Reject(int id, [FromBody] ModerateReview moderateDto)
         {
-            await _reviewsService.RejectReviewAsync(id, moderateDto.ModeratorId, moderateDto.Comment);
+            await _reviewsService.RejectReviewAsync(id, moderateDto.ModeratorId, moderateDto.ModeratorComment);
             return Ok();
         }
     }
@@ -131,6 +131,8 @@ namespace ShopBack.Controllers
 
         public int Rating { get; set; }
 
+        public string Header { get; set; }
+
         public string? Comment { get; set; }
     }
 
@@ -140,6 +142,8 @@ namespace ShopBack.Controllers
 
         public int? Rating { get; set; }
 
+        public string? Header { get; set; }
+
         public string? Comment { get; set; }
     }
 
@@ -147,6 +151,6 @@ namespace ShopBack.Controllers
     {
         public int ModeratorId { get; set; }
 
-        public string? Comment { get; set; }
+        public string? ModeratorComment { get; set; }
     }
 }

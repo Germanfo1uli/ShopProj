@@ -19,7 +19,6 @@ namespace ShopBack.Models
         public Users User { get; set; }
 
         [ForeignKey("ProductId")]
-        [JsonIgnore]
         public Products Product { get; set; }
     }
 }
