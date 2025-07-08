@@ -1,53 +1,87 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaTimes, FaCreditCard, FaApplePay, FaGooglePay, FaCcPaypal, FaCheckCircle, FaChevronDown } from 'react-icons/fa';
 import styles from '../../CSS/PaymentModal.module.css';
-import MirIconSvg from 'C:/Users/user/Desktop/ShopProj/shop/src/CSS/image/miricon.svg';
+import MirIconSvg from '../../CSS/image/miricon.svg';
+import { apiRequest } from '../Api/ApiRequest';
+import { useAuth } from '../Hooks/UseAuth';
 
 const PaymentModal = ({
-                          isOpen,
-                          onClose,
-                          totalAmount,
-                          orderId,
-                          handleFastPayment
-                      }) => {
+    isOpen,
+    onClose,
+    totalAmount,
+    orderId,
+    handleFastPayment,
+    refreshCart
+}) => {
+    const { userId, isAuthenticated } = useAuth();
     const [paymentMethod, setPaymentMethod] = useState('card');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-    const [showSavedCards, setShowSavedCards] = useState(false);
+    const [savedCards, setSavedCards] = useState([]);
+    const [selectedCard, setSelectedCard] = useState(null);
+    const [isLoadingCards, setIsLoadingCards] = useState(false);
 
-    const [savedCards] = useState([
-        { id: 1, last4: '4242', brand: 'Visa', exp: '12/25', isDefault: true },
-        { id: 2, last4: '5555', brand: 'Mastercard', exp: '06/24', isDefault: false },
-    ]);
+    useEffect(() => {
+        const fetchSavedCards = async () => {
+            if (!isOpen || !isAuthenticated || !userId) return;
+            
+            setIsLoadingCards(true);
+            try {
+                const response = await apiRequest(`/api/paymethods/user/${userId}`, {
+                    authenticated: true
+                });
+                setSavedCards(response);
+                const defaultCard = response.find(card => card.isDefault);
+                if (defaultCard) {
+                    setSelectedCard(defaultCard);
+                }
+            } catch (error) {
+                console.error('Ошибка при загрузке карт:', error);
+            } finally {
+                setIsLoadingCards(false);
+            }
+        };
+
+        fetchSavedCards();
+    }, [isOpen, isAuthenticated, userId]);
 
     const MirIcon = () => (
         <span className={styles.mirIcon}>
-        <img
-            src={MirIconSvg}
-            alt="Мир"
-            className={styles.mirIconImage}
-        />
-    </span>
+            <img src={MirIconSvg} alt="Мир" className={styles.mirIconImage} />
+        </span>
     );
-
-    const [selectedCard, setSelectedCard] = useState(null);
 
     const handlePayment = async (method = null) => {
         setIsProcessing(true);
         const paymentType = method || paymentMethod;
 
-        console.log(`Processing ${paymentType} payment...`);
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        setIsProcessing(false);
-        setIsSuccess(true);
-
-        setTimeout(() => {
+        try {
+            await apiRequest(`/api/orders/${orderId}/status`, {
+                method: 'PUT',
+                body: "Processing",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                authenticated: true
+            });
+            console.log(`Processing ${paymentType} payment...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            if (refreshCart) {
+                await refreshCart();
+            }
             onClose();
             setIsSuccess(false);
-        }, 3000);
+            setSelectedCard(null);
+            
+        } 
+        catch (error) {
+            console.error('Ошибка при обработке платежа:', error);
+        } 
+        finally {
+            setIsProcessing(false);
+        }
     };
-
     if (!isOpen) return null;
 
     return (
@@ -73,7 +107,7 @@ const PaymentModal = ({
                         <div className={styles.fastPaymentButtons}>
                             <button
                                 className={styles.fastPaymentButton}
-                                onClick={() => handleFastPayment('applepay')}
+                                onClick={() => handlePayment('applepay')}
                                 disabled={isProcessing}
                             >
                                 <FaApplePay className={styles.fastPaymentIcon} />
@@ -81,7 +115,7 @@ const PaymentModal = ({
                             </button>
                             <button
                                 className={styles.fastPaymentButton}
-                                onClick={() => handleFastPayment('googlepay')}
+                                onClick={() => handlePayment('googlepay')}
                                 disabled={isProcessing}
                             >
                                 <FaGooglePay className={styles.fastPaymentIcon} />
@@ -89,7 +123,7 @@ const PaymentModal = ({
                             </button>
                             <button
                                 className={styles.fastPaymentButton}
-                                onClick={() => handleFastPayment('mirpay')}
+                                onClick={() => handlePayment('mirpay')}
                                 disabled={isProcessing}
                             >
                                 <MirIcon />
@@ -123,82 +157,48 @@ const PaymentModal = ({
 
                         {paymentMethod === 'card' && (
                             <div className={styles.cardForm}>
-                                {savedCards.length > 0 && (
+                                {isLoadingCards ? (
+                                    <div className={styles.loadingMessage}>Загрузка карт...</div>
+                                ) : isAuthenticated && savedCards.length > 0 ? (
                                     <div className={styles.savedCardsContainer}>
-                                        <button
-                                            className={styles.savedCardsToggle}
-                                            onClick={() => setShowSavedCards(!showSavedCards)}
-                                        >
-                                            <span>Сохранённые карты</span>
-                                            <FaChevronDown className={`${styles.chevron} ${showSavedCards ? styles.rotated : ''}`} />
-                                        </button>
-
-                                        {showSavedCards && (
-                                            <div className={styles.savedCardsList}>
-                                                {savedCards.map(card => (
-                                                    <div
-                                                        key={card.id}
-                                                        className={`${styles.savedCard} ${selectedCard?.id === card.id ? styles.selected : ''}`}
-                                                        onClick={() => setSelectedCard(card)}
-                                                    >
-                                                        <div className={styles.cardLogo}>{card.brand === 'Visa' ? 'VISA' : 'MC'}</div>
-                                                        <div className={styles.cardInfo}>
-                                                            <span className={styles.cardNumber}>•••• •••• •••• {card.last4}</span>
-                                                            <span className={styles.cardExp}>Действ. до {card.exp}</span>
-                                                        </div>
-                                                        {card.isDefault && <span className={styles.cardDefault}>По умолчанию</span>}
+                                        <h4 className={styles.savedCardsTitle}>Выберите карту</h4>
+                                        <div className={styles.savedCardsList}>
+                                            {savedCards.map(card => (
+                                                <div
+                                                    key={card.id}
+                                                    className={`${styles.savedCard} ${selectedCard?.id === card.id ? styles.selected : ''}`}
+                                                    onClick={() => setSelectedCard(card)}
+                                                >
+                                                    <div className={styles.cardLogo}>
+                                                        {card.cardBrand === 'visa' && <span>VISA</span>}
+                                                        {card.cardBrand === 'mastercard' && <span>MC</span>}
+                                                        {!['visa', 'mastercard'].includes(card.cardBrand) && <span>CARD</span>}
                                                     </div>
-                                                ))}
-                                            </div>
-                                        )}
+                                                    <div className={styles.cardInfo}>
+                                                        <span className={styles.cardNumber}>•••• •••• •••• {card.cardLastFourDigits}</span>
+                                                        <span className={styles.cardExp}>Действ. до {card.expiryMonth}/{card.expiryYear}</span>
+                                                    </div>
+                                                    {card.isDefault && <span className={styles.cardDefault}>По умолчанию</span>}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                )}
-
-                                {(!selectedCard || !showSavedCards) && (
-                                    <>
-                                        <div className={styles.formGroup}>
-                                            <label>Номер карты</label>
-                                            <input
-                                                type="text"
-                                                placeholder="1234 5678 9012 3456"
-                                                className={styles.cardInput2}
-                                            />
-                                        </div>
-
-                                        <div className={styles.formRow}>
-                                            <div className={styles.formGroup}>
-                                                <label>Срок действия</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="MM/YY"
-                                                    className={styles.cardInput}
-                                                />
-                                            </div>
-
-                                            <div className={styles.formGroup}>
-                                                <label>CVV</label>
-                                                <input
-                                                    type="text"
-                                                    placeholder="123"
-                                                    className={styles.cardInput}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className={styles.formGroup}>
-                                            <label>Имя владельца карты</label>
-                                            <input
-                                                type="text"
-                                                placeholder="IVAN IVANOV"
-                                                className={styles.cardInput2}
-                                            />
-                                        </div>
-
-                                        <div className={styles.saveCardOption}>
-                                            <input type="checkbox" id="saveCard" />
-                                            <label htmlFor="saveCard">Сохранить карту для будущих платежей</label>
-                                        </div>
-                                    </>
+                                ) : isAuthenticated ? (
+                                    <div className={styles.noCardsMessage}>
+                                        У вас нет сохраненных карт. Хотите добавить карту?
+                                        <button 
+                                            className={styles.addCardButton}
+                                            onClick={() => {
+                                                onClose();
+                                            }}
+                                        >
+                                            Добавить карту
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className={styles.authMessage}>
+                                        <p>Войдите в систему, чтобы использовать сохраненные карты</p>
+                                    </div>
                                 )}
                             </div>
                         )}
@@ -206,7 +206,7 @@ const PaymentModal = ({
                         <button
                             className={styles.payButton}
                             onClick={() => handlePayment()}
-                            disabled={isProcessing}
+                            disabled={isProcessing || (paymentMethod === 'card' && isAuthenticated && savedCards.length > 0 && !selectedCard)}
                         >
                             {isProcessing ? 'Обработка платежа...' : `Оплатить ${totalAmount.toLocaleString('ru-RU')} ₽`}
                         </button>
@@ -218,3 +218,5 @@ const PaymentModal = ({
 };
 
 export default PaymentModal;
+
+

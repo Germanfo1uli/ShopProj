@@ -145,25 +145,50 @@ const Payments = () => {
           const response = await apiRequest(`/api/paymethods/user/${userId}`, {
             authenticated: isAuthenticated
           });
-          setCards(response);
-        } catch (error) {
+          setCards(response || []);
+        } 
+        catch (error) {
           console.error('Error fetching cards:', error);
+          setCards([]);
         }
       };
       
       if (userId && isAuthenticated) {
         fetchCards();
+      } else {
+        setCards([]);
       }
-    }, [userId, isAuthenticated]);
+    }, [userId, isAuthenticated, showAddForm]);
 
-    const handleAddSuccess = (newCard) => {
-      if (newCard.isDefault) {
-        setCards(prevCards =>
-          prevCards.map(card => ({ ...card, isDefault: false })))
+    const handleAddSuccess = async (newCard) => {
+      try {
+        const response = await apiRequest(`/api/paymethods/user/${userId}`, {
+          authenticated: isAuthenticated
+        });
+        
+        setCards(response);
+        setShowAddForm(false);
+        
+        if (newCard.isDefault) {
+          setCards(prevCards => 
+            prevCards.map(card => ({
+              ...card,
+              isDefault: card.id === newCard.id
+            }))
+          );
+        }
+      } 
+      catch (error) {
+        console.error('Error refreshing cards:', error);
+        if (newCard.isDefault) {
+          setCards(prevCards =>
+            prevCards.map(card => ({ ...card, isDefault: false }))
+          );
+        }
+        setCards(prevCards => [...prevCards, newCard]);
+        setShowAddForm(false);
       }
-      setCards(prevCards => [...prevCards, newCard]);
-      setShowAddForm(false);
-    };
+  };
 
     const removeCard = async (id) => {
       try {
@@ -190,7 +215,8 @@ const Payments = () => {
             isDefault: card.id === id
           }))
         );
-      } catch (error) {
+      } 
+      catch (error) {
         console.error('Error setting default card:', error);
       }
     };

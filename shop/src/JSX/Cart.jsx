@@ -50,31 +50,31 @@ const CartPage = () => {
         togglePaymentModal();
     }, [togglePaymentModal]);
 
-    useEffect(() => {
-        const fetchCart = async () => {
-            if (!isAuthenticated || !userId) {
-                setIsLoading(false);
-                return;
-            }
+    const fetchCart = useCallback(async () => {
+        if (!isAuthenticated || !userId) {
+            setIsLoading(false);
+            return;
+        }
 
-            try {
-                setIsLoading(true);
-                const cartResponse = await apiRequest(`/api/orders/${userId}/cart`, {
-                    authenticated: isAuthenticated
-                });
-
-                setCart(cartResponse);
-
-            } catch (err) {
-                console.error('Error fetching cart:', err);
-                setError('Не удалось загрузить данные корзины');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchCart();
+        try {
+            setIsLoading(true);
+            const cartResponse = await apiRequest(`/api/orders/${userId}/cart`, {
+                authenticated: isAuthenticated
+            });
+            setCart(cartResponse);
+        } 
+        catch (err) {
+            console.error('Error fetching cart:', err);
+            setError('Не удалось загрузить данные корзины');
+        } 
+        finally {
+            setIsLoading(false);
+        }
     }, [userId, isAuthenticated]);
+
+    useEffect(() => {
+        fetchCart();
+    }, [fetchCart]);
 
     const totalItems = cart?.orderItem?.reduce((sum, item) => sum + item.quantity, 0) || 0;
     const subtotal = cart?.amountWOSale || cart?.orderItem?.reduce((sum, item) => sum + (item.product.price * item.quantity), 0) || 0;
@@ -404,11 +404,12 @@ const CartPage = () => {
                 </div>
             </main>
             <PaymentModal
-                isOpen={isPaymentModalOpen}
+                 isOpen={isPaymentModalOpen}
                 onClose={togglePaymentModal}
                 totalAmount={total}
                 orderId={cart?.id || '0000'}
                 handleFastPayment={handleFastPayment}
+                refreshCart={fetchCart} 
             />
             <Footer/>
         </div>
