@@ -153,7 +153,6 @@ const useToken = () => {
         if (auth.token) {
             checkTokenExpiration();
         }
-        
         return () => clearTimeout(timer);
     }, [auth.token, refreshTokens, logout]);
 

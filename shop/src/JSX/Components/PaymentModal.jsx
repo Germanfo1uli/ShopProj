@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes, FaCreditCard, FaApplePay, FaGooglePay, FaCcPaypal, FaCheckCircle, FaChevronDown } from 'react-icons/fa';
+import { FaTimes, FaCreditCard, FaApplePay, FaGooglePay, FaCheckCircle } from 'react-icons/fa';
 import styles from '../../CSS/PaymentModal.module.css';
 import MirIconSvg from '../../CSS/image/miricon.svg';
 import { apiRequest } from '../Api/ApiRequest';
@@ -63,13 +63,15 @@ const PaymentModal = ({
             const result = await apiRequest('/api/payments/process', {
                 method: 'POST',
                 body: {
-                    UserId: userId,
-                    OrderId: orderId,
-                    PaymentMethodId: selectedCard.id 
+                    userId: userId,
+                    orderId: orderId,
+                    paymentMethodId: selectedCard.id 
                 },
                 authenticated: isAuthenticated
             });
             console.log(selectedCard.id)
+            console.log(userId)
+            console.log(orderId,)
             if (result && result.PaymentId) {
                 console.log('Платеж успешен. ID:', result.PaymentId);
                 setIsSuccess(true);
