@@ -60,6 +60,11 @@ const PaymentModal = ({
         setIsProcessing(true);
 
         try {
+            console.log('Request body:', {
+                userId: userId,
+                orderId: orderId,
+                paymentMethodId: selectedCard.id 
+            });
             const result = await apiRequest('/api/payments/process', {
                 method: 'POST',
                 body: {
@@ -69,9 +74,6 @@ const PaymentModal = ({
                 },
                 authenticated: isAuthenticated
             });
-            console.log(selectedCard.id)
-            console.log(userId)
-            console.log(orderId,)
             if (result && result.PaymentId) {
                 console.log('Платеж успешен. ID:', result.PaymentId);
                 setIsSuccess(true);

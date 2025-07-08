@@ -54,13 +54,14 @@ namespace ShopBack.Services
                 {
                     await _ordersService.PayOrderAsync(orderId);
                 }
-
-                await transaction.CommitAsync();
+                await _paymentRepository.UpdateAsync(payment);
+                await transaction.CommitAsync();    
 
                 return new PaymentGatewayResult(paymentResult.IsSuccess, payment.Id.ToString());
             }
+
             catch (Exception ex)
-            {
+            {  
                 await transaction.RollbackAsync();
                 _logger.LogError(ex, "Ошибка при обработке платежа");
                 throw;
