@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaTimes, FaCreditCard, FaApplePay, FaGooglePay, FaCheckCircle } from 'react-icons/fa';
 import styles from '../../CSS/PaymentModal.module.css';
 import MirIconSvg from '../../CSS/image/miricon.svg';
+import { loadStripe } from '@stripe/stripe-js';
 import { apiRequest } from '../Api/ApiRequest';
 import { useAuth } from '../Hooks/UseAuth';
 
@@ -10,7 +11,6 @@ const PaymentModal = ({
     onClose,
     totalAmount,
     orderId,
-    handleFastPayment,
     refreshCart
 }) => {
     const { userId, isAuthenticated } = useAuth();
@@ -56,39 +56,38 @@ const PaymentModal = ({
             alert('Пожалуйста, выберите карту для оплаты');
             return;
         }
-        
+
         setIsProcessing(true);
 
         try {
-            console.log('Request body:', {
-                userId: userId,
-                orderId: orderId,
-                paymentMethodId: selectedCard.id 
-            });
             const result = await apiRequest('/api/payments/process', {
                 method: 'POST',
                 body: {
                     userId: userId,
                     orderId: orderId,
-                    paymentMethodId: selectedCard.id 
+                    paymentMethodId: selectedCard.id,
                 },
-                authenticated: isAuthenticated
+                authenticated: true
             });
-            if (result && result.PaymentId) {
-                console.log('Платеж успешен. ID:', result.PaymentId);
+
+            if (result) {
+                if (result.requiresAction && result.paymentIntentClientSecret) {
+                    const stripe = await loadStripe('pk_test_51RiD22QEDYKwRuF49r5tJQ3oVIJyl5yN10Ghmk8FGXXwMpToDO0SEwfoCCcd8tSd3VfP5bDFMMBTffnfhq37SWOP00tZz2jKpP');
+                    const { error } = await stripe.confirmCardPayment(
+                        result.paymentIntentClientSecret
+                    );
+                    
+                    if (error) {
+                        throw error;
+                    }
+                }
+                
                 setIsSuccess(true);
                 
                 if (refreshCart) {
                     await refreshCart();
                 }
                 
-                setTimeout(() => {
-                    onClose();
-                    setIsSuccess(false);
-                    setSelectedCard(null);
-                }, 3000);
-            } else {
-                throw new Error('Не удалось обработать платеж');
             }
         } 
         catch (error) {

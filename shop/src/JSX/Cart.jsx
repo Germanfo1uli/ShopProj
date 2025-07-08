@@ -8,14 +8,8 @@ import LoadingSpinner from './Components/LoadingSpinner';
 import AuthModal from './Components/AuthModal';
 import { useNavigate } from 'react-router-dom';
 import PaymentModal from '../JSX/Components/PaymentModal';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { FaShoppingCart, FaTrashAlt, FaTimes, FaMinus, FaPlus, FaCreditCard, FaGift, FaSignInAlt } from 'react-icons/fa';
 import { FaApplePay, FaGooglePay, FaCcPaypal } from 'react-icons/fa';
-
-const stripePromise = loadStripe('your_publishable_key_here');
-
-
 
 const CartPage = () => {
     const [cart, setCart] = useState(null);
