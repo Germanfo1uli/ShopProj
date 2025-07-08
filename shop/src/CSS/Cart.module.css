@@ -71,11 +71,18 @@
 }
 
 body {
+    background-color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+[data-theme="dark"] body {
     background-color: rgb(18, 18, 18);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;
 }
+
 
 .main {
     max-width: 1200px;
@@ -617,6 +624,18 @@ body {
     text-align: center;
     transition: background-color 0.3s;
 }
+.paymentButton img.paymentIcon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    filter: grayscale(100%) contrast(70%);
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .paymentButton img.paymentIcon {
+    filter: grayscale(100%) contrast(50%) brightness(1.5);
+}
+
 
 .promoIcon {
     color: var(--accent-color);

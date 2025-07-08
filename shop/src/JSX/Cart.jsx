@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import PaymentModal from '../JSX/Components/PaymentModal';
 import { FaShoppingCart, FaTrashAlt, FaTimes, FaMinus, FaPlus, FaCreditCard, FaGift, FaSignInAlt } from 'react-icons/fa';
 import { FaApplePay, FaGooglePay, FaCcPaypal } from 'react-icons/fa';
+import MirIconSvg from '../CSS/image/miricon.svg';
 
 const CartPage = () => {
     const [cart, setCart] = useState(null);
@@ -377,9 +378,9 @@ const CartPage = () => {
                                         </button>
                                         <button
                                             className={styles.paymentButton}
-                                            onClick={() => handleFastPayment('paypal')}
+                                            onClick={() => handleFastPayment('mir')}
                                         >
-                                            <FaCcPaypal className={styles.paymentIcon} />
+                                            <img src={MirIconSvg} alt="Мир" className={styles.paymentIcon} />
                                         </button>
                                     </div>
                                 </div>

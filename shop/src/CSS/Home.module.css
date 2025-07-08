@@ -48,8 +48,14 @@
     --slider-btn-color: #e0e0e0;
     --slider-btn-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
-
 .container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 10px;
+    background-color: white;
+    color: var(--text-color);
+}
+[data-theme="dark"] .container {
     width: 100%;
     margin: 0 auto;
     padding: 10px;
