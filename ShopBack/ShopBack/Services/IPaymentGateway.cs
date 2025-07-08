@@ -2,6 +2,6 @@
 {
     public interface IPaymentGateway
     {
-        Task<PaymentGatewayResult> ChargeAsync(string paymentMethodToken, decimal amount, string description);
+        Task<PaymentGatewayResult> ChargeAsync(int paymentId, string paymentMethodToken, decimal amount, int userId, string description);
     }
 }
