@@ -28,7 +28,7 @@ const PaymentModal = ({
             setIsLoadingCards(true);
             try {
                 const response = await apiRequest(`/api/paymethods/user/${userId}`, {
-                    authenticated: true
+                    authenticated: isAuthenticated
                 });
                 setSavedCards(response);
                 const defaultCard = response.find(card => card.isDefault);
@@ -41,7 +41,7 @@ const PaymentModal = ({
                 setIsLoadingCards(false);
             }
         };
-
+        
         fetchSavedCards();
     }, [isOpen, isAuthenticated, userId]);
 
@@ -51,37 +51,51 @@ const PaymentModal = ({
         </span>
     );
 
-    const handlePayment = async (method = null) => {
+    const handlePayment = async () => {
+        if (!selectedCard) {
+            alert('Пожалуйста, выберите карту для оплаты');
+            return;
+        }
+        
         setIsProcessing(true);
-        const paymentType = method || paymentMethod;
 
         try {
-            await apiRequest(`/api/orders/${orderId}/status`, {
-                method: 'PUT',
-                body: "Processing",
-                headers: {
-                    'Content-Type': 'application/json'
+            const result = await apiRequest('/api/payments/process', {
+                method: 'POST',
+                body: {
+                    UserId: userId,
+                    OrderId: orderId,
+                    PaymentMethodId: selectedCard.id 
                 },
-                authenticated: true
+                authenticated: isAuthenticated
             });
-            console.log(`Processing ${paymentType} payment...`);
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            if (refreshCart) {
-                await refreshCart();
+            console.log(selectedCard.id)
+            if (result && result.PaymentId) {
+                console.log('Платеж успешен. ID:', result.PaymentId);
+                setIsSuccess(true);
+                
+                if (refreshCart) {
+                    await refreshCart();
+                }
+                
+                setTimeout(() => {
+                    onClose();
+                    setIsSuccess(false);
+                    setSelectedCard(null);
+                }, 3000);
+            } else {
+                throw new Error('Не удалось обработать платеж');
             }
-            onClose();
-            setIsSuccess(false);
-            setSelectedCard(null);
-            
         } 
         catch (error) {
-            console.error('Ошибка при обработке платежа:', error);
+            console.error('Ошибка платежа:', error);
+            alert(`Ошибка оплаты: ${error.message}`);
         } 
         finally {
             setIsProcessing(false);
         }
     };
+    
     if (!isOpen) return null;
 
     return (
@@ -205,8 +219,8 @@ const PaymentModal = ({
 
                         <button
                             className={styles.payButton}
-                            onClick={() => handlePayment()}
-                            disabled={isProcessing || (paymentMethod === 'card' && isAuthenticated && savedCards.length > 0 && !selectedCard)}
+                            onClick={handlePayment}
+                            disabled={isProcessing || !selectedCard}
                         >
                             {isProcessing ? 'Обработка платежа...' : `Оплатить ${totalAmount.toLocaleString('ru-RU')} ₽`}
                         </button>

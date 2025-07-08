@@ -11,6 +11,7 @@ const Home = () => {
     const sliderRef = useRef(null);
     const [isSwitching, setIsSwitching] = useState(false);
     const [products, setProducts] = useState([]);
+    const [productImages, setProductImages] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -32,8 +33,21 @@ const Home = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const data = await apiRequest('/api/products');
-                const formattedProducts = data.map(product => ({
+                setLoading(true);
+                const productsData = await apiRequest('/api/products');
+                const imagesResponse = await apiRequest('/api/productimages');
+                const imagesByProduct = {};
+                
+                imagesResponse.forEach(image => {
+                    if (!imagesByProduct[image.productId]) {
+                        imagesByProduct[image.productId] = [];
+                    }
+                    imagesByProduct[image.productId].push(image);
+                });
+                
+                setProductImages(imagesByProduct);
+
+                const formattedProducts = productsData.map(product => ({
                     id: product.id,
                     name: product.name,
                     price: product.price.toLocaleString('ru-RU') + ' ₽',
@@ -44,8 +58,10 @@ const Home = () => {
                     specs: product.description ? product.description.substring(0, 50) + '...' : 'Нет описания',
                     rating: 4.5 + Math.random() * 0.5,
                     reviews: Math.floor(Math.random() * 200),
+                    // Временная заглушка, будет заменена при рендере
                     image: 'https://via.placeholder.com/300'
                 }));
+
                 setProducts(formattedProducts);
                 setLoading(false);
             } catch (err) {
@@ -91,6 +107,14 @@ const Home = () => {
     if (products.length === 0) {
         return <LoadingSpinner message="Нет доступных товаров" status="empty" />;
     }
+
+    const getProductImage = (productId) => {
+        if (productImages[productId] && productImages[productId].length > 0) {
+            const mainImage = productImages[productId].find(img => img.isMain) || productImages[productId][0];
+            return mainImage.imageUrl;
+        }
+        return 'https://via.placeholder.com/300'; // Заглушка, если изображений нет
+    };
 
     const recommendedProducts = [...products].sort(() => 0.5 - Math.random()).slice(0, 8);
     const specialOffers = [...products]
@@ -162,7 +186,11 @@ const Home = () => {
                                         <span className={styles.discountBadge}>-{product.discount}%</span>
                                     </div>
                                 )}
-                                <img src={product.image} alt={product.name} className={styles.productImage} />
+                                <img 
+                                    src={getProductImage(product.id)} 
+                                    alt={product.name} 
+                                    className={styles.productImage} 
+                                />
                                 <div className={styles.productInfo}>
                                     <h3 className={styles.productName}>{product.name}</h3>
                                     <p className={styles.productSpecs}>{product.specs}</p>
@@ -209,7 +237,11 @@ const Home = () => {
                                         <span className={styles.discountBadge}>-{product.discount}%</span>
                                     </div>
                                 )}
-                                <img src={product.image} alt={product.name} className={styles.productImage} />
+                                <img 
+                                    src={getProductImage(product.id)} 
+                                    alt={product.name} 
+                                    className={styles.productImage} 
+                                />
                                 <div className={styles.productInfo}>
                                     <h3 className={styles.productName}>{product.name}</h3>
                                     <p className={styles.productSpecs}>{product.specs}</p>
@@ -268,7 +300,11 @@ const Home = () => {
                                         <span className={styles.discountBadge}>-{product.discount}%</span>
                                     </div>
                                 )}
-                                <img src={product.image} alt={product.name} className={styles.productImage} />
+                                <img 
+                                    src={getProductImage(product.id)} 
+                                    alt={product.name} 
+                                    className={styles.productImage} 
+                                />
                                 <div className={styles.productInfo}>
                                     <h3 className={styles.productName}>{product.name}</h3>
                                     <p className={styles.productSpecs}>{product.specs}</p>

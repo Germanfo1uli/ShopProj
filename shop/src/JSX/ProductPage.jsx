@@ -20,6 +20,7 @@ const ProductPage = () => {
     const [isFavorite, setIsFavorite] = useState(false);
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
+    const [productImages, setProductImages] = useState([]);
     const [activeTab, setActiveTab] = useState('description');
     const [mainImage, setMainImage] = useState('');
     const [showImageModal, setShowImageModal] = useState(false);
@@ -35,16 +36,15 @@ const ProductPage = () => {
     const [showCartNotification, setShowCartNotification] = useState(false);
 
     useEffect(() => {
-        const fetchProduct = async () => {
+         const fetchProduct = async () => {
             try {
                 setIsLoading(true);
                 const response = await apiRequest(`/api/products/${id}`);
                 setProductData(response);
-
-                if (response.product?.productImage && response.product.productImage.length > 0) {
-                    setMainImage(`${process.env.REACT_APP_API_URL}${response.product.productImage[0].url}`);
-                }
-
+                const imagesResponse = await apiRequest(`/api/products/${id}/images`);
+                setProductImages(imagesResponse || []);
+                const mainImgResponse = await apiRequest(`/api/products/${id}/main`);
+                setMainImage(mainImgResponse?.imageUrl || '');
                 if (userId) {
                     const userFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
                         authenticated: isAuthenticated
@@ -384,13 +384,13 @@ const ProductPage = () => {
                             </div>
                         )}
                         <div className={styles.thumbnails}>
-                            {product.images?.map((image, index) => (
+                            {productImages.map((image, index) => (
                                 <div
                                     key={index}
-                                    className={`${styles.thumbnail} ${mainImage.includes(image.url) ? styles.thumbnailActive : ''}`}
-                                    onClick={() => setMainImage(`${process.env.REACT_APP_API_URL}${image.url}`)}
+                                    className={`${styles.thumbnail} ${mainImage === image.imageUrl ? styles.thumbnailActive : ''}`}
+                                    onClick={() => setMainImage(image.imageUrl)}
                                 >
-                                    <img src={`${process.env.REACT_APP_API_URL}${image.url}`} alt={`Миниатюра ${index + 1}`} />
+                                    <img src={image.imageUrl} alt={`Миниатюра ${index + 1}`} />
                                 </div>
                             ))}
                         </div>
@@ -414,15 +414,6 @@ const ProductPage = () => {
                                 {renderStars(Math.floor(product.rating || 0), (product.rating || 0) % 1 !== 0)}
                             </div>
                             <span className={styles.ratingText}>{product.rating?.toFixed(1) || 0} ({product.reviewsNumber || 0} отзывов)</span>
-                        </div>
-
-                        <div className={styles.features}>
-                            {product.features?.map((feature, index) => (
-                                <div key={index} className={styles.featureItem}>
-                                    <FaCheckCircle className={styles.featureIcon} />
-                                    <span>{feature}</span>
-                                </div>
-                            ))}
                         </div>
 
                         <div className={styles.specifications}>
@@ -698,11 +689,6 @@ const ProductPage = () => {
                     </form>
                 </div>
 
-                {showImageModal && (
-                    <div className={styles.imageModal} onClick={() => setShowImageModal(false)}>
-                        <img src={mainImage} alt="Увеличенное изображение" className={styles.modalImage} />
-                    </div>
-                )}
             </div>
             <Footer/>
         </>

@@ -19,6 +19,7 @@ const stripePromise = loadStripe('your_publishable_key_here');
 
 const CartPage = () => {
     const [cart, setCart] = useState(null);
+    const [productImages, setProductImages] = useState({}); 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const { userId, isAuthenticated, login } = useAuth();
@@ -62,6 +63,22 @@ const CartPage = () => {
                 authenticated: isAuthenticated
             });
             setCart(cartResponse);
+
+            if (cartResponse?.orderItem?.length > 0) {
+                const productIds = cartResponse.orderItem.map(item => item.product.id);
+                const imagesResponse = await apiRequest('/api/productimages');
+                
+                const imagesByProduct = {};
+                imagesResponse.forEach(image => {
+                    if (productIds.includes(image.productId)) {
+                        if (!imagesByProduct[image.productId]) {
+                            imagesByProduct[image.productId] = [];
+                        }
+                        imagesByProduct[image.productId].push(image);
+                    }
+                });
+                setProductImages(imagesByProduct);
+            }
         } 
         catch (err) {
             console.error('Error fetching cart:', err);
@@ -75,6 +92,14 @@ const CartPage = () => {
     useEffect(() => {
         fetchCart();
     }, [fetchCart]);
+
+    const getProductImage = (productId) => {
+        if (productImages[productId] && productImages[productId].length > 0) {
+            const mainImage = productImages[productId].find(img => img.isMain) || productImages[productId][0];
+            return mainImage.imageUrl;
+        }
+        return 'https://via.placeholder.com/300'; // Заглушка, если изображений нет
+    };
 
     const totalItems = cart?.orderItem?.reduce((sum, item) => sum + item.quantity, 0) || 0;
     const subtotal = cart?.amountWOSale || cart?.orderItem?.reduce((sum, item) => sum + (item.product.price * item.quantity), 0) || 0;
@@ -239,13 +264,11 @@ const CartPage = () => {
                                         <div key={item.id} className={styles.productCard}>
                                             <div className={styles.productContent}>
                                                 <div className={styles.productImageContainer}>
-                                                    {item.product?.productImage?.length > 0 && (
-                                                        <img
-                                                            src={`${process.env.REACT_APP_API_URL}${item.product.productImage[0].url}`}
-                                                            alt={item.product.name}
-                                                            className={styles.productImage}
-                                                        />
-                                                    )}
+                                                    <img
+                                                        src={getProductImage(item.product.id)}
+                                                        alt={item.product.name}
+                                                        className={styles.productImage}
+                                                    />
                                                 </div>
 
                                                 <div className={styles.productInfo}>
@@ -404,7 +427,7 @@ const CartPage = () => {
                 </div>
             </main>
             <PaymentModal
-                 isOpen={isPaymentModalOpen}
+                isOpen={isPaymentModalOpen}
                 onClose={togglePaymentModal}
                 totalAmount={total}
                 orderId={cart?.id || '0000'}

@@ -25,6 +25,7 @@ const Catalog = () => {
     const [sortOption, setSortOption] = useState('popularity');
     const [categories, setCategories] = useState([]);
     const [products, setProducts] = useState([]);
+    const [productImages, setProductImages] = useState({}); 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const {userId, isAuthenticated, logout } = useAuth();
@@ -32,7 +33,6 @@ const Catalog = () => {
     const [hoverTimeout, setHoverTimeout] = useState(null);
 
     const handleMouseEnterCategory = (categoryName) => {
-        // Очищаем предыдущий таймер, если он есть
         if (hoverTimeout) {
             clearTimeout(hoverTimeout);
             setHoverTimeout(null);
@@ -41,7 +41,6 @@ const Catalog = () => {
     };
 
     const handleMouseLeaveCategory = () => {
-        // Устанавливаем таймер на закрытие через 300мс
         const timer = setTimeout(() => {
             setExpandedMainCategory(null);
         }, 300);
@@ -49,7 +48,6 @@ const Catalog = () => {
     };
 
     const handleMouseEnterSubmenu = () => {
-        // Отменяем закрытие при наведении на подменю
         if (hoverTimeout) {
             clearTimeout(hoverTimeout);
             setHoverTimeout(null);
@@ -57,14 +55,13 @@ const Catalog = () => {
     };
 
     const handleMouseLeaveSubmenu = () => {
-        // Закрываем подменю через небольшой промежуток времени
         const timer = setTimeout(() => {
             setExpandedMainCategory(null);
         }, 300);
         setHoverTimeout(timer);
     };
 
-    useEffect(() => {
+        useEffect(() => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
@@ -78,10 +75,10 @@ const Catalog = () => {
                     
                     const favoriteIds = userFavorites.map(fav => Number(fav.id)); 
                     setFavorites(favoriteIds);
-                }
-                else {
+                } else {
                     setFavorites([]);
                 }
+
                 const categoriesStructure = parentCategories.map(parent => {
                     const children = allCategories.filter(
                         cat => cat.parentCategoryId === parent.id
@@ -139,6 +136,19 @@ const Catalog = () => {
                 setCategories([...specialCategories, ...categoriesStructure]);
                 const productsData = await apiRequest('/api/products');
                 setProducts(productsData);
+
+                // Загружаем изображения для всех продуктов
+                const imagesResponse = await apiRequest('/api/productimages');
+                const imagesByProduct = {};
+                
+                imagesResponse.forEach(image => {
+                    if (!imagesByProduct[image.productId]) {
+                        imagesByProduct[image.productId] = [];
+                    }
+                    imagesByProduct[image.productId].push(image);
+                });
+
+                setProductImages(imagesByProduct);
                 
             } catch (err) {
                 console.error('Ошибка загрузки данных:', err);
@@ -149,7 +159,7 @@ const Catalog = () => {
         };
 
         fetchData();
-    }, [userId,  isAuthenticated]);
+    }, [userId, isAuthenticated]);
 
     useEffect(() => {
     if (products.length === 0 || categories.length === 0) return;
@@ -469,7 +479,6 @@ const Catalog = () => {
                             </ul>
                         </div>
 
-                        {/* Остальные фильтры остаются без изменений */}
                         <div className={styles.filterSection}>
                             <h3 className={styles.filterTitle}>Цена</h3>
                             <div className={styles.priceRange}>
@@ -606,65 +615,69 @@ const Catalog = () => {
                         </div>
                         <div className={styles.products}>
                             {filteredProducts.length > 0 ? (
-                                filteredProducts.map((product) => (
-                                    <div key={product.id} className={styles.productCard}>
-                                        <div className={styles.productImage}>
-                                            {/* Основное изображение продукта */}
-                                            {product.mainImage && (
-                                                <img 
-                                                    src={`${process.env.REACT_APP_API_URL}${product.mainImage.url}`} 
-                                                    alt={product.name}
-                                                />
-                                            )}
-                                            
-                                            {/* Бейдж, если есть */}
-                                            {product.badge && (
-                                                <span className={`${styles.badge} ${styles[product.badgeColor || 'blue']}`}>
-                                                    {product.badge}
-                                                </span>
-                                            )}
-                                            
-                                            {/* Кнопка избранного */}
-                                            <button
-                                                className={styles.favoriteButton}
-                                                onClick={() => toggleFavorite(Number(product.id))} 
-                                                disabled={!userId} 
-                                                title={!userId ? "Войдите, чтобы добавить в избранное" : ""}
-                                                >
-                                                {favorites.includes(Number(product.id)) ? ( 
-                                                    <FaHeart className={styles.favoriteIconActive} />
+                                filteredProducts.map((product) => {
+                                    const images = productImages[product.id] || [];
+                                    const mainImage = images.find(img => img.isMain) || images[0];
+
+                                    return (
+                                        <div key={product.id} className={styles.productCard}>
+                                            <div className={styles.productImage}>
+                                                {mainImage ? (
+                                                    <img 
+                                                        src={mainImage.imageUrl} 
+                                                        alt={product.name}
+                                                        className={styles.productImage}
+                                                    />
                                                 ) : (
-                                                    <FaRegHeart className={styles.favoriteIcon} />
+                                                    <div className={styles.imagePlaceholder}>Нет изображения</div>
                                                 )}
-                                            </button>
-                                        </div>
-                                        
-                                        <div className={styles.productInfo}>
-                                            <h3 className={styles.productName}>{product.name}</h3>
-                                             <div className={styles.productPrice}>
-                                                <span className={styles.currentPrice}>
-                                                    {product.price.toLocaleString('ru-RU')} ₽
-                                                </span>
-                                                {/* Исправленная проверка на oldPrice */}
-                                                {product.oldPrice && product.oldPrice > 0 && (
-                                                    <del className={styles.oldPrice}>
-                                                    {product.oldPrice.toLocaleString('ru-RU')} ₽
-                                                    </del>
+                                                
+                                                {product.badge && (
+                                                    <span className={`${styles.badge} ${styles[product.badgeColor || 'blue']}`}>
+                                                        {product.badge}
+                                                    </span>
                                                 )}
-                                                </div>
-                                            <div className={styles.productRating}>
-                                                {renderStars(product.rating || 0)}
-                                                <span className={styles.reviews}>({product.reviews || 0})</span>
+                                                
+                                                <button
+                                                    className={styles.favoriteButton}
+                                                    onClick={() => toggleFavorite(Number(product.id))} 
+                                                    disabled={!userId} 
+                                                    title={!userId ? "Войдите, чтобы добавить в избранное" : ""}
+                                                >
+                                                    {favorites.includes(Number(product.id)) ? ( 
+                                                        <FaHeart className={styles.favoriteIconActive} />
+                                                    ) : (
+                                                        <FaRegHeart className={styles.favoriteIcon} />
+                                                    )}
+                                                </button>
                                             </div>
-                                            <button className={styles.addToCart}>
-                                                <Link to={`/product/${product.id}`} className={styles.linkToCart}>
-                                                    <FaSearch className={styles.cartIcon} />
-                                                    Перейти к товару
-                                                </Link>
-                                            </button>
+                                            
+                                            <div className={styles.productInfo}>
+                                                <h3 className={styles.productName}>{product.name}</h3>
+                                                <div className={styles.productPrice}>
+                                                    <span className={styles.currentPrice}>
+                                                        {product.price.toLocaleString('ru-RU')} ₽
+                                                    </span>
+                                                    {product.oldPrice && product.oldPrice > 0 && (
+                                                        <del className={styles.oldPrice}>
+                                                            {product.oldPrice.toLocaleString('ru-RU')} ₽
+                                                        </del>
+                                                    )}
+                                                </div>
+                                                <div className={styles.productRating}>
+                                                    {renderStars(product.rating || 0)}
+                                                    <span className={styles.reviews}>({product.reviews || 0})</span>
+                                                </div>
+                                                <button className={styles.addToCart}>
+                                                    <Link to={`/product/${product.id}`} className={styles.linkToCart}>
+                                                        <FaSearch className={styles.cartIcon} />
+                                                        Перейти к товару
+                                                    </Link>
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))
+                                    );
+                                })
                             ) : (
                                 <div className={styles.noResults}>
                                     <FaSearch className={styles.noResultsIcon} />
@@ -678,7 +691,7 @@ const Catalog = () => {
                                     </button>
                                 </div>
                             )}
-                        </div>
+                        </div>`
 
                         {filteredProducts.length > 0 && (
                             <div className={styles.pagination}>
