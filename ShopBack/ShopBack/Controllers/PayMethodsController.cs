@@ -117,7 +117,7 @@ namespace ShopBack.Controllers
             }
 
             await _payMethodsService.SetDefaultAsync(id);
-            return NoContent();
+            return Ok(method);
         }
 
     }
