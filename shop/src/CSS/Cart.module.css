@@ -71,7 +71,7 @@
 }
 
 body {
-    background-color: var(--bg-color);
+    background-color: rgb(18, 18, 18);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: var(--text-color);
     transition: background-color 0.3s, color 0.3s;

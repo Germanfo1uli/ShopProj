@@ -1,0 +1,556 @@
+/* Payment Modal Styles */
+.paymentModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+[data-theme="dark"] .paymentModal {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+}
+
+.paymentModal {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    width: 100%;
+    max-width: 450px; /* Уменьшено с 500px */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    position: relative;
+    max-height: 85vh; /* Уменьшено с 90vh */
+    overflow-y: auto;
+}
+
+.paymentModalClose {
+    position: absolute;
+    top: 12px; /* Уменьшено */
+    right: 12px; /* Уменьшено */
+    background: none;
+    border: none;
+    font-size: 1.1rem; /* Уменьшено */
+    cursor: pointer;
+    color: #666;
+}
+
+[data-theme="dark"] .paymentModalClose {
+    color: #aaa;
+}
+
+.paymentModalTitle {
+    font-size: 1.3rem; /* Уменьшено */
+    margin-bottom: 15px; /* Уменьшено */
+    text-align: center;
+}
+
+.paymentAmount {
+    font-size: 1.1rem; /* Уменьшено */
+    text-align: center;
+    margin-bottom: 20px; /* Уменьшено */
+}
+
+.paymentAmount span {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* Fast payment buttons */
+.fastPaymentButtons {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px; /* Уменьшено */
+    margin-bottom: 20px; /* Уменьшено */
+}
+
+.fastPaymentButton {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px; /* Уменьшено */
+    border-radius: 10px; /* Уменьшено */
+    border: 1px solid #444;
+    background-color: #333;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.fastPaymentButton:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(var(--primary-rgb), 0.05);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(var(--primary-rgb), 0.1);
+}
+
+[data-theme="dark"] .fastPaymentButton {
+    background-color: #333;
+    border-color: #555;
+}
+
+[data-theme="dark"] .fastPaymentButton:hover {
+    background-color: #3a3a3a;
+}
+
+.fastPaymentButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.fastPaymentIcon {
+    font-size: 2.2rem; /* Уменьшено */
+    margin-bottom: 5px;
+    color: #ffffff;
+}
+
+/* Стили для иконки Мир */
+.mirIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; /* Уменьшено */
+    height: 36px; /* Уменьшено */
+    margin-bottom: 5px;
+}
+
+.mirIconImage {
+    width: 30px; /* Уменьшено */
+    height: 30px; /* Уменьшено */
+    object-fit: contain;
+    filter: brightness(0) invert(0);
+}
+
+[data-theme="dark"] .mirIconImage {
+    filter: brightness(0) invert(1);
+}
+
+/* Стили для надписей быстрых платежей */
+.fastPaymentButton span {
+    font-size: 0.8rem; /* Уменьшено */
+    font-weight: 500;
+    margin-top: 5px;
+    color: #fff;
+    transition: all 0.2s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Payment separator */
+.paymentSeparator {
+    display: flex;
+    align-items: center;
+    margin: 15px 0; /* Уменьшено */
+    color: #777;
+}
+
+[data-theme="dark"] .paymentSeparator {
+    color: #999;
+}
+
+.paymentSeparator::before,
+.paymentSeparator::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #ddd;
+    margin: 0 8px; /* Уменьшено */
+}
+
+[data-theme="dark"] .paymentSeparator::before,
+[data-theme="dark"] .paymentSeparator::after {
+    background: #444;
+}
+
+/* Payment methods */
+.paymentMethods h3 {
+    font-size: 1rem; /* Уменьшено */
+    margin-bottom: 12px; /* Уменьшено */
+}
+
+.paymentOptions {
+    margin-bottom: 20px; /* Уменьшено */
+    display: flex;
+}
+
+.paymentOption {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px; /* Уменьшено */
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 8px; /* Уменьшено */
+}
+
+[data-theme="dark"] .paymentOption {
+    border-color: #444;
+    background-color: #333;
+}
+
+.paymentOption:hover {
+    border-color: var(--primary-color);
+}
+
+.paymentOption input {
+    display: none;
+}
+
+.paymentOptionContent {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Уменьшено */
+}
+
+.paymentOptionIcon {
+    font-size: 1.3rem; /* Уменьшено */
+}
+
+/* Card form styles */
+.cardForm {
+    margin: 15px 0; /* Уменьшено */
+}
+
+.formGroup {
+    margin-bottom: 12px; /* Уменьшено */
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.85rem; /* Уменьшено */
+}
+
+.cardInput {
+    width: 91%;
+    padding: 8px; /* Уменьшено */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem; /* Уменьшено */
+}
+.cardInput2 {
+    width: 96%;
+    padding: 8px; /* Уменьшено */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem; /* Уменьшено */
+}
+
+[data-theme="dark"] .cardInput {
+    background-color: #333;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .cardInput2{
+    background-color: #333;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.formRow {
+    display: flex;
+    gap: 12px; /* Уменьшено */
+}
+
+.formRow .formGroup {
+    flex: 1;
+}
+
+/* Saved cards styles */
+.savedCardsContainer {
+    margin-bottom: 15px; /* Уменьшено */
+}
+
+.savedCardsToggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 8px; /* Уменьшено */
+    background: none;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    color: inherit;
+}
+
+[data-theme="dark"] .savedCardsToggle {
+    border-color: #444;
+}
+
+.chevron {
+    transition: transform 0.2s;
+}
+
+.rotated {
+    transform: rotate(180deg);
+}
+
+.savedCardsList {
+    margin-top: 8px; /* Уменьшено */
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .savedCardsList {
+    border-color: #444;
+}
+
+.savedCard {
+    display: flex;
+    align-items: center;
+    padding: 10px; /* Уменьшено */
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid #eee;
+}
+
+[data-theme="dark"] .savedCard {
+    border-color: #444;
+}
+
+.savedCard:hover {
+    background-color: rgba(var(--primary-rgb), 0.05);
+}
+
+[data-theme="dark"] .savedCard:hover {
+    background-color: #3a3a3a;
+}
+
+.savedCard.selected {
+    background-color: rgba(var(--primary-rgb), 0.1);
+}
+
+[data-theme="dark"] .savedCard.selected {
+    background-color: #3a3a3a;
+    border-left: 3px solid var(--primary-color);
+}
+
+.cardLogo {
+    width: 36px; /* Уменьшено */
+    height: 22px; /* Уменьшено */
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px; /* Уменьшено */
+    font-size: 0.65rem; /* Уменьшено */
+    font-weight: bold;
+    color: #333;
+}
+
+[data-theme="dark"] .cardLogo {
+    background-color: #444;
+    color: #e0e0e0;
+}
+
+.cardInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.cardNumber {
+    font-weight: 500;
+    font-size: 0.9rem; /* Уменьшено */
+}
+
+.cardExp {
+    font-size: 0.75rem; /* Уменьшено */
+    color: #777;
+}
+
+[data-theme="dark"] .cardExp {
+    color: #aaa;
+}
+
+.cardDefault {
+    font-size: 0.65rem; /* Уменьшено */
+    background-color: rgba(var(--primary-rgb), 0.1);
+    color: var(--primary-color);
+    padding: 2px 5px; /* Уменьшено */
+    border-radius: 10px;
+}
+
+/* Save card option */
+.saveCardOption {
+    display: flex;
+    align-items: center;
+    margin-top: 8px; /* Уменьшено */
+    font-size: 0.85rem; /* Уменьшено */
+}
+
+.saveCardOption input {
+    margin-right: 6px; /* Уменьшено */
+}
+
+/* Pay button - modern adaptive style with smooth out animation */
+/* Pay button - modern adaptive style with smooth out animation */
+.payButton {
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark-color));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    margin-top: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    transform: translateY(0) scale(1);
+}
+
+/* Light theme specific */
+[data-theme="light"] .payButton {
+    --primary-color: #2563eb;
+    --primary-dark-color: #1d4ed8;
+    color: #ffffff;
+}
+
+/* Dark theme specific */
+[data-theme="dark"] .payButton {
+    --primary-color: #3b82f6;
+    --primary-dark-color: #2563eb;
+    color: #f8fafc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Hover effect */
+.payButton:hover {
+    background: linear-gradient(135deg, var(--primary-dark-color), var(--primary-color));
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Smooth return animation when mouse leaves */
+.payButton {
+    transition:
+            transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+            background 0.4s ease,
+            box-shadow 0.4s ease;
+}
+
+/* Active/pressed state */
+.payButton:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+    transition: all 0.1s ease;
+}
+
+/* Disabled state */
+.payButton:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    color: #e2e8f0;
+}
+
+/* Shine effect */
+.payButton::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+            to bottom right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0) 45%,
+            rgba(255, 255, 255, 0.15) 50%,
+            rgba(255, 255, 255, 0) 55%,
+            rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(30deg);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.payButton:hover::after {
+    opacity: 1;
+    animation: shine 1.5s infinite;
+}
+
+/* Smooth shine fade out */
+.payButton:not(:hover)::after {
+    animation: none;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+@keyframes shine {
+    0% {
+        left: -50%;
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 0.5;
+    }
+    100% {
+        left: 150%;
+        opacity: 0;
+    }
+}
+
+/* Success message */
+.paymentSuccess {
+    text-align: center;
+    padding: 15px; /* Уменьшено */
+}
+
+.successIcon {
+    font-size: 2.5rem; /* Уменьшено */
+    color: #3b82f6; /* Изменено на синий */
+    margin-bottom: 12px; /* Уменьшено */
+}
+
+.paymentSuccess h3 {
+    font-size: 1.3rem; /* Уменьшено */
+    margin-bottom: 8px; /* Уменьшено */
+}
+
+.paymentSuccess p {
+    color: #666;
+    font-size: 0.9rem; /* Уменьшено */
+}
+
+[data-theme="dark"] .paymentSuccess p {
+    color: #aaa;
+}
+
+/* Адаптивность */
+@media (max-width: 480px) {
+    .paymentModal {
+        max-width: 95%;
+        padding: 15px;
+    }
+
+    .fastPaymentButtons {
+        flex-direction: column;
+    }
+
+    .fastPaymentButton {
+        padding: 10px;
+    }
+
+    .fastPaymentButton span {
+        font-size: 0.7rem;
+    }
+}

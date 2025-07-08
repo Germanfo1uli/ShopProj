@@ -7,7 +7,7 @@ import { useAuth } from './Hooks/UseAuth';
 import LoadingSpinner from './Components/LoadingSpinner';
 import AuthModal from './Components/AuthModal';
 import { useNavigate } from 'react-router-dom';
-
+import PaymentModal from '../JSX/Components/PaymentModal';
 import { FaShoppingCart, FaTrashAlt, FaTimes, FaMinus, FaPlus, FaCreditCard, FaGift, FaSignInAlt } from 'react-icons/fa';
 import { FaApplePay, FaGooglePay, FaCcPaypal } from 'react-icons/fa';
 
@@ -18,6 +18,14 @@ const CartPage = () => {
     const { userId, isAuthenticated, login } = useAuth();
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const navigate = useNavigate();
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('card');
+
+    const togglePaymentModal = useCallback(() => {
+        const newState = !isPaymentModalOpen;
+        setIsPaymentModalOpen(newState);
+        document.body.style.overflow = newState ? 'hidden' : 'auto';
+    }, [isPaymentModalOpen]);
 
     const toggleAuthModal = useCallback(() => {
         const newState = !isAuthModalOpen;
@@ -30,6 +38,11 @@ const CartPage = () => {
         setIsAuthModalOpen(false);
         navigate('/profile');
     }, [login, navigate]);
+
+    const handleFastPayment = useCallback((method) => {
+        setPaymentMethod(method);
+        togglePaymentModal();
+    }, [togglePaymentModal]);
 
     useEffect(() => {
         const fetchCart = async () => {
@@ -333,7 +346,10 @@ const CartPage = () => {
                                     </div>
                                 </div>
 
-                                <button className={styles.checkoutButton}>
+                                <button
+                                    className={styles.checkoutButton}
+                                    onClick={togglePaymentModal}
+                                >
                                     <FaCreditCard className={styles.checkoutIcon} />
                                     Перейти к оплате
                                 </button>
@@ -347,13 +363,22 @@ const CartPage = () => {
                                 <div className={styles.paymentMethods}>
                                     <h3 className={styles.paymentMethodsTitle}>Или продолжите с</h3>
                                     <div className={styles.paymentButtons}>
-                                        <button className={styles.paymentButton}>
+                                        <button
+                                            className={styles.paymentButton}
+                                            onClick={() => handleFastPayment('applepay')}
+                                        >
                                             <FaApplePay className={styles.paymentIcon} />
                                         </button>
-                                        <button className={styles.paymentButton}>
+                                        <button
+                                            className={styles.paymentButton}
+                                            onClick={() => handleFastPayment('googlepay')}
+                                        >
                                             <FaGooglePay className={styles.paymentIcon} />
                                         </button>
-                                        <button className={styles.paymentButton}>
+                                        <button
+                                            className={styles.paymentButton}
+                                            onClick={() => handleFastPayment('paypal')}
+                                        >
                                             <FaCcPaypal className={styles.paymentIcon} />
                                         </button>
                                     </div>
@@ -372,6 +397,13 @@ const CartPage = () => {
                     )}
                 </div>
             </main>
+            <PaymentModal
+                isOpen={isPaymentModalOpen}
+                onClose={togglePaymentModal}
+                totalAmount={total}
+                orderId={cart?.id || '0000'}
+                handleFastPayment={handleFastPayment}
+            />
             <Footer/>
         </div>
     );
