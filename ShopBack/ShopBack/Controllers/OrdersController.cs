@@ -134,8 +134,7 @@ namespace ShopBack.Controllers
         public async Task<ActionResult<Orders>> ReserveOrder(int userId)
         {
             var orderId = await _ordersService.GetUserCartOrderIdAsync(userId);
-            var order = await _ordersService.ReserveOrderAsync(orderId);
-            return Ok(order);
+            return Ok(orderId);
         }
 
         [HttpPut("{orderId}/status")]
