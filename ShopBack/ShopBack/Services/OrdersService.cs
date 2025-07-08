@@ -42,17 +42,19 @@ namespace ShopBack.Services
             if (order.Status == "Paid")
                 throw new InvalidOperationException("Заказ уже забронирован");
 
-            foreach (var item in order.OrderItem)
+            var orderItems = await _ordersRepository.GetOrderItemsByOrderIdAsync(orderId);
+
+            foreach (var item in orderItems)
             {
-                var product = await _productsRepository.GetByIdAsync(item.ProductId)
-                    ?? throw new InvalidOperationException($"Товар с ID {item.ProductId} не найден");
+                if (item.Product == null)
+                    throw new InvalidOperationException($"Товар с ID {item.ProductId} не найден");
 
-                if (product.QuantityInStock < item.Quantity)
+                if (item.Product.QuantityInStock < item.Quantity)
                     throw new InvalidOperationException(
-                        $"Недостаточно товара {product.Name} на складе. Доступно: {product.QuantityInStock}, требуется: {item.Quantity}");
+                        $"Недостаточно товара {item.Product.Name} на складе. Доступно: {item.Product.QuantityInStock}, требуется: {item.Quantity}");
 
-                product.QuantityInStock -= item.Quantity;
-                await _productsRepository.UpdateAsync(product);
+                item.Product.QuantityInStock -= item.Quantity;
+                await _productsRepository.UpdateAsync(item.Product);
             }
 
             await UpdateOrderStatusAsync(orderId, "Paid");
