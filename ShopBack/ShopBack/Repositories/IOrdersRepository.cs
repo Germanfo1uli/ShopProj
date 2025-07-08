@@ -23,5 +23,7 @@ namespace ShopBack.Repositories
         Task AssignmentOrderPrice(int orderId, decimal sumSale, decimal sum); // Присваивает значения сумм заказу
 
         Task UpdateOrderStatusAsync(int orderId, string status); // Изменяет статус заказа ("Processing" → "Completed")
+
+        Task <IEnumerable<OrderItems>> GetOrderItemsByOrderIdAsync(int orderId); // Получает все товары в заказе
     }
 }

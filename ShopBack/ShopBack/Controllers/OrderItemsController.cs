@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using Stripe;
+using System.Security.Claims;
 
 namespace ShopBack.Controllers
 {
@@ -65,12 +67,22 @@ namespace ShopBack.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = "SelfOrAdminAccess")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            var order = await _orderItemsService.GetByIdAsync(id);
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            bool isAdmin = User.IsInRole("Admin");
+
+            var orderItem = await _orderItemsService.GetByIdAsync(id);
+            var order = await _ordersService.GetByIdAsync(orderItem.OrderId);
+
+            if (order.UserId != currentUserId && !isAdmin)
+            {
+                return Forbid();
+            }
+
             await _orderItemsService.DeleteAsync(id);
-            await _ordersService.RecalculateTotalAmountAsync(order.OrderId);
+            await _ordersService.RecalculateTotalAmountAsync(order.Id);
             return NoContent();
         }
     }
