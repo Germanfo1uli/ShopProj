@@ -21,7 +21,13 @@ namespace ShopBack.Services
                     Currency = "rub",
                     PaymentMethod = paymentMethodToken,
                     Description = description,
-                    Confirm = true
+                    Confirm = true,
+                    ReturnUrl = "http://localhost:3000/cart",
+                    AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
+                    {
+                        Enabled = true,
+                        AllowRedirects = "always"
+                    }
                 };
 
                 var service = new PaymentIntentService(_stripeClient);

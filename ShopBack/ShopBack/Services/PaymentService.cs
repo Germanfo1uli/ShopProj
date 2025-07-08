@@ -54,8 +54,10 @@ namespace ShopBack.Services
                 {
                     await _ordersService.PayOrderAsync(orderId);
                 }
+
                 await _paymentRepository.UpdateAsync(payment);
-                await transaction.CommitAsync();    
+
+                await transaction.CommitAsync();
 
                 return new PaymentGatewayResult(paymentResult.IsSuccess, payment.Id.ToString());
             }
