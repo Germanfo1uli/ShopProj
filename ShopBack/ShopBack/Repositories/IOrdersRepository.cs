@@ -4,6 +4,8 @@ namespace ShopBack.Repositories
 {
     public interface IOrdersRepository : IRepository<Orders>
     {
+        Task<Orders> GetByIdNoTrackingAsync(int id); // Получить по айди без трекинга
+
         Task CreateCart(int userId); // Создает новую корзину (Нужно для нового пользователя)
 
         Task<Orders> GetUserCartOrderAsync(int userId); // Получает корзину пользователя

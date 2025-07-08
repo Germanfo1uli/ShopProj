@@ -1,15 +1,18 @@
 ﻿using ShopBack.Models;
 using ShopBack.Repositories;
+using ShopBack.Services;
 
 namespace ShopBack.Services
 {
-    public class PaymentService(IOrdersRepository ordersRepository,
+    public class PaymentService(OrdersService ordersService,
+                                IOrdersRepository ordersRepository,
                                 IPayMethodsRepository payMethodsRepository,
                                 IRepository<Payments> paymentRepository,
                                 IPaymentGateway paymentGateway,
                                 IUnitOfWork unitOfWork,
                                 ILogger<PaymentService> logger) : Service<Payments>(paymentRepository)
     {
+        private readonly OrdersService _ordersService = ordersService;
         private readonly IOrdersRepository _ordersRepository = ordersRepository;
         private readonly IPayMethodsRepository _payMethodsRepository = payMethodsRepository;
         private readonly IPaymentGateway _paymentGateway = paymentGateway;
@@ -23,11 +26,10 @@ namespace ShopBack.Services
 
             try
             {
-                var order = await _ordersRepository.GetByIdAsync(orderId);
-
+                var order = await _ordersRepository.GetByIdNoTrackingAsync(orderId);
                 var paymentMethod = await _payMethodsRepository.GetByIdAsync(paymentMethodId);
 
-                if (order.Status != "Awaiting") throw new InvalidOperationException("Заказ не готов к оплате");
+                if (order.Status != "Cart") throw new InvalidOperationException("Неверный статус заказа");
 
                 var payment = new Payments
                 {
@@ -50,11 +52,9 @@ namespace ShopBack.Services
 
                 if (paymentResult.IsSuccess)
                 {
-                    order.Status = "Paid";
-                    order.UpdatedAt = DateTime.UtcNow;
+                    await _ordersService.PayOrderAsync(orderId);
                 }
 
-                await _ordersRepository.UpdateAsync(order);
                 await transaction.CommitAsync();
 
                 return new PaymentGatewayResult(paymentResult.IsSuccess, payment.Id.ToString());

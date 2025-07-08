@@ -36,37 +36,29 @@ namespace ShopBack.Services
             return await _ordersRepository.GetOrderPaymentAsync(orderId);
         }
 
-        public async Task<Orders> ReserveOrderAsync(int orderId) // Бронирование заказа в корзине
+        public async Task<Orders> PayOrderAsync(int orderId) // Бронирование заказа в корзине
         {
-            using var transaction = await _unitOfWork.BeginTransactionAsync(); // Транзакция, нужна для массовой обработки данных
-            try
+            var order = await _ordersRepository.GetByIdNoTrackingAsync(orderId);
+            if (order.Status == "Paid")
+                throw new InvalidOperationException("Заказ уже забронирован");
+
+            foreach (var item in order.OrderItem)
             {
-                var order = await _ordersRepository.GetByIdAsync(orderId);
-                if (order.Status == "Awaiting")
-                    throw new InvalidOperationException("Заказ уже забронирован");
+                var product = await _productsRepository.GetByIdAsync(item.ProductId)
+                    ?? throw new InvalidOperationException($"Товар с ID {item.ProductId} не найден");
 
-                foreach (var item in order.OrderItem)
-                {
-                    var product = await _productsRepository.GetByIdAsync(item.ProductId) ?? throw new InvalidOperationException($"Товар с ID {item.ProductId} не найден");
+                if (product.QuantityInStock < item.Quantity)
+                    throw new InvalidOperationException(
+                        $"Недостаточно товара {product.Name} на складе. Доступно: {product.QuantityInStock}, требуется: {item.Quantity}");
 
-                    if (product.QuantityInStock < item.Quantity)
-                        throw new InvalidOperationException(
-                            $"Недостаточно товара {product.Name} на складе. Доступно: {product.QuantityInStock}, требуется: {item.Quantity}");
-
-                    product.QuantityInStock -= item.Quantity;
-                    await _productsRepository.UpdateAsync(product);
-                }
-
-                await UpdateOrderStatusAsync(orderId, "Awaiting");
-                await _ordersRepository.CreateCart(order.UserId);
-                await _unitOfWork.CommitAsync(transaction);
-                return order;
+                product.QuantityInStock -= item.Quantity;
+                await _productsRepository.UpdateAsync(product);
             }
-            catch
-            {
-                await _unitOfWork.RollbackAsync(transaction);
-                throw;
-            }
+
+            await UpdateOrderStatusAsync(orderId, "Paid");
+            await _ordersRepository.CreateCart(order.UserId);
+            order.Status = "Paid";
+            return order;
         }
 
         public async Task ClearCartAsync(int userId)

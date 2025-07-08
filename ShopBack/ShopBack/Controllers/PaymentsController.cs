@@ -105,7 +105,7 @@ namespace ShopBack.Controllers
                 request.PaymentMethodId);
 
             return result.IsSuccess
-                ? Ok(new { PaymentId = result.PaymentId })
+                ? Ok( result.PaymentId )
                 : BadRequest("Оплата не прошла");
         }
     }

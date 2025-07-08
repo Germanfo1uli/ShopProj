@@ -21,6 +21,9 @@ namespace ShopBack.Repositories
         public async Task<Orders> GetByIdNoTrackingAsync(int id)
         {
             return await _context.Orders
+                .Include(o => o.OrderItem)
+                    .ThenInclude(oi => oi.Product)
+                .Include(o => o.Payment)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(o => o.Id == id)
                 ?? throw new KeyNotFoundException($"Заказ с ID {id} не найден");
@@ -127,6 +130,7 @@ namespace ShopBack.Repositories
                 ?? throw new KeyNotFoundException($"Заказ с ID {orderId} не найден");
             order.Status = status;
             order.UpdatedAt = DateTime.UtcNow;
+            _context.Orders.Update(order);
             await _context.SaveChangesAsync();
         }
         public async Task<decimal> GetOrderSumSaleAsync(int orderId)
