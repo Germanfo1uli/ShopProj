@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from '../CSS/Cart.module.css';
 import Footer from "./Components/Footer";
 import sb from "../CSS/Breadcrumbs.module.css";
 import { apiRequest } from './Api/ApiRequest';
 import { useAuth } from './Hooks/UseAuth';
+import LoadingSpinner from './Components/LoadingSpinner';
+import AuthModal from './Components/AuthModal';
+import { useNavigate } from 'react-router-dom';
+import PaymentModal from '../JSX/Components/PaymentModal';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { FaShoppingCart, FaTrashAlt, FaTimes, FaMinus, FaPlus, FaCreditCard, FaGift } from 'react-icons/fa';
+import { FaShoppingCart, FaTrashAlt, FaTimes, FaMinus, FaPlus, FaCreditCard, FaGift, FaSignInAlt } from 'react-icons/fa';
 import { FaApplePay, FaGooglePay, FaCcPaypal } from 'react-icons/fa';
 
 const stripePromise = loadStripe('your_publishable_key_here');
@@ -17,7 +21,34 @@ const CartPage = () => {
     const [cart, setCart] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const { userId, isAuthenticated } = useAuth();
+    const { userId, isAuthenticated, login } = useAuth();
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const navigate = useNavigate();
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('card');
+
+    const togglePaymentModal = useCallback(() => {
+        const newState = !isPaymentModalOpen;
+        setIsPaymentModalOpen(newState);
+        document.body.style.overflow = newState ? 'hidden' : 'auto';
+    }, [isPaymentModalOpen]);
+
+    const toggleAuthModal = useCallback(() => {
+        const newState = !isAuthModalOpen;
+        setIsAuthModalOpen(newState);
+        document.body.style.overflow = newState ? 'hidden' : 'auto';
+    }, [isAuthModalOpen]);
+
+    const handleLoginSuccess = useCallback((token, refreshToken, userId) => {
+        login(token, refreshToken, userId);
+        setIsAuthModalOpen(false);
+        navigate('/profile');
+    }, [login, navigate]);
+
+    const handleFastPayment = useCallback((method) => {
+        setPaymentMethod(method);
+        togglePaymentModal();
+    }, [togglePaymentModal]);
 
     useEffect(() => {
         const fetchCart = async () => {
@@ -31,9 +62,9 @@ const CartPage = () => {
                 const cartResponse = await apiRequest(`/api/orders/${userId}/cart`, {
                     authenticated: isAuthenticated
                 });
-                
+
                 setCart(cartResponse);
-                
+
             } catch (err) {
                 console.error('Error fetching cart:', err);
                 setError('Не удалось загрузить данные корзины');
@@ -52,27 +83,27 @@ const CartPage = () => {
 
     const handleQuantityChange = async (id, newQuantity) => {
         if (newQuantity < 1) return;
-        
+
         try {
             await apiRequest(`/api/orderitems/${id}`, {
                 method: 'PUT',
-                body: { 
-                    quantity: newQuantity 
+                body: {
+                    quantity: newQuantity
                 },
                 authenticated: isAuthenticated
             });
-            
+
             setCart(prev => {
                 const updatedItems = prev.orderItem.map(item =>
                     item.id === id ? { ...item, quantity: newQuantity } : item
                 );
-                
-                const newTotal = updatedItems.reduce((sum, item) => 
+
+                const newTotal = updatedItems.reduce((sum, item) =>
                     sum + (item.product.price * item.quantity), 0);
-                
-                const newAmountWOSale = updatedItems.reduce((sum, item) => 
+
+                const newAmountWOSale = updatedItems.reduce((sum, item) =>
                     sum + (item.product.oldPrice * item.quantity), 0);
-                
+
                 return {
                     ...prev,
                     orderItem: updatedItems,
@@ -92,15 +123,15 @@ const CartPage = () => {
                 method: 'DELETE',
                 authenticated: isAuthenticated
             });
-            
+
             setCart(prev => {
                 const newOrderItems = prev.orderItem.filter(item => item.id !== id);
                 return {
                     ...prev,
                     orderItem: newOrderItems,
-                    totalAmount: newOrderItems.reduce((sum, item) => 
+                    totalAmount: newOrderItems.reduce((sum, item) =>
                         sum + (item.product.price * item.quantity), 0),
-                    amountWOSale: newOrderItems.reduce((sum, item) => 
+                    amountWOSale: newOrderItems.reduce((sum, item) =>
                         sum + (item.product.oldPrice * item.quantity), 0)
                 };
             });
@@ -112,19 +143,19 @@ const CartPage = () => {
 
     const clearCart = async () => {
         if (!cart?.orderItem?.length) return;
-        
+
         try {
             await Promise.all(
-                cart.orderItem.map(item => 
+                cart.orderItem.map(item =>
                     apiRequest(`/api/orderitems/${item.id}`, {
                         method: 'DELETE',
                         authenticated: isAuthenticated
                     })
                 )
             );
-            
-            setCart(prev => ({ 
-                ...prev, 
+
+            setCart(prev => ({
+                ...prev,
                 orderItem: [],
                 totalAmount: 0,
                 amountWOSale: 0
@@ -136,17 +167,38 @@ const CartPage = () => {
     };
 
     if (isLoading) {
-        return <div className={styles.loading}>Загрузка корзины...</div>;
+        return <LoadingSpinner message="Загружаем корзину..." status="loading" />;
     }
 
     if (error) {
-        return <div className={styles.error}>{error}</div>;
+        return <LoadingSpinner message={error} status="error" />;
     }
 
     if (!isAuthenticated) {
         return (
-            <div className={styles.error}>
-                Пожалуйста, войдите в систему, чтобы просмотреть корзину
+            <div className={styles.body}>
+                <div className={styles.authRequired}>
+                    <div className={styles.authContent}>
+                        <div className={styles.authIcon}>
+                            <FaShoppingCart />
+                        </div>
+                        <h2 className={styles.authTitle}>Корзина недоступна</h2>
+                        <p className={styles.authMessage}>Пожалуйста, войдите в систему, чтобы просмотреть корзину</p>
+                        <button
+                            onClick={toggleAuthModal}
+                            className={styles.authButton}
+                        >
+                            <FaSignInAlt className={styles.authButtonIcon} />
+                            Войти в систему
+                        </button>
+                    </div>
+                </div>
+                <AuthModal
+                    isOpen={isAuthModalOpen}
+                    onClose={toggleAuthModal}
+                    onLoginSuccess={handleLoginSuccess}
+                />
+                <Footer />
             </div>
         );
     }
@@ -200,14 +252,11 @@ const CartPage = () => {
                                                     <div className={styles.productHeader}>
                                                         <div>
                                                             <h3 className={styles.productName}>{item.product?.name || 'Товар'}</h3>
-                                                            <p className={styles.productDescription}>
-                                                                Цена: {item.product.price} ₽
-                                                                {item.product.oldPrice && (
-                                                                    <span className={styles.oldPrice}>
-                                                                        {item.product.oldPrice} ₽ {/*СДЕЛАТЬ СТИЛЬ ЗАЧЁРНУТОГО ТЕКСТА*/}
-                                                                    </span>
-                                                                )}
-                                                            </p>
+                                                            {item.product?.description && (
+                                                                <p className={styles.productDescription}>
+                                                                    {item.product.description}
+                                                                </p>
+                                                            )}
                                                         </div>
                                                         <button
                                                             className={styles.removeButton}
@@ -235,6 +284,11 @@ const CartPage = () => {
                                                         </div>
 
                                                         <div className={styles.priceContainer}>
+                                                            {item.product.oldPrice && (
+                                                                <span className={styles.oldPrice}>
+                                                                    {item.product.oldPrice.toLocaleString('ru-RU')} ₽
+                                                                </span>
+                                                            )}
                                                             <p className={styles.price}>
                                                                 {(item.product.price * item.quantity).toLocaleString('ru-RU')} ₽
                                                             </p>
@@ -298,7 +352,10 @@ const CartPage = () => {
                                     </div>
                                 </div>
 
-                                <button className={styles.checkoutButton}>
+                                <button
+                                    className={styles.checkoutButton}
+                                    onClick={togglePaymentModal}
+                                >
                                     <FaCreditCard className={styles.checkoutIcon} />
                                     Перейти к оплате
                                 </button>
@@ -312,13 +369,22 @@ const CartPage = () => {
                                 <div className={styles.paymentMethods}>
                                     <h3 className={styles.paymentMethodsTitle}>Или продолжите с</h3>
                                     <div className={styles.paymentButtons}>
-                                        <button className={styles.paymentButton}>
+                                        <button
+                                            className={styles.paymentButton}
+                                            onClick={() => handleFastPayment('applepay')}
+                                        >
                                             <FaApplePay className={styles.paymentIcon} />
                                         </button>
-                                        <button className={styles.paymentButton}>
+                                        <button
+                                            className={styles.paymentButton}
+                                            onClick={() => handleFastPayment('googlepay')}
+                                        >
                                             <FaGooglePay className={styles.paymentIcon} />
                                         </button>
-                                        <button className={styles.paymentButton}>
+                                        <button
+                                            className={styles.paymentButton}
+                                            onClick={() => handleFastPayment('paypal')}
+                                        >
                                             <FaCcPaypal className={styles.paymentIcon} />
                                         </button>
                                     </div>
@@ -337,6 +403,13 @@ const CartPage = () => {
                     )}
                 </div>
             </main>
+            <PaymentModal
+                isOpen={isPaymentModalOpen}
+                onClose={togglePaymentModal}
+                totalAmount={total}
+                orderId={cart?.id || '0000'}
+                handleFastPayment={handleFastPayment}
+            />
             <Footer/>
         </div>
     );

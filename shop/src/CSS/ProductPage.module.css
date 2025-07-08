@@ -479,6 +479,273 @@
     color: var(--price-color, #1e40af);
     margin: 0;
 }
+/* Success Animation Styles - Alternative Version */
+.successAnimation {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 30px 40px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    max-width: 90%;
+    width: 320px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .successAnimation {
+    background-color: rgba(30, 30, 30, 0.95);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.successCheckmark {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 20px;
+    position: relative;
+}
+
+.checkIcon {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    border-radius: 50%;
+    box-sizing: border-box;
+    border: 5px solid #4CAF50;
+    background-color: white;
+    animation: scaleIn 0.3s ease-out;
+}
+
+[data-theme="dark"] .checkIcon {
+    background-color: #222;
+    border-color: #66BB6A;
+}
+
+.checkIcon::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border: 5px solid rgba(76, 175, 80, 0.2);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+[data-theme="dark"] .checkIcon::before {
+    border-color: rgba(102, 187, 106, 0.3);
+}
+
+.iconLine {
+    height: 6px;
+    background-color: #4CAF50;
+    display: block;
+    border-radius: 3px;
+    position: absolute;
+    z-index: 10;
+    animation: fadeIn 0.3s ease-out;
+}
+
+[data-theme="dark"] .iconLine {
+    background-color: #66BB6A;
+}
+
+/* Стили для уведомления о добавлении в корзину */
+.cartNotification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out forwards;
+    max-width: 350px;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .cartNotification {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.cartNotificationContent {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background-color: #fff;
+    color: #333;
+    border-left: 4px solid #2196F3; /* Синий цвет вместо зеленого */
+    background-color: #f0f8ff; /* Очень светлый синий фон */
+}
+
+[data-theme="dark"] .cartNotificationContent {
+    background-color: #1a2a3a; /* Темно-синий фон для темной темы */
+    color: #f0f0f0;
+    border-left-color: #64B5F6; /* Светло-синий для темной темы */
+}
+
+.cartNotificationIcon {
+    font-size: 24px;
+    margin-right: 16px;
+    color: #2196F3; /* Синий цвет иконки */
+}
+
+[data-theme="dark"] .cartNotificationIcon {
+    color: #64B5F6; /* Светло-синий для темной темы */
+}
+
+.cartNotificationText {
+    display: flex;
+    flex-direction: column;
+}
+
+.cartNotificationTitle {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #1565C0;
+}
+
+[data-theme="dark"] .cartNotificationTitle {
+    color: #90CAF9;
+}
+
+.cartNotificationProduct {
+    font-size: 14px;
+    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.lineTip {
+    top: 52px;
+    left: 22px;
+    width: 21px;
+    transform: rotate(45deg);
+}
+
+.lineLong {
+    top: 43px;
+    right: 18px;
+    width: 40px;
+    transform: rotate(-45deg);
+}
+
+.successText {
+    text-align: center;
+    margin-top: 20px;
+    color: #333;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+[data-theme="dark"] .successText {
+    color: #f0f0f0;
+}
+
+.successSubtext {
+    text-align: center;
+    margin-top: 10px;
+    color: #666;
+    font-size: 16px;
+    font-weight: 400;
+    max-width: 280px;
+}
+
+[data-theme="dark"] .successSubtext {
+    color: #aaa;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -45%) scale(0.9); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes scaleIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    70% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.6; }
+    70% { transform: scale(1.1); opacity: 0.1; }
+    100% { transform: scale(0.95); opacity: 0.6; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .successAnimation {
+        padding: 25px 30px;
+        width: 280px;
+    }
+
+    .successCheckmark {
+        width: 80px;
+        height: 80px;
+    }
+
+    .checkIcon {
+        width: 80px;
+        height: 80px;
+        border-width: 4px;
+    }
+
+    .lineTip {
+        top: 42px;
+        left: 18px;
+        width: 18px;
+        height: 5px;
+    }
+
+    .lineLong {
+        top: 34px;
+        right: 14px; /* Сдвинуто влево для мобильной версии */
+        width: 32px; /* Укорочено с 44px */
+        height: 5px;
+    }
+
+    .successText {
+        font-size: 18px;
+    }
+
+    .successSubtext {
+        font-size: 14px;
+    }
+}
 
 /* Reviews Section */
 .sectionTitle {

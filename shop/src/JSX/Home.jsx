@@ -4,6 +4,7 @@ import Footer from "./Components/Footer";
 import { FaGift, FaGem, FaFire } from 'react-icons/fa';
 import { Link } from "react-router-dom";
 import { apiRequest } from '../JSX/Api/ApiRequest';
+import LoadingSpinner from './Components/LoadingSpinner';
 
 const Home = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -49,7 +50,7 @@ const Home = () => {
                 setLoading(false);
             } catch (err) {
                 console.error('Ошибка при загрузке товаров:', err);
-                setError('Не удалось загрузить товары');
+                setError('Не удалось загрузить товары.');
                 setLoading(false);
             }
         };
@@ -80,15 +81,15 @@ const Home = () => {
     };
 
     if (loading) {
-        return <div className={styles.loading}>Загрузка...</div>;
+        return <LoadingSpinner message="Загружаем товары..." status="loading" />;
     }
 
     if (error) {
-        return <div className={styles.error}>{error}</div>;
+        return <LoadingSpinner message={error} status="error" />;
     }
 
     if (products.length === 0) {
-        return <div className={styles.empty}>Товары не найдены</div>;
+        return <LoadingSpinner message="Нет доступных товаров" status="empty" />;
     }
 
     const recommendedProducts = [...products].sort(() => 0.5 - Math.random()).slice(0, 8);

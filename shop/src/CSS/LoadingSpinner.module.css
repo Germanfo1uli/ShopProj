@@ -1,0 +1,127 @@
+.loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+/* Анимация прыгающих точек */
+.bouncingLoader {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 60px;
+}
+
+.bouncingLoader div {
+    width: 16px;
+    height: 16px;
+    margin: 0 4px;
+    background-color: #4a90e2;
+    border-radius: 50%;
+    animation: bouncing 0.6s infinite alternate;
+}
+
+.bouncingLoader div:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.bouncingLoader div:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes bouncing {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0.6;
+        transform: translateY(-20px);
+    }
+}
+
+.loadingMessage {
+    margin-top: 20px;
+    font-size: 1.3rem;
+    color: #7a7a7a;
+    text-align: center;
+    max-width: 200px;
+}
+
+/* Стили для состояния ошибки */
+.errorState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+
+.errorIcon {
+    font-size: 3rem;
+    color: #ff4d4f;
+    margin-bottom: 15px;
+}
+
+.errorTitle {
+    color: #ff4d4f;
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.errorMessage {
+    color: #7a7a7a;
+    margin-bottom: 20px;
+    max-width: 300px;
+    font-size: 1.3rem;
+}
+
+.retryButton {
+    padding: 10px 20px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+
+}
+
+.retryButton:hover {
+    background-color: #3a7bc8;
+}
+
+/* Стили для пустого состояния */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+
+.emptyIcon {
+    font-size: 3rem;
+    color: #a0a0a0;
+    margin-bottom: 15px;
+}
+
+.emptyTitle {
+    color: #555;
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.emptyMessage {
+    color: #888;
+    max-width: 300px;
+}
+
