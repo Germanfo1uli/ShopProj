@@ -1,0 +1,448 @@
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInFromRight {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.navPage {
+    display: flex;
+    align-items: center;
+    background-color: #f8fafc;
+    padding: 15px 5%;
+    border-bottom: 2px solid #dbdbdd;
+    position: relative;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    font-family: 'Inter', -apple-system, sans-serif;
+    gap: 20px;
+}
+
+.logo {
+    color: #1c3eda;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-right: auto;
+    margin-left: 10rem;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in 0.3s forwards;
+}
+
+.searchContainer {
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex-grow: 1;
+    max-width: 500px;
+    margin: 0 20px;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 12px;
+    color: #707070;
+    font-size: 0.9rem;
+}
+
+.Input {
+    padding: 10px 15px 10px 35px;
+    border-radius: 25px;
+    border: 2px solid #d0d0d0;
+    background-color: #ffffff;
+    color: #3a3a3a;
+    outline: none;
+    width: 100%;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.Input:focus {
+    border-color: #6a41b6;
+    box-shadow: 0 0 0 3px rgba(74, 107, 255, 0.15);
+}
+
+.navSection {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.navButtons {
+    display: flex;
+    gap: 10px;
+}
+
+.navButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: none;
+    border: none;
+    color: #4a4a4a;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    min-width: 60px;
+}
+
+.navButton:hover {
+    background-color: rgba(106, 65, 182, 0.1);
+    color: #6a41b6;
+    transform: translateY(-2px);
+}
+
+.navIcon {
+    font-size: 1.2rem;
+    margin-bottom: 4px;
+}
+
+.navLabel {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.profileButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.profileButton:hover {
+    background-color: rgba(106, 65, 182, 0.1);
+}
+
+.userAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #6572FF;
+}
+
+.profileText {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #4a4a4a;
+}
+
+.loginButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 25px;
+    background-color: transparent;
+    color: #6a41b6;
+    border: 2px solid #6a41b6;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.loginButton:hover {
+    background-color: #6a41b6;
+    color: white;
+    box-shadow: 0 4px 15px rgba(106, 65, 182, 0.3);
+}
+
+.loginIcon {
+    font-size: 0.9rem;
+}
+
+.burger {
+    display: none;
+    cursor: pointer;
+    padding: 8px;
+    margin-right: 15px;
+    z-index: 1001;
+}
+
+.burgerIcon {
+    font-size: 1.5rem;
+    color: #4a4a4a;
+}
+
+/* Мобильное меню */
+.mobileMenu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: #f8fafc;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+}
+
+.mobileMenu.active {
+    transform: translateX(0);
+}
+
+.mobileHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.mobileLogo {
+    color: #1c3eda;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.closeButton {
+    font-size: 1.5rem;
+    color: #4a4a4a;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.mobileSearchContainer {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.mobileSearchIcon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #707070;
+}
+
+.mobileInput {
+    width: 100%;
+    padding: 12px 15px 12px 40px;
+    border-radius: 25px;
+    border: 2px solid #d0d0d0;
+    background-color: #ffffff;
+    color: #3a3a3a;
+    outline: none;
+    font-size: 1rem;
+}
+
+.mobileNavButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: auto;
+}
+
+.mobileNavButton {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    color: #4a4a4a;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.mobileNavButton:hover {
+    background-color: rgba(106, 65, 182, 0.1);
+    color: #6a41b6;
+}
+
+.mobileNavIcon {
+    font-size: 1.2rem;
+    width: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.mobileNavLabel {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.mobileAuthButton {
+    margin-top: 20px;
+}
+
+.mobileLoginButton {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 15px;
+    border-radius: 25px;
+    background-color: #6a41b6;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.mobileLoginButton:hover {
+    background-color: #5a31a6;
+}
+
+.mobileLoginIcon {
+    font-size: 1.1rem;
+}
+
+.mobileProfileButton {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 15px;
+    border-radius: 25px;
+    background-color: rgba(106, 65, 182, 0.1);
+    color: #4a4a4a;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.mobileProfileButton:hover {
+    background-color: rgba(106, 65, 182, 0.2);
+}
+
+.mobileUserAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #6572FF;
+}
+
+@media (max-width: 992px) {
+    .navButtons {
+        gap: 8px;
+    }
+
+    .navButton {
+        padding: 8px 10px;
+        min-width: 50px;
+    }
+
+    .navLabel {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .navButtons,
+    .searchContainer,
+    .profileButton,
+    .loginButton {
+        display: none;
+    }
+
+    .burger {
+        display: block;
+    }
+
+    .logo {
+        margin-right: 0;
+    }
+
+    .navPage {
+        justify-content: space-between;
+        gap: 10px;
+    }
+}
+
+/* Темная тема */
+[data-theme="dark"] .navPage {
+    background-color: #121212;
+    border-bottom-color: #242424;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .logo {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .navButton {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .navButton:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .Input {
+    background-color: #1e1e1e;
+    border-color: #333333;
+    color: #f0f0f0;
+}
+
+[data-theme="dark"] .Input::placeholder {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .searchIcon {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .profileText {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .mobileMenu {
+    background-color: #121212;
+}
+
+[data-theme="dark"] .mobileNavButton {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .mobileNavButton:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .mobileInput {
+    background-color: #1e1e1e;
+    border-color: #333333;
+    color: #f0f0f0;
+}
+
+[data-theme="dark"] .mobileInput::placeholder {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .mobileSearchIcon {
+    color: #a0a0a0;
+}
+
+[data-theme="dark"] .burgerIcon,
+[data-theme="dark"] .closeButton {
+    color: #e0e0e0;
+}

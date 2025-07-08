@@ -10,7 +10,7 @@ using System.Security.Claims;
 
 namespace ShopBack.Controllers
 {
-    [Route("api/[controller]")] //api/userfavorites
+    [Route("api/[controller]")] //api/userfavorites 
     [ApiController]
     public class UserFavoritesController(FavoriteService favoritesService) : ControllerBase
     {

@@ -21,6 +21,7 @@ namespace ShopBack.Models
         public int? ParentCategoryId { get; set; }
 
         [ForeignKey("ParentCategoryId")]
+        
         public Categories? ParentCategory { get; set; }
 
         public ICollection<Categories> ChildCategories { get; set; } = new List<Categories>();

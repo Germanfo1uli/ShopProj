@@ -1,9 +1,9 @@
-@host = https://localhost:7008
+@host = http://localhost:5000
 @contentType = application/json
-@adminToken = 
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjYiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJOaWtpdGFhIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsImV4cCI6MTc1MTgxMDUwMX0.FYPSCeATa3_2oW-vrRQJEtXn_cb7bCfz2mgVaEuT-1U
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjkiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJBZG1pbiIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzUxNjIwMzc1fQ.V0BD6sJInUqjRAD1Ngdr86FxhcEe1vZGjg4AzZzXV-I
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjgiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJnZXJtYW5AbWFpbC5ydSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJleHAiOjE3NTE4MTA5NTl9.tfMmKLEp23k0aD1Sgkj5QNZsvRZTLpkToqaCVFAUfdA
 
-@refreshToken = "bOD8A0eWZRi7xU7oV2wwvxcpkuIdBA4zViFeLm3yhfIzHNNTdJJYReu78TEjAFc/vgA3Bgjkh4lLZCD1gBAPXA=="
+@refreshToken = 
 
 ### 1. Аутентификация и пользователи ###
 
@@ -13,7 +13,7 @@ Content-Type: {{contentType}}
 
 {
   "email": "user@mail.com",
-  "password": "Password123!",
+  "password": "Password",
   "firstName": "Иван",
   "middleName": "Иванович",
   "lastName": "Иванов"
@@ -24,9 +24,19 @@ POST {{host}}/api/users/login
 Content-Type: {{contentType}}
 
 {
-  "email": "user@mail.com",
-  "password": "Password123!"
+  "email": "Admin",
+  "password": "Password"
 }
+
+###
+POST {{host}}/api/users/login
+Content-Type: {{contentType}}
+
+{
+  "email": "german@mail.ru",
+  "password": "Password"
+}
+
 
 ### Получить всех пользователей (требует авторизации)
 GET {{host}}/api/users
@@ -56,8 +66,7 @@ Authorization: Bearer {{userToken}}
 
 {
   "oldPassword": "Password123!",
-  "newPassword": "NewPassword123!",
-  "token": {{refreshToken}}
+  "newPassword": "NewPassword123!"
 }
 
 ### Удалить пользователя
@@ -80,7 +89,7 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{adminToken}}
 
 {
-  "name": "Moderator"
+  "name": "Admin"
 }
 
 ### Получить все роли
@@ -112,8 +121,8 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{adminToken}}
 
 {
-  "userId": 1,
-  "roleId": 2
+  "userId": 6,
+  "roleId": 1
 }
 
 ### Получить все назначения ролей
@@ -137,6 +146,1384 @@ Authorization: Bearer {{adminToken}}
 DELETE {{host}}/api/userroles/1
 Authorization: Bearer {{adminToken}}
 
+### 4. Категории (полный шаблон) ###
+
+### 1. Создание родительских категорий ###
+
+### Родительская категория 1: Одежда
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Одежда",
+  "description": "Мужская, женская и детская одежда"
+}
+
+### Родительская категория 2: Посуда
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Посуда",
+  "description": "Кухонная и столовая посуда"
+}
+
+### Родительская категория 3: Интерьер
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Интерьер",
+  "description": "Предметы для оформления интерьера"
+}
+
+### Родительская категория 4: Текстиль
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Текстиль",
+  "description": "Тканевые изделия для дома"
+}
+
+### Родительская категория 5: Аксессуары
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Аксессуары",
+  "description": "Дополнительные элементы гардероба и интерьера"
+}
+
+
+### 2. Создание дочерних категорий ###
+
+### Дочерние для Одежды (ID родителя: 1)
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Женская одежда",
+  "description": "Одежда для женщин",
+  "parentCategoryId": 1
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Мужская одежда",
+  "description": "Одежда для мужчин",
+  "parentCategoryId": 1
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Детская одежда",
+  "description": "Одежда для детей",
+  "parentCategoryId": 1
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Спортивная одежда",
+  "description": "Одежда для занятий спортом",
+  "parentCategoryId": 1
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Домашняя одежда",
+  "description": "Одежда для дома",
+  "parentCategoryId": 1
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Верхняя одежда",
+  "description": "Пальто, куртки, пуховики",
+  "parentCategoryId": 1
+}
+
+
+### Дочерние для Посуда (ID родителя: 2)
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Кухонная посуда",
+  "description": "Кастрюли, сковороды, ковши",
+  "parentCategoryId": 2
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Столовая посуда",
+  "description": "Тарелки, блюда, салатницы",
+  "parentCategoryId": 2
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Стеклянная посуда",
+  "description": "Стаканы, бокалы, фужеры",
+  "parentCategoryId": 2
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Посуда для сервировки",
+  "description": "Сервировочные наборы, подносы",
+  "parentCategoryId": 2
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Посуда для приготовления",
+  "description": "Формы для выпечки, ножи",
+  "parentCategoryId": 2
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Посуда для хранения",
+  "description": "Контейнеры, банки для сыпучих",
+  "parentCategoryId": 2
+}
+
+
+### Дочерние для Интерьер (ID родителя: 3)
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Мебель",
+  "description": "Предметы мебели для дома",
+  "parentCategoryId": 3
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Декор",
+  "description": "Декоративные элементы",
+  "parentCategoryId": 3
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Освещение",
+  "description": "Лампы, светильники, бра",
+  "parentCategoryId": 3
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Зеркала",
+  "description": "Настенные и напольные зеркала",
+  "parentCategoryId": 3
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Картины и постеры",
+  "description": "Художественные произведения",
+  "parentCategoryId": 3
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Часы",
+  "description": "Настенные и настольные часы",
+  "parentCategoryId": 3
+}
+
+
+### Дочерние для Текстиль (ID родителя: 4)
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Постельное белье",
+  "description": "Комплекты постельного белья",
+  "parentCategoryId": 4
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Пледы и покрывала",
+  "description": "Текстиль для спальни",
+  "parentCategoryId": 4
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Шторы",
+  "description": "Гардины, портьеры, занавески",
+  "parentCategoryId": 4
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Полотенца",
+  "description": "Банные и кухонные полотенца",
+  "parentCategoryId": 4
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Ковры",
+  "description": "Ковровые покрытия",
+  "parentCategoryId": 4
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Скатерти",
+  "description": "Скатерти и салфетки",
+  "parentCategoryId": 4
+}
+
+
+### Дочерние для Аксессуары (ID родителя: 5)
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Сумки",
+  "description": "Женские и мужские сумки",
+  "parentCategoryId": 5
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Ремни",
+  "description": "Кожаные и текстильные ремни",
+  "parentCategoryId": 5
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Головные уборы",
+  "description": "Шляпы, кепки, шапки",
+  "parentCategoryId": 5
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Шарфы и платки",
+  "description": "Шейные аксессуары",
+  "parentCategoryId": 5
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Бижутерия",
+  "description": "Украшения и аксессуары",
+  "parentCategoryId": 5
+}
+###
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Зонты",
+  "description": "Зонты и дождевики",
+  "parentCategoryId": 5
+}
+
+### 5. Создание Продуктов для всех категорий ###
+
+### 1. Продукты для категории "Женская одежда" (ID: 6)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Платье летнее хлопковое",
+  "description": "Легкое летнее платье из натурального хлопка",
+  "price": 3490,
+  "oldPrice": 4290,
+  "quantityInStock": 15,
+  "categoryId": 6,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Блузка офисная",
+  "description": "Элегантная блузка для офиса",
+  "price": 2790,
+  "oldPrice": 3290,
+  "quantityInStock": 10,
+  "categoryId": 6,
+  "isActive": true
+}
+
+### 2. Продукты для категории "Мужская одежда" (ID: 7)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Рубашка классическая",
+  "description": "Классическая мужская рубашка",
+  "price": 2990,
+  "oldPrice": 3590,
+  "quantityInStock": 12,
+  "categoryId": 7,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Джинсы прямого кроя",
+  "description": "Качественные мужские джинсы",
+  "price": 4590,
+  "quantityInStock": 8,
+  "categoryId": 7,
+  "isActive": true
+}
+
+### 3. Продукты для категории "Детская одежда" (ID: 8)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Комплект для новорожденного",
+  "description": "Комплект из боди и ползунков",
+  "price": 1890,
+  "quantityInStock": 20,
+  "categoryId": 8,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Футболка детская с принтом",
+  "description": "Яркая футболка для детей",
+  "price": 990,
+  "oldPrice": 1290,
+  "quantityInStock": 25,
+  "categoryId": 8,
+  "isActive": true
+}
+
+### 4. Продукты для категории "Спортивная одежда" (ID: 9)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Спортивные штаны",
+  "description": "Удобные штаны для тренировок",
+  "price": 2190,
+  "quantityInStock": 15,
+  "categoryId": 9,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Спортивная футболка",
+  "description": "Дышащая футболка для занятий спортом",
+  "price": 1590,
+  "quantityInStock": 18,
+  "categoryId": 9,
+  "isActive": true
+}
+
+### 5. Продукты для категории "Домашняя одежда" (ID: 10)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Халат махровый",
+  "description": "Мягкий халат для дома",
+  "price": 2490,
+  "quantityInStock": 10,
+  "categoryId": 10,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Пижамный комплект",
+  "description": "Уютный комплект для сна",
+  "price": 1990,
+  "oldPrice": 2490,
+  "quantityInStock": 12,
+  "categoryId": 10,
+  "isActive": true
+}
+
+### 6. Продукты для категории "Верхняя одежда" (ID: 11)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Пальто демисезонное",
+  "description": "Стильное пальто на весну/осень",
+  "price": 8990,
+  "oldPrice": 9990,
+  "quantityInStock": 5,
+  "categoryId": 11,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Куртка зимняя",
+  "description": "Теплая куртка для холодной зимы",
+  "price": 12990,
+  "quantityInStock": 7,
+  "categoryId": 11,
+  "isActive": true
+}
+
+### 7. Продукты для категории "Кухонная посуда" (ID: 12)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Сковорода антипригарная",
+  "description": "Качественная сковорода с покрытием",
+  "price": 3490,
+  "quantityInStock": 15,
+  "categoryId": 12,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Кастрюля набор 3 шт",
+  "description": "Набор кастрюль разного размера",
+  "price": 5990,
+  "oldPrice": 6990,
+  "quantityInStock": 8,
+  "categoryId": 12,
+  "isActive": true
+}
+
+### 8. Продукты для категории "Столовая посуда" (ID: 13)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Набор тарелок 6 персон",
+  "description": "Сервиз на 6 персон",
+  "price": 4590,
+  "quantityInStock": 10,
+  "categoryId": 13,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Салатник керамический",
+  "description": "Красивый салатник для сервировки",
+  "price": 1290,
+  "quantityInStock": 20,
+  "categoryId": 13,
+  "isActive": true
+}
+
+### 9. Продукты для категории "Стеклянная посуда" (ID: 14)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Набор бокалов для вина",
+  "description": "6 бокалов для красного и белого вина",
+  "price": 3490,
+  "quantityInStock": 12,
+  "categoryId": 14,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Графин для напитков",
+  "description": "Стеклянный графин с пробкой",
+  "price": 1990,
+  "oldPrice": 2490,
+  "quantityInStock": 15,
+  "categoryId": 14,
+  "isActive": true
+}
+
+### 10. Продукты для категории "Посуда для сервировки" (ID: 15)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Сервировочный поднос",
+  "description": "Деревянный поднос для сервировки",
+  "price": 2490,
+  "quantityInStock": 10,
+  "categoryId": 15,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Набор столовых приборов",
+  "description": "24 предмета в подарочной упаковке",
+  "price": 3990,
+  "quantityInStock": 8,
+  "categoryId": 15,
+  "isActive": true
+}
+
+### 11. Продукты для категории "Посуда для приготовления" (ID: 16)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Форма для выпечки",
+  "description": "Форма для кексов на 12 порций",
+  "price": 1490,
+  "quantityInStock": 15,
+  "categoryId": 16,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Кухонные ножи набор",
+  "description": "Набор из 3 профессиональных ножей",
+  "price": 4990,
+  "oldPrice": 5990,
+  "quantityInStock": 10,
+  "categoryId": 16,
+  "isActive": true
+}
+
+### 12. Продукты для категории "Посуда для хранения" (ID: 17)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Набор контейнеров для хранения",
+  "description": "5 контейнеров разного размера",
+  "price": 2990,
+  "quantityInStock": 12,
+  "categoryId": 17,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Банка для сыпучих продуктов",
+  "description": "Стеклянная банка с герметичной крышкой",
+  "price": 890,
+  "quantityInStock": 20,
+  "categoryId": 17,
+  "isActive": true
+}
+
+### 13. Продукты для категории "Мебель" (ID: 18)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Комод 3-х ярусный",
+  "description": "Комод для хранения вещей",
+  "price": 12990,
+  "quantityInStock": 5,
+  "categoryId": 18,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Журнальный столик",
+  "description": "Современный столик для гостиной",
+  "price": 8990,
+  "oldPrice": 9990,
+  "quantityInStock": 7,
+  "categoryId": 18,
+  "isActive": true
+}
+
+### 14. Продукты для категории "Декор" (ID: 19)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Декоративная ваза",
+  "description": "Керамическая ваза для цветов",
+  "price": 2490,
+  "quantityInStock": 15,
+  "categoryId": 19,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Статуэтка интерьерная",
+  "description": "Декоративная фигурка для интерьера",
+  "price": 1790,
+  "quantityInStock": 20,
+  "categoryId": 19,
+  "isActive": true
+}
+
+### 15. Продукты для категории "Освещение" (ID: 20)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Настольная лампа",
+  "description": "Современная лампа для рабочего стола",
+  "price": 2990,
+  "quantityInStock": 10,
+  "categoryId": 20,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Подвесной светильник",
+  "description": "Стильный светильник для кухни",
+  "price": 4590,
+  "oldPrice": 4990,
+  "quantityInStock": 8,
+  "categoryId": 20,
+  "isActive": true
+}
+
+### 16. Продукты для категории "Зеркала" (ID: 21)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Зеркало настенное",
+  "description": "Большое зеркало для прихожей",
+  "price": 5990,
+  "quantityInStock": 6,
+  "categoryId": 21,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Зеркало с подсветкой",
+  "description": "Зеркало с LED подсветкой",
+  "price": 7990,
+  "quantityInStock": 4,
+  "categoryId": 21,
+  "isActive": true
+}
+
+### 17. Продукты для категории "Картины и постеры" (ID: 22)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Картина на холсте",
+  "description": "Абстрактная картина для интерьера",
+  "price": 4990,
+  "quantityInStock": 8,
+  "categoryId": 22,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Постер в рамке",
+  "description": "Стильный постер для оформления",
+  "price": 1990,
+  "oldPrice": 2490,
+  "quantityInStock": 15,
+  "categoryId": 22,
+  "isActive": true
+}
+
+### 18. Продукты для категории "Часы" (ID: 23)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Настенные часы",
+  "description": "Большие часы для гостиной",
+  "price": 3490,
+  "quantityInStock": 10,
+  "categoryId": 23,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Будильник цифровой",
+  "description": "Современный будильник с проекцией",
+  "price": 2490,
+  "quantityInStock": 12,
+  "categoryId": 23,
+  "isActive": true
+}
+
+### 19. Продукты для категории "Постельное белье" (ID: 24)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Комплект постельного белья",
+  "description": "Набор из 3 предметов, сатин",
+  "price": 3990,
+  "quantityInStock": 10,
+  "categoryId": 24,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Детский комплект белья",
+  "description": "Яркий комплект с детским принтом",
+  "price": 2990,
+  "oldPrice": 3490,
+  "quantityInStock": 15,
+  "categoryId": 24,
+  "isActive": true
+}
+
+### 20. Продукты для категории "Пледы и покрывала" (ID: 25)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Плед вязаный",
+  "description": "Мягкий плед для дома",
+  "price": 2490,
+  "quantityInStock": 12,
+  "categoryId": 25,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Покрывало на кровать",
+  "description": "Стильное покрывало 200x220 см",
+  "price": 3990,
+  "quantityInStock": 8,
+  "categoryId": 25,
+  "isActive": true
+}
+
+### 21. Продукты для категории "Шторы" (ID: 26)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Шторы черныеout",
+  "description": "Готовые шторы для гостиной",
+  "price": 4990,
+  "quantityInStock": 7,
+  "categoryId": 26,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Тюль прозрачный",
+  "description": "Легкий тюль для окон",
+  "price": 2990,
+  "oldPrice": 3490,
+  "quantityInStock": 10,
+  "categoryId": 26,
+  "isActive": true
+}
+
+### 22. Продукты для категории "Полотенца" (ID: 27)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Банное полотенце",
+  "description": "Большое махровое полотенце",
+  "price": 1290,
+  "quantityInStock": 20,
+  "categoryId": 27,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Набор полотенец 3 шт",
+  "description": "Набор банных полотенец",
+  "price": 2990,
+  "quantityInStock": 12,
+  "categoryId": 27,
+  "isActive": true
+}
+
+### 23. Продукты для категории "Ковры" (ID: 28)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Ковер для гостиной",
+  "description": "Ковер 200x300 см, ворс",
+  "price": 8990,
+  "quantityInStock": 5,
+  "categoryId": 28,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Коврик для прихожей",
+  "description": "Практичный коврик 60x90 см",
+  "price": 1990,
+  "oldPrice": 2490,
+  "quantityInStock": 15,
+  "categoryId": 28,
+  "isActive": true
+}
+
+### 24. Продукты для категории "Скатерти" (ID: 29)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Скатерть праздничная",
+  "description": "Скатерть на 6 персон",
+  "price": 1990,
+  "quantityInStock": 12,
+  "categoryId": 29,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Салфетки тканевые",
+  "description": "Набор из 6 салфеток",
+  "price": 990,
+  "quantityInStock": 20,
+  "categoryId": 29,
+  "isActive": true
+}
+
+### 25. Продукты для категории "Сумки" (ID: 30)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Женская сумка через плечо",
+  "description": "Стильная кожаная сумка",
+  "price": 4990,
+  "quantityInStock": 8,
+  "categoryId": 30,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Рюкзак городской",
+  "description": "Удобный рюкзак для повседневного использования",
+  "price": 3990,
+  "oldPrice": 4490,
+  "quantityInStock": 10,
+  "categoryId": 30,
+  "isActive": true
+}
+
+### 26. Продукты для категории "Ремни" (ID: 31)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Ремень кожаный мужской",
+  "description": "Классический кожаный ремень",
+  "price": 1990,
+  "quantityInStock": 15,
+  "categoryId": 31,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Ремень женский",
+  "description": "Элегантный ремень для платья",
+  "price": 1790,
+  "quantityInStock": 12,
+  "categoryId": 31,
+  "isActive": true
+}
+
+### 27. Продукты для категории "Головные уборы" (ID: 32)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Шапка вязаная",
+  "description": "Теплая зимняя шапка",
+  "price": 1490,
+  "quantityInStock": 20,
+  "categoryId": 32,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Кепка бейсболка",
+  "description": "Спортивная кепка с регулировкой",
+  "price": 1290,
+  "oldPrice": 1590,
+  "quantityInStock": 15,
+  "categoryId": 32,
+  "isActive": true
+}
+
+### 28. Продукты для категории "Шарфы и платки" (ID: 33)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Шарф шерстяной",
+  "description": "Теплый шарф на зиму",
+  "price": 1790,
+  "quantityInStock": 15,
+  "categoryId": 33,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Шелковый платок",
+  "description": "Элегантный платок для женщин",
+  "price": 2490,
+  "quantityInStock": 10,
+  "categoryId": 33,
+  "isActive": true
+}
+
+### 29. Продукты для категории "Бижутерия" (ID: 34)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Колье золотистое",
+  "description": "Стильное колье для вечернего образа",
+  "price": 1990,
+  "quantityInStock": 12,
+  "categoryId": 34,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Браслет серебристый",
+  "description": "Модный браслет на руку",
+  "price": 1490,
+  "oldPrice": 1990,
+  "quantityInStock": 15,
+  "categoryId": 34,
+  "isActive": true
+}
+
+### 30. Продукты для категории "Зонты" (ID: 35)
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Зонт автоматический",
+  "description": "Компактный зонт с автоматическим открытием",
+  "price": 1290,
+  "quantityInStock": 20,
+  "categoryId": 35,
+  "isActive": true
+}
+
+###
+POST {{host}}/api/products
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Зонт большой",
+  "description": "Большой зонт на 2 человек",
+  "price": 1790,
+  "quantityInStock": 15,
+  "categoryId": 35,
+  "isActive": true
+}
+
+### 6. Заказы и позиции заказов ###
+
+### Создать новый заказ
+POST {{host}}/api/orders
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "userId": 8,
+  "status": "InCart",
+  "totalAmount": 0,
+  "shippingAddress": "ул. Примерная, д. 123, кв. 45",
+  "contactPhone": "+79991234567",
+  "notes": "Позвонить перед доставкой"
+}
+
+### Получить все заказы пользователя
+GET {{host}}/api/orders/user/8
+Authorization: Bearer {{userToken}}
+
+### Создать позицию заказа (order item) для заказа с ID=1
+POST {{host}}/api/orderitems
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "orderId": 1,
+  "productId": 1,
+  "quantity": 2,
+  "unitPrice": 3490
+}
+
+### Создать вторую позицию заказа для того же заказа
+POST {{host}}/api/orderitems
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "orderId": 1,
+  "productId": 3,
+  "quantity": 1,
+  "unitPrice": 2990
+}
+
+### Получить все позиции заказа с ID=1
+GET {{host}}/api/orders/1/items
+Authorization: Bearer {{userToken}}
+
+### Обновить количество товара в позиции заказа с ID=1
+PUT {{host}}/api/orderitems/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "quantity": 3
+}
+
+### Удалить позицию заказа с ID=2
+DELETE {{host}}/api/orderitems/2
+Authorization: Bearer {{userToken}}
+
+### Получить информацию о платеже по заказу (если есть)
+GET {{host}}/api/orders/1/payment
+Authorization: Bearer {{userToken}}
+
+### Получить все заказы (для администратора)
+GET {{host}}/api/orders
+Authorization: Bearer {{adminToken}}
+
+### Получить заказ по ID
+GET {{host}}/api/orders/1
+Authorization: Bearer {{userToken}}
+
+### Обновить информацию о заказе
+PUT {{host}}/api/orders/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "shippingAddress": "ул. Обновленная, д. 456, кв. 78",
+  "contactPhone": "+79997654321",
+  "notes": "Доставить после 18:00"
+}
+
+### Удалить заказ (для администратора)
+DELETE {{host}}/api/orders/1
+Authorization: Bearer {{adminToken}}
+
+### 7. Платежи (Payments) ###
+
+### Создать новый платеж (требует авторизации)
+POST {{host}}/api/payments
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "orderId": 1,
+  "amount": 9999.99,
+  "paymentMethod": "CreditCard",
+  "status": "Pending",
+  "transactionId": "txn_123456789"
+}
+
+### Получить все платежи (только для администратора)
+GET {{host}}/api/payments
+Authorization: Bearer {{adminToken}}
+
+### Получить платеж по ID (доступно владельцу или админу)
+GET {{host}}/api/payments/1
+Authorization: Bearer {{userToken}}
+
+### Обновить статус платежа
+PUT {{host}}/api/payments/1
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "status": "Refunded",
+  "transactionId": "txn_refund_987654"
+}
+
+### Удалить платеж
+DELETE {{host}}/api/payments/1
+Authorization: Bearer {{adminToken}}
+
+### Дополнительные тестовые данные:
+
+### Платеж для заказа 2
+POST {{host}}/api/payments
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "orderId": 2,
+  "amount": 5490.00,
+  "paymentMethod": "PayPal",
+  "status": "Pending",
+  "transactionId": "paypal_987654321"
+}
+
+### Платеж для заказа 3 (наличные)
+POST {{host}}/api/payments
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "orderId": 3,
+  "amount": 12990.00,
+  "paymentMethod": "Cash",
+  "status": "Completed",
+  "transactionId": null
+}
 ### Получить корзину пользователя
-GET {{host}}/api/orders/6/cart
+GET {{host}}/api/orders/8/cart
 Authorization: Bearer {{userToken}}

@@ -1,0 +1,545 @@
+import React, { useState, useEffect  } from 'react';
+import { useParams } from 'react-router-dom';
+import styles from '../CSS/ProductPage.module.css';
+import { FaStar, FaStarHalfAlt, FaHeart, FaShoppingCart, FaMinus, FaPlus, FaBoxOpen, FaShippingFast, FaCheckCircle, FaInfoCircle, FaCloudUploadAlt } from 'react-icons/fa';
+import Footer from "./Components/Footer";
+import sb from "../CSS/Breadcrumbs.module.css";
+import { apiRequest } from './Api/ApiRequest';
+import { useAuth } from './Hooks/UseAuth';
+
+const ProductPage = () => {
+    const { id } = useParams();
+    const { userId, isAuthenticated } = useAuth();
+    
+    const [productData, setProductData] = useState(null); // переименовали для ясности
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [quantity, setQuantity] = useState(1);
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [rating, setRating] = useState(0);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [activeTab, setActiveTab] = useState('description');
+    const [mainImage, setMainImage] = useState('');
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [favorites, setFavorites] = useState([]);
+
+    const reviews = [
+        {
+            name: "Анна К.",
+            date: "21 мая 2025",
+            rating: 5,
+            title: "Лучшее масло лаванды!",
+            text: "Покупаю уже второй флакон. Аромат просто волшебный - натуральный, нежный, без химических примесей. Добавляю в ванну вечером и засыпаю как младенец. Также заметила, что помогает снять тревожность.",
+            avatar: "https://i.pravatar.cc/150?img=1"
+        },
+        {
+            name: "Игорь С.",
+            date: "14 апреля 2025",
+            rating: 4.5,
+            title: "Качественный продукт",
+            text: "Использую для ароматизации квартиры и добавления в массажное масло. Аромат держится долго, не вызывает аллергии (у меня чувствительная кожа). Единственное - хотелось бы чуть большего объема флакона, но это совсем не критично."
+        }
+    ];
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                setIsLoading(true);
+                const response = await apiRequest(`/api/products/${id}`);
+                setProductData(response); 
+                
+                if (response.product?.images && response.product.images.length > 0) {
+                    setMainImage(`${process.env.REACT_APP_API_URL}${response.product.images[0].url}`);
+                }
+                
+                if (userId) {
+                    const userFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
+                        authenticated: isAuthenticated  
+                    });
+                    
+                    const favoriteIds = userFavorites.map(fav => Number(fav.id)); 
+                    setFavorites(favoriteIds);
+                    setIsFavorite(favoriteIds.includes(Number(id)));
+                }
+                
+            } catch (err) {
+                console.error('Ошибка загрузки данных товара:', err);
+                setError('Не удалось загрузить данные товара');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProduct();
+    }, [id, userId, isAuthenticated]);
+
+    const handleQuantityChange = (amount) => {
+        const newQuantity = quantity + amount;
+        if (newQuantity > 0) {
+            setQuantity(newQuantity);
+        }
+    };
+
+    const toggleFavorite = async () => {
+        if (!userId) {
+            alert('Войдите в систему, чтобы добавлять товары в избранное');
+            return;
+        }
+
+        try {
+            setIsFavorite(prev => !prev);
+            
+            const response = await apiRequest('/api/userfavorites', {
+                method: isFavorite ? 'DELETE' : 'POST',
+                body: {
+                    userId: userId,
+                    productId: Number(id)
+                },
+                authenticated: isAuthenticated
+            });
+
+            if (response) {
+                const updatedFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
+                    authenticated: isAuthenticated
+                });
+                
+                const favoriteIds = updatedFavorites.map(item => {
+                    if (item.id) return Number(item.id);
+                    if (item.productId) return Number(item.productId);
+                    return null;
+                }).filter(id => id !== null);
+                
+                setFavorites(favoriteIds);
+                setIsFavorite(favoriteIds.includes(Number(id)));
+            }
+        } catch (error) {
+            console.error('Ошибка при обновлении избранного:', error);
+            setIsFavorite(prev => !prev);
+            alert('Не удалось обновить избранное: ' + error.message);
+        }
+    };
+
+    const addToCart = async () => {
+        if (!userId) {
+            alert('Войдите в систему, чтобы добавлять товары в корзину');
+            return;
+        }
+
+        try {
+            const response = await apiRequest('/api/orderitems', {
+                method: 'POST',
+                body: {
+                    userId: userId,
+                    productId: Number(id),
+                    quantity: quantity
+                },
+                authenticated: isAuthenticated
+            });
+
+            if (response) {
+                alert('Товар успешно добавлен в корзину!');
+            }
+        } catch (error) {
+            console.error('Ошибка при добавлении в корзину:', error);
+            alert('Не удалось добавить товар в корзину: ' + error.message);
+        }
+    };
+
+    const handleRatingClick = (value) => {
+        setRating(value);
+    };
+
+    const handleRatingHover = (value) => {
+        setHoverRating(value);
+    };
+
+    const handleRatingLeave = () => {
+        setHoverRating(0);
+    };
+
+    const renderStars = (count, isHalf = false) => {
+        const stars = [];
+        for (let i = 1; i <= count; i++) {
+            stars.push(
+                <FaStar
+                    key={i}
+                    className={`${styles.star} ${i <= (hoverRating || rating) ? styles.starActive : ''}`}
+                    onClick={() => handleRatingClick(i)}
+                    onMouseEnter={() => handleRatingHover(i)}
+                    onMouseLeave={handleRatingLeave}
+                />
+            );
+        }
+        if (isHalf) {
+            stars.push(
+                <FaStarHalfAlt
+                    key={count + 1}
+                    className={`${styles.star} ${styles.starActive}`}
+                />
+            );
+        }
+        return stars;
+    };
+
+    if (isLoading) {
+        return <div className={styles.loading}>Загрузка...</div>;
+    }
+
+    if (error) {
+        return <div className={styles.error}>{error}</div>;
+    }
+
+    if (!productData?.product) {
+        return <div className={styles.error}>Товар не найден</div>;
+    }
+    const { product } = productData;
+    return (
+        <>
+        <div className={styles.container}>
+                <nav className={sb.breadcrumbs}>
+                    <a href="/home" className={sb.breadcrumbLink}>Главная</a>
+                    <span className={sb.breadcrumbSeparator}>/</span>
+                    <a href="/catalog" className={sb.breadcrumbLink}>Каталог</a>
+                    <span className={sb.breadcrumbSeparator}>/</span>
+                    <span className={sb.breadcrumbActive}>{product.name}</span>
+                </nav>
+                <div className={styles.productContainer}>
+                    <div className={styles.gallery}>
+                        {mainImage && (
+                            <div className={styles.mainImageContainer} onClick={() => setShowImageModal(true)}>
+                                <img src={mainImage} alt={product.name} className={styles.mainImage} />
+                            </div>
+                        )}
+                        <div className={styles.thumbnails}>
+                            {product.images?.map((image, index) => (
+                                <div
+                                    key={index}
+                                    className={`${styles.thumbnail} ${mainImage.includes(image.url) ? styles.thumbnailActive : ''}`}
+                                    onClick={() => setMainImage(`${process.env.REACT_APP_API_URL}${image.url}`)}
+                                >
+                                    <img src={`${process.env.REACT_APP_API_URL}${image.url}`} alt={`Миниатюра ${index + 1}`} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className={styles.details}>
+                        <div className={styles.titleRow}>
+                            <h1 className={styles.title}>{product.name}</h1>
+                            <button
+                                className={styles.favoriteButton}
+                                onClick={toggleFavorite}
+                                onMouseEnter={() => document.querySelector(`.${styles.favoriteIcon}`)?.classList.add(styles.heartAnimation)}
+                                onMouseLeave={() => document.querySelector(`.${styles.favoriteIcon}`)?.classList.remove(styles.heartAnimation)}
+                            >
+                                <FaHeart className={`${styles.favoriteIcon} ${isFavorite ? styles.favoriteActive : ''}`} />
+                            </button>
+                        </div>
+
+                        <div className={styles.ratingContainer}>
+                            <div className={styles.stars}>
+                                {renderStars(Math.floor(product.rating || 0), (product.rating || 0) % 1 !== 0)}
+                            </div>
+                            <span className={styles.ratingText}>{product.rating?.toFixed(1) || 0} ({product.reviews || 0} отзывов)</span>
+                        </div>
+
+                        <div className={styles.features}>
+                            {product.features?.map((feature, index) => (
+                                <div key={index} className={styles.featureItem}>
+                                    <FaCheckCircle className={styles.featureIcon} />
+                                    <span>{feature}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className={styles.description}>
+                            <p>{product.description}</p>
+
+                            <div className={styles.specs}>
+                                {product.specifications?.map((spec, index) => (
+                                    <div key={index} className={styles.specItem}>
+                                        <span className={styles.specLabel}>{spec.label}:</span>
+                                        <span className={styles.specValue}>{spec.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className={styles.priceContainer}>
+                            <div className={styles.priceRow}>
+                                <div>
+                                    <span className={styles.currentPrice}>{product.price} ₽</span>
+                                    {product.oldPrice && product.oldPrice > 0 && (
+                                        <>
+                                            <span className={styles.oldPrice}>{product.oldPrice} ₽</span>
+                                            {product.discount && (
+                                                <span className={styles.discountBadge}>-{product.discount}%</span>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                                <div className={styles.stock}>
+                                    <FaBoxOpen className={styles.stockIcon} />
+                                    <span>В наличии {product.quantityInStock} шт.</span>
+                                </div>
+                            </div>
+                            <div className={styles.shipping}>
+                                <FaShippingFast className={styles.shippingIcon} />
+                                <span>Бесплатная доставка при заказе от 3000 ₽</span>
+                            </div>
+                        </div>
+
+                        <div className={styles.actions}>
+                            <div className={styles.quantitySelector}>
+                                <button onClick={() => handleQuantityChange(-1)}>
+                                    <FaMinus />
+                                </button>
+                                <span>{quantity}</span>
+                                <button onClick={() => handleQuantityChange(1)}>
+                                    <FaPlus />
+                                </button>
+                            </div>
+                            <button 
+                                className={styles.addToCart} 
+                                onClick={addToCart}
+                                disabled={!product.quantityInStock || product.quantityInStock <= 0}
+                            >
+                                <FaShoppingCart className={styles.cartIcon} />
+                                {product.quantityInStock && product.quantityInStock > 0 
+                                    ? 'Добавить в корзину' 
+                                    : 'Нет в наличии'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className={styles.tabsContainer}>
+                    <div className={styles.tabs}>
+                        <button
+                            className={`${styles.tab} ${activeTab === 'description' ? styles.tabActive : ''}`}
+                            onClick={() => setActiveTab('description')}
+                        >
+                            Описание
+                        </button>
+                        <button
+                            className={`${styles.tab} ${activeTab === 'specs' ? styles.tabActive : ''}`}
+                            onClick={() => setActiveTab('specs')}
+                        >
+                            Характеристики
+                        </button>
+                        <button
+                            className={`${styles.tab} ${activeTab === 'usage' ? styles.tabActive : ''}`}
+                            onClick={() => setActiveTab('usage')}
+                        >
+                            Способ применения
+                        </button>
+                    </div>
+
+                    <div className={styles.tabContent}>
+                        {activeTab === 'description' && (
+                            <>
+                                <h2 className={styles.tabTitle}>{product.name}</h2>
+                                <p className={styles.tabText}>{product.description}</p>
+
+                                {product.benefits && (
+                                    <>
+                                        <h3 className={styles.subtitle}>Основные свойства:</h3>
+                                        <ul className={styles.featuresList}>
+                                            {product.benefits.map((benefit, index) => (
+                                                <li key={index}>{benefit}</li>
+                                            ))}
+                                        </ul>
+                                    </>
+                                )}
+
+                                {product.tip && (
+                                    <div className={styles.tip}>
+                                        <FaInfoCircle className={styles.tipIcon} />
+                                        <p>
+                                            <strong>Совет:</strong> {product.tip}
+                                        </p>
+                                    </div>
+                                )}
+                            </>
+                        )}
+
+                        {activeTab === 'specs' && (
+                            <div>
+                                <h3 className={styles.subtitle}>Технические характеристики</h3>
+                                <div className={styles.specsTable}>
+                                    {product.technicalSpecs?.map((spec, index) => (
+                                        <div key={index} className={styles.specRow}>
+                                            <div className={styles.specName}>{spec.name}</div>
+                                            <div className={styles.specValue}>{spec.value}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'usage' && (
+                            <div>
+                                <h3 className={styles.subtitle}>Способы применения</h3>
+                                <div className={styles.usageContent}>
+                                    {product.usageInstructions?.map((instruction, index) => (
+                                        <div key={index} className={styles.usageItem}>
+                                            <h4 className={styles.usageTitle}>{instruction.title}</h4>
+                                            <p className={styles.usageText}>{instruction.text}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+
+            <div className={styles.reviewsSection}>
+                <h2 className={styles.sectionTitle}>Отзывы покупателей</h2>
+
+                <div className={styles.overallRating}>
+                    <div className={styles.ratingSummary}>
+                        <div className={styles.averageRating}>4.7</div>
+                        <div className={styles.stars}>
+                            {renderStars(4)}
+                            <FaStarHalfAlt className={`${styles.star} ${styles.starActive}`} />
+                        </div>
+                        <div className={styles.ratingCount}>на основе 128 отзывов</div>
+                    </div>
+
+                    <div className={styles.ratingBars}>
+                        {[5, 4, 3, 2, 1].map((star) => (
+                            <div key={star} className={styles.ratingBar}>
+                                <span className={styles.ratingLabel}>{star}</span>
+                                <FaStar className={`${styles.star} ${styles.starActive} ${styles.smallStar}`} />
+                                <div className={styles.barContainer}>
+                                    <div
+                                        className={styles.barFill}
+                                        style={{ width: `${[70, 20, 5, 3, 2][5-star]}%` }}
+                                    ></div>
+                                </div>
+                                <span className={styles.ratingCount}>{[89, 25, 8, 4, 2][5-star]}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <button className={styles.reviewButton}>
+                        Оставить отзыв
+                    </button>
+                </div>
+
+                <div className={styles.reviewsList}>
+                    {reviews.map((review, index) => (
+                        <div key={index} className={styles.reviewCard}>
+                            <div className={styles.reviewHeader}>
+                                <div>
+                                    <div className={styles.reviewAuthor}>{review.name}</div>
+                                    <div className={styles.reviewDate}>{review.date}</div>
+                                </div>
+                                <div className={styles.stars}>
+                                    {renderStars(Math.floor(review.rating), review.rating % 1 !== 0)}
+                                </div>
+                            </div>
+                            <h3 className={styles.reviewTitle}>{review.title}</h3>
+                            <p className={styles.reviewText}>{review.text}</p>
+                            {review.avatar && (
+                                <div className={styles.reviewImages}>
+                                    <img src={review.avatar} alt="Фото пользователя" className={styles.reviewImage} />
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                <div className={styles.moreReviews}>
+                    <button className={styles.moreButton}>
+                        Показать еще отзывы
+                    </button>
+                </div>
+            </div>
+
+            <div className={styles.reviewForm}>
+                <h2 className={styles.sectionTitle}>Оставить отзыв</h2>
+                <p className={styles.formDescription}>Расскажите о вашем опыте использования этого товара</p>
+
+                <form>
+                    <div className={styles.formGroup}>
+                        <label className={styles.formLabel}>Ваша оценка</label>
+                        <div className={styles.ratingInput}>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                    key={star}
+                                    type="button"
+                                    className={`${styles.starButton} ${star <= (hoverRating || rating) ? styles.starButtonActive : ''}`}
+                                    onClick={() => setRating(star)}
+                                    onMouseEnter={() => setHoverRating(star)}
+                                    onMouseLeave={() => setHoverRating(0)}
+                                >
+                                    <FaStar className={styles.starIcon} />
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className={styles.formGrid}>
+                        <div className={styles.formGroup}>
+                            <label htmlFor="name" className={styles.formLabel}>Имя</label>
+                            <input type="text" id="name" className={styles.formInput} />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label htmlFor="email" className={styles.formLabel}>Email (не будет опубликован)</label>
+                            <input type="email" id="email" className={styles.formInput} />
+                        </div>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label htmlFor="title" className={styles.formLabel}>Заголовок отзыва</label>
+                        <input
+                            type="text"
+                            id="title"
+                            className={styles.formInput2}
+                            placeholder="Например: 'Отличное качество'"
+                        />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label htmlFor="review" className={styles.formLabel}>Ваш отзыв</label>
+                        <textarea
+                            id="review"
+                            rows="5"
+                            className={styles.formTextarea}
+                            placeholder="Расскажите о ваших впечатлениях"
+                        ></textarea>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label className={styles.formLabel}>Добавить фото (по желанию)</label>
+                        <div className={styles.uploadContainer}>
+                            <label htmlFor="dropzone-file" className={styles.uploadLabel}>
+                                <div className={styles.uploadContent}>
+                                    <FaCloudUploadAlt className={styles.uploadIcon} />
+                                    <p className={styles.uploadText}>Перетащите фото сюда или нажмите для выбора</p>
+                                </div>
+                                <input id="dropzone-file" type="file" className={styles.uploadInput} />
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" className={styles.submitButton}>
+                        Опубликовать отзыв
+                    </button>
+                </form>
+            </div>
+
+            {showImageModal && (
+                <div className={styles.imageModal} onClick={() => setShowImageModal(false)}>
+                    <img src={mainImage} alt="Увеличенное изображение" className={styles.modalImage} />
+                </div>
+            )}
+        </div>
+    <Footer/>
+        </>
+    );
+};
+
+export default ProductPage;
