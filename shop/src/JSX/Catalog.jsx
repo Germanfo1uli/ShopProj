@@ -11,6 +11,7 @@ import Footer from "./Components/Footer";
 import { Link } from "react-router-dom";
 import { apiRequest } from './Api/ApiRequest';
 import { useAuth} from './Hooks/UseAuth.js';
+import LoadingSpinner from './Components/LoadingSpinner';
 
 const Catalog = () => {
     const location = useLocation();
@@ -221,7 +222,17 @@ const Catalog = () => {
             }
         }
     }, [location.state]);
+    if (isLoading) {
+        return <LoadingSpinner message="Загружаем каталог..." status="loading" />;
+    }
 
+    if (error) {
+        return <LoadingSpinner message={error} status="error" />;
+    }
+
+    if (products.length === 0 && !isLoading) {
+        return <LoadingSpinner message="Товары не найдены" status="empty" />;
+    }
     const sortProducts = (products, option) => {
         const sorted = [...products];
         switch(option) {
