@@ -308,6 +308,73 @@
     background-color: #5a31a6;
 }
 
+.searchWrapper {
+    position: relative;
+    flex-grow: 1;
+    max-width: 600px;
+    margin: 0 20px;
+}
+
+.searchResults {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.searchResultItem {
+    padding: 10px 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+}
+
+.searchResultItem:hover {
+    background-color: #f5f5f5;
+}
+
+.searchResultName {
+    font-size: 14px;
+    color: #333;
+}
+
+.searchResultPrice {
+    font-size: 14px;
+    font-weight: bold;
+    color: #2a5885;
+}
+
+/* Для мобильной версии */
+.mobileSearchContainer {
+    position: relative;
+    margin: 15px;
+}
+
+.mobileSearchResults {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+
+
 .mobileLoginIcon {
     font-size: 1.1rem;
 }
@@ -376,7 +443,192 @@
         gap: 10px;
     }
 }
+/* Общие стили для результатов поиска */
+.searchResults,
+.mobileSearchResults {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 8px;
+    animation: fadeIn 0.2s ease-out forwards;
+}
 
+.searchResults {
+    max-height: 400px;
+}
+
+.mobileSearchResults {
+    max-height: 300px;
+}
+
+.searchResultImage,
+.mobileSearchResultImage {
+    width: 50px;
+    height: 50px;
+    min-width: 50px; /* Добавляем минимальную ширину */
+    margin-right: 12px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.searchResultItem:last-child,
+.mobileSearchResultItem:last-child {
+    border-bottom: none;
+}
+
+
+.searchResults,
+.mobileSearchResults {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-height: 400px;
+    overflow-x: hidden;
+    z-index: 1000;
+    margin-top: 8px;
+    animation: fadeIn 0.2s ease-out forwards;
+}
+
+
+.mobileSearchResults {
+    max-height: 300px;
+    overflow-y: hidden;
+}
+
+.searchResultImage img,
+.mobileSearchResultImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+
+
+/* Информация о товаре */
+.searchResultInfo,
+.mobileSearchResultInfo {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.searchResultInfo h4,
+.mobileSearchResultInfo h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mobileSearchResultInfo h4 {
+    font-size: 13px;
+}
+
+.searchResultInfo p,
+.mobileSearchResultInfo p {
+    margin: 4px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.mobileSearchResultInfo p {
+    font-size: 13px;
+}
+
+/* Состояния */
+.searchResultItem:hover,
+.mobileSearchResultItem:hover {
+    transform: translateX(2px);
+}
+
+/* Пустые результаты */
+.noResults {
+    padding: 16px;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Светлая тема */
+[data-theme="light"] .searchResults,
+[data-theme="light"] .mobileSearchResults {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+}
+
+[data-theme="light"] .searchResultItem,
+[data-theme="light"] .mobileSearchResultItem {
+    border-bottom-color: #f0f0f0;
+    background: #ffffff;
+}
+
+[data-theme="light"] .searchResultItem:hover,
+[data-theme="light"] .mobileSearchResultItem:hover {
+    background: #f8f8f8;
+}
+
+[data-theme="light"] .searchResultInfo h4,
+[data-theme="light"] .mobileSearchResultInfo h4 {
+    color: #333;
+}
+
+[data-theme="light"] .searchResultInfo p,
+[data-theme="light"] .mobileSearchResultInfo p {
+    color: #2a5885;
+}
+
+/* Темная тема */
+[data-theme="dark"] .searchResults,
+[data-theme="dark"] .mobileSearchResults {
+    background: #1e1e1e;
+    border: 1px solid #333;
+}
+
+[data-theme="dark"] .searchResultItem,
+[data-theme="dark"] .mobileSearchResultItem {
+    border-bottom-color: #333;
+    background: #1e1e1e;
+}
+
+[data-theme="dark"] .searchResultItem:hover,
+[data-theme="dark"] .mobileSearchResultItem:hover {
+    background: #2a2a2a;
+}
+
+[data-theme="dark"] .searchResultInfo h4,
+[data-theme="dark"] .mobileSearchResultInfo h4 {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .searchResultInfo p,
+[data-theme="dark"] .mobileSearchResultInfo p {
+    color: #6572FF;
+}
+
+[data-theme="dark"] .searchResultImage,
+[data-theme="dark"] .mobileSearchResultImage {
+    background-color: #333;
+}
+
+[data-theme="dark"] .noResults {
+    color: #a0a0a0;
+}
 /* Темная тема */
 [data-theme="dark"] .navPage {
     background-color: #121212;

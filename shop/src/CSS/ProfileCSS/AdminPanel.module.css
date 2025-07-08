@@ -1,13 +1,54 @@
+:root {
+    /* Цвета кнопок */
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --secondary-color: #6b7280;
+    --secondary-hover: #4b5563;
+    --danger-color: #dc2626;
+    --danger-hover: #b91c1c;
+    --disabled-color: #d1d5db;
+
+    /* Фон и текст */
+    --bg-color: #ffffff;
+    --text-color: #111827;
+    --button-text-light: #ffffff;
+    --button-text-dark: #111827;
+
+    /* Дополнительные */
+    --border-color: #e5e7eb;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Темная тема */
+[data-theme="dark"] {
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --secondary-color: #6b7280;
+    --secondary-hover: #4b5563;
+    --danger-color: #ef4444;
+    --danger-hover: #dc2626;
+    --disabled-color: #4b5563;
+
+    --bg-color: #1e1e1e;
+    --text-color: #e5e7eb;
+    --button-text-light: #f9fafb;
+    --button-text-dark: #e5e7eb;
+
+    --border-color: #374151;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+
 /* Основные стили */
 .profileCard {
-    background: #ffffff;
-    color: #1f2937;
+    background: var(--bg-color);
+    color: var(--text-color);
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px var(--shadow-color);
     margin-bottom: 20px;
     transition: all 0.3s ease;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-color);
 }
 
 .cardHeader {
@@ -20,7 +61,7 @@
 .cardTitle {
     font-size: 1.4rem;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--text-color);
     margin: 0;
 }
 
@@ -31,7 +72,7 @@
 
 .tabs {
     display: flex;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .tab {
@@ -40,17 +81,17 @@
     border: none;
     cursor: pointer;
     font-size: 0.9rem;
-    color: #6b7280;
+    color: var(--secondary-color);
     position: relative;
     transition: all 0.3s ease;
 }
 
 .tab:hover {
-    color: #1f2937;
+    color: var(--text-color);
 }
 
 .activeTab {
-    color: #1c4ebc;
+    color: var(--primary-color);
     font-weight: 500;
 }
 
@@ -61,7 +102,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background-color: #1c4ebc;
+    background-color: var(--primary-color);
 }
 
 /* Контент вкладок */
@@ -76,10 +117,10 @@
 .settingsTitle {
     font-size: 1.2rem;
     margin-bottom: 15px;
-    color: #1f2937;
+    color: var(--text-color);
 }
 
-/* Форма добавления товара */
+/* Форма */
 .formGroup {
     margin-bottom: 15px;
 }
@@ -91,17 +132,19 @@
 }
 
 .formInput, .formTextarea, .formSelect {
-    width: 100%;
+    width: 97%;
     padding: 8px 12px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.9rem;
     transition: border-color 0.3s ease;
+    background-color: var(--input-bg);
+    color: var(--text-color);
 }
 
 .formInput:focus, .formTextarea:focus, .formSelect:focus {
     outline: none;
-    border-color: #1c4ebc;
+    border-color: var(--primary-color);
 }
 
 .formTextarea {
@@ -109,7 +152,7 @@
     resize: vertical;
 }
 
-/* Таблица пользователей */
+/* Таблица */
 .tableContainer {
     overflow-x: auto;
 }
@@ -122,19 +165,19 @@
 .usersTable th, .usersTable td {
     padding: 10px 15px;
     text-align: left;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .usersTable th {
-    background-color: #f9fafb;
+    background-color: var(--highlight-bg);
     font-weight: 500;
 }
 
 .usersTable tr:hover {
-    background-color: #f9fafb;
+    background-color: var(--highlight-bg);
 }
 
-/* Стили для отзывов */
+/* Отзывы */
 .reviewsList {
     display: grid;
     gap: 15px;
@@ -142,9 +185,9 @@
 
 .reviewItem {
     padding: 15px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    background-color: #f9fafb;
+    background-color: var(--highlight-bg);
 }
 
 .reviewHeader {
@@ -159,11 +202,11 @@
 }
 
 .reviewUser {
-    color: #6b7280;
+    color: var(--secondary-color);
 }
 
 .reviewRating {
-    color: #1c4ebc;
+    color: var(--primary-color);
     font-weight: 500;
 }
 
@@ -171,10 +214,8 @@
     margin-bottom: 10px;
 }
 
-/* Кнопки */
-.saveButton {
-    background-color: #1c4ebc;
-    color: white;
+/* Кнопки (общие стили) */
+.button {
     padding: 8px 16px;
     border: none;
     border-radius: 6px;
@@ -183,199 +224,165 @@
     transition: background-color 0.3s ease;
 }
 
+.saveButton {
+    background-color: var(--primary-color);
+    color: white;
+}
+
 .saveButton:hover {
-    background-color: #163b8f;
+    background-color: var(--primary-hover);
 }
 
 .saveButton:disabled {
-    background-color: #9ca3af;
+    background-color: var(--disabled-color);
     cursor: not-allowed;
 }
 
 .smallButton {
-    background-color: #1c4ebc;
-    color: white;
     padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
     font-size: 0.8rem;
     margin-right: 5px;
-    transition: background-color 0.3s ease;
+    border-radius: 4px;
 }
 
-.smallButton:hover {
-    background-color: #163b8f;
-}
-
-.smallButtonCancel {
-    background-color: #6b7280;
+.smallButton.primary {
+    background-color: var(--primary-color);
     color: white;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    margin-right: 5px;
-    transition: background-color 0.3s ease;
 }
 
-.smallButtonCancel:hover {
-    background-color: #4b5563;
+.smallButton.primary:hover {
+    background-color: var(--primary-hover);
 }
 
-.smallButtonDanger {
-    background-color: #dc2626;
+.smallButton.secondary {
+    background-color: var(--secondary-color);
     color: white;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: background-color 0.3s ease;
 }
 
-.smallButtonDanger:hover {
-    background-color: #b91c1c;
+.smallButton.secondary:hover {
+    background-color: var(--secondary-hover);
 }
 
-/* Поля редактирования */
-.editInput {
-    padding: 5px 8px;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    width: 100%;
+.smallButton.danger {
+    background-color: var(--danger-color);
+    color: white;
 }
 
-.editSelect {
-    padding: 5px 8px;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    background-color: white;
+.smallButton.danger:hover {
+    background-color: var(--danger-hover);
 }
 
-/* Темная тема */
-[data-theme="dark"] .profileCard {
-    background: #1e1e1e;
-    color: #e0e0e0;
-    border-color: #2a2a2a;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-[data-theme="dark"] .cardTitle {
-    color: #e0e0e0;
-}
-
-[data-theme="dark"] .tabs {
-    border-bottom-color: #444;
-}
-
-[data-theme="dark"] .tab {
-    color: #a0a0a0;
-}
-
-[data-theme="dark"] .tab:hover {
-    color: #e0e0e0;
-}
-
-[data-theme="dark"] .activeTab {
-    color: #4d90fe;
-}
-
-[data-theme="dark"] .activeTab::after {
-    background-color: #4d90fe;
-}
-
-[data-theme="dark"] .settingsTitle {
-    color: #e0e0e0;
-}
-/* Добавляем новые стили к существующим */
-
-/* Грид для формы */
-.formGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-.formColumn {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-/* Загрузка изображения */
-.imageUploadContainer {
-    margin-top: 10px;
-}
-
+/* Загрузка изображений */
 .uploadArea {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 150px;
-    border: 2px dashed #d1d5db;
+    border: 2px dashed var(--border-color);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     padding: 20px;
     text-align: center;
+    background-color: var(--upload-area-bg);
 }
 
 .uploadArea:hover {
-    border-color: #1c4ebc;
-    background-color: rgba(28, 78, 188, 0.05);
+    border-color: var(--primary-color);
 }
 
 .uploadText {
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: #6b7280;
+    color: var(--secondary-color);
 }
 
 .uploadText i {
     font-size: 2rem;
     margin-bottom: 10px;
-    color: #9ca3af;
+    color: var(--secondary-color);
 }
 
-.fileInput {
-    display: none;
+.uploadHint {
+    display: block;
+    margin-top: 5px;
+    color: var(--secondary-color);
+    font-size: 0.8rem;
+}
+
+/* Изображения */
+.imagesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.imagePreviewWrapper {
+    position: relative;
+    aspect-ratio: 1/1;
 }
 
 .imagePreview {
     position: relative;
     width: 100%;
-    height: 150px;
+    height: 100%;
     border-radius: 8px;
     overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    background-color: var(--highlight-bg);
+}
+
+.imagePreview:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mainImage {
+    border-color: var(--primary-color);
 }
 
 .previewImage {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    background-color: #f3f4f6;
+    object-fit: cover;
+}
+
+.mainImageBadge {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
 }
 
 .removeImageButton {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
     background-color: rgba(220, 38, 38, 0.9);
     color: white;
     border: none;
-    border-radius: 4px;
-    padding: 5px 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    font-size: 0.8rem;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .removeImageButton:hover {
     background-color: rgba(185, 28, 28, 0.9);
+    transform: scale(1.1);
 }
 
 /* Переключатель */
@@ -418,68 +425,441 @@
 }
 
 input:checked + .slider {
-    background-color: #1c4ebc;
+    background-color: var(--primary-color);
 }
 
 input:checked + .slider:before {
     transform: translateX(26px);
 }
 
-/* Темная тема для новых элементов */
-[data-theme="dark"] .uploadArea {
-    border-color: #444;
-    background-color: #2a2a2a;
+/* Дополнительные стили */
+.formGrid {
+    display: grid;
+    gap: 20px;
 }
 
-[data-theme="dark"] .uploadArea:hover {
-    border-color: #4d90fe;
-    background-color: rgba(77, 144, 254, 0.1);
+.formColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-[data-theme="dark"] .uploadText {
-    color: #a0a0a0;
+.fileInput {
+    display: none;
 }
 
-[data-theme="dark"] .uploadText i {
-    color: #6b7280;
+.addByUrlContainer {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-[data-theme="dark"] .imagePreview {
-    background-color: #333;
+.urlInput {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background-color: var(--input-bg);
+    color: var(--text-color);
 }
 
-[data-theme="dark"] .slider {
-    background-color: #666;
+.urlInput:focus {
+    outline: none;
+    border-color: var(--primary-color);
 }
 
-[data-theme="dark"] .formInput,
-[data-theme="dark"] .formTextarea,
-[data-theme="dark"] .formSelect,
-[data-theme="dark"] .editInput,
+/* Основные стили кнопок */
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px var(--shadow-color);
+}
+
+/* Большая кнопка сохранения */
+.saveButton {
+    composes: button;
+    background-color: var(--primary-color);
+    color: var(--button-text-light);
+    min-width: 120px;
+}
+
+.saveButton:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.saveButton:disabled {
+    background-color: var(--disabled-color);
+    color: var(--text-color);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    opacity: 0.7;
+}
+
+/* Маленькие кнопки */
+.smallButton {
+    composes: button;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    margin-right: 5px;
+    border-radius: 4px;
+    background-color: #d0ece1;
+}
+
+
+/* Основная маленькая кнопка */
+.smallButton.primary {
+    background-color: var(--primary-color);
+    color: var(--button-text-light);
+}
+
+.smallButton.primary:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Вторичная маленькая кнопка */
+.smallButton.secondary {
+    background-color: var(--secondary-color);
+    color: var(--button-text-light);
+}
+
+.smallButton.secondary:hover {
+    background-color: var(--secondary-hover);
+}
+
+/* Опасная маленькая кнопка */
+.smallButton.danger {
+    background-color: var(--danger-color);
+    color: var(--button-text-light);
+}
+
+.smallButton.danger:hover {
+    background-color: var(--danger-hover);
+}
+
+/* Кнопка отмены */
+.smallButton.cancel {
+    background-color: var(--secondary-color);
+    color: var(--button-text-light);
+}
+
+.smallButton.cancel:hover {
+    background-color: var(--secondary-hover);
+}
+
+/* Кнопка добавления по URL */
+.addUrlButton {
+    composes: button;
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: var(--button-text-light);
+    border-radius: 8px;
+}
+
+.addUrlButton:hover {
+    background-color: var(--primary-hover);
+}
+
+.addUrlButton:disabled {
+    background-color: var(--disabled-color);
+    color: var(--text-color);
+    cursor: not-allowed;
+}
+
+
+.button i {
+    margin-right: 6px;
+    font-size: 0.9em;
+}
+
+.editInput {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    width: 100%;
+    transition: border-color 0.2s;
+}
+
+.editInput:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Стили для селекта при редактировании */
+/* Стили для селекта с темной темой */
+.editSelect {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    width: 100%;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236b7280'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.editSelect:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+
 [data-theme="dark"] .editSelect {
-    background-color: #333;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+}
+
+/* Стили для списка отзывов */
+.reviewsList {
+    margin-top: 20px;
+}
+
+.reviewItem {
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px var(--shadow-color);
+    transition: all 0.3s ease;
+}
+
+.reviewItem.approved {
+    border-left: 4px solid var(--primary-color);
+}
+
+.reviewItem.hasReply {
+    background-color: var(--highlight-bg);
+}
+
+.reviewHeader {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+}
+
+
+
+.reviewProduct {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.reviewUser {
+    color: var(--secondary-color);
+}
+
+.reviewRating {
+    background-color: var(--highlight-bg);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+
+.approvedBadge {
+    background-color: var(--primary-color);
     color: white;
-    border-color: #555;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-left: auto;
 }
 
-[data-theme="dark"] .usersTable th,
-[data-theme="dark"] .usersTable td {
-    border-bottom-color: #444;
+.reviewText {
+    margin-bottom: 15px;
+    line-height: 1.5;
 }
 
-[data-theme="dark"] .usersTable th {
+.reviewReply {
+    margin: 15px 0;
+    padding: 12px;
+    background-color: rgba(59, 130, 246, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid var(--primary-color);
+}
+
+.replyHeader {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--primary-color);
+}
+
+.replyText {
+    line-height: 1.5;
+}
+
+.reviewActions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.replyForm {
+    margin-top: 15px;
+}
+
+.replyTextarea {
+    width: 95%;
+    min-height: 100px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    margin-bottom: 10px;
+    resize: vertical;
+}
+
+.replyFormActions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Новые стили кнопок */
+.smallButtonSecondary {
+    composes: button;
+    padding: 6px 12px;
+    background-color: var(--secondary-color);
+    color: var(--button-text-light);
+    border: 1px solid var(--secondary-color);
+}
+
+.smallButtonSecondary:hover {
+    background-color: var(--secondary-hover);
+    border-color: var(--secondary-hover);
+}
+
+.smallButtonPrimary {
+    composes: button;
+    padding: 6px 12px;
+    background-color: var(--primary-color);
+    color: var(--button-text-light);
+    border: 1px solid var(--primary-color);
+}
+
+.smallButtonPrimary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+.editSelect option {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .editSelect option {
+    background-color: #291111;
+    color: var(--text-color);
+}
+
+.editSelect option:hover {
+    background-color: var(--primary-color)!important;
+    color: white;
+}
+
+.editSelect option:checked {
+    background-color: var(--primary-color);
+    color: white;
+}
+.smallButtonCancel {
+    composes: button;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    margin-right: 8px;
+    border-radius: 4px;
+    background-color: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.smallButtonCancel:hover {
+    background-color: var(--highlight-bg);
+    border-color: var(--secondary-hover);
+}
+
+
+.smallButtonDanger {
+    composes: button;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    margin-right: 5px;
+    border-radius: 4px;
+    background-color: var(--danger-color);
+    color: var(--button-text-light);
+    border: 1px solid var(--danger-color);
+}
+
+.smallButtonDanger:hover {
+    background-color: var(--danger-hover);
+    border-color: var(--danger-hover);
+}
+
+/* Адаптация для темной темы */
+[data-theme="dark"] .smallButtonCancel {
     background-color: #2a2a2a;
 }
 
-[data-theme="dark"] .usersTable tr:hover {
-    background-color: #2a2a2a;
+[data-theme="dark"] .smallButtonCancel:hover {
+    background-color: #333;
 }
 
-[data-theme="dark"] .reviewItem {
-    background-color: #2a2a2a;
-    border-color: #444;
+/* Группировка кнопок в ячейке */
+td > button {
+    margin-right: 8px;
+    transition: all 0.2s ease;
 }
 
-[data-theme="dark"] .reviewUser {
-    color: #a0a0a0;
+td > button:last-child {
+    margin-right: 0;
+}
+
+.button:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}
+
+
+.tableActions .smallButton {
+    margin: 2px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+}
+
+
+[data-theme="dark"] .button {
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .smallButton {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .saveButton:disabled,
+[data-theme="dark"] .addUrlButton:disabled {
+    background-color: #333;
+    color: #777;
 }

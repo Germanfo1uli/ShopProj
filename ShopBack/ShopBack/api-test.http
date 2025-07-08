@@ -1,8 +1,7 @@
 @host = http://localhost:5000
 @contentType = application/json
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjkiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJBZG1pbiIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzUxNjIwMzc1fQ.V0BD6sJInUqjRAD1Ngdr86FxhcEe1vZGjg4AzZzXV-I
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjgiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJnZXJtYW5AbWFpbC5ydSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJleHAiOjE3NTE4MTA5NTl9.tfMmKLEp23k0aD1Sgkj5QNZsvRZTLpkToqaCVFAUfdA
-
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjkiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJBZG1pbiIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzUxODgwNTgxfQ.0OM6m-mHE46XhVCpV7iHNhAp8XEsKbwn7DoeF072QI0
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjgiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJnZXJtYW5AbWFpbC5ydSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJleHAiOjE3NTE4NzUwODN9.lg2pdqMTqJuoAwgxaa4JpXObmIS3gB3tyPglab1n3X0
 @refreshToken = 
 
 ### 1. Аутентификация и пользователи ###
@@ -1527,3 +1526,196 @@ Authorization: Bearer {{userToken}}
 ### Получить корзину пользователя
 GET {{host}}/api/orders/8/cart
 Authorization: Bearer {{userToken}}
+
+### Создание отзыва ###
+POST {{host}}/api/reviews
+Content-Type: {{contentType}}
+Authorization: Bearer {{userToken}}
+
+{
+  "productId":1,
+  "userId": 8,
+  "rating": 2,
+  "header": "Bad",
+  "comment": "Плохо, очень плохо"
+}
+
+### Создание Спецификаций ###
+
+### ProductId = 1 ###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 1,
+"key": "Артикул",
+"value": "2025 01"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 1,
+"key": "Состав",
+"value": "100% хлопок"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 1,
+"key": "Пол",
+"value": "Женский"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 1,
+"key": "Размер",
+"value": "S, M, L, XL"
+}
+
+### ProductId = 2 ###
+
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 2,
+"key": "Артикул",
+"value": "2025 02"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 2,
+"key": "Состав",
+"value": "65% полиэстер, 35% вискоза"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 2,
+"key": "Пол",
+"value": "Женский"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 2,
+"key": "Размер",
+"value": "XS, S, M, L"
+}
+
+### ProductId = 3 ###
+
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 3,
+"key": "Артикул",
+"value": "2025 03"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 3,
+"key": "Состав",
+"value": "80% хлопок, 20% полиэстер"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 3,
+"key": "Пол",
+"value": "Мужской"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 3,
+"key": "Размер",
+"value": "40, 42, 44, 46, 48"
+}
+
+### ProductId = 4 ###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 4,
+"key": "Артикул",
+"value": "2025 04"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 4,
+"key": "Состав",
+"value": "98% хлопок, 2% эластан"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 4,
+"key": "Пол",
+"value": "Мужской"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 4,
+"key": "Размер",
+"value": "28/30, 30/32, 32/34, 34/36"
+}

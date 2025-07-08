@@ -30,9 +30,13 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
-    });
-});
 
+        policy.WithOrigins("https://js.stripe.com", "https://merchant-ui-api.stripe.com")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+
+});
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -81,7 +85,7 @@ builder.Services.AddScoped<ProductsService>();
 builder.Services.AddScoped<ReviewsService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<PayMethodsRepository>();
+builder.Services.AddScoped<PayMethodsService>();
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<IPaymentGateway, StripePaymentGateway>();
 

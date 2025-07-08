@@ -47,7 +47,8 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
         try {
             const response = await apiRequest('/api/users/login', {
                 method: 'POST',
-                body: { Email: values.login, Password: values.password }
+                body: { Email: values.login, Password: values.password },
+                authenticated: false
             });
 
             const jwtToken = response.jwtToken || response.token || response?.data?.token;

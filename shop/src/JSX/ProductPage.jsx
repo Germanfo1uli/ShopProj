@@ -7,12 +7,14 @@ import sb from "../CSS/Breadcrumbs.module.css";
 import { apiRequest } from './Api/ApiRequest';
 import { useAuth } from './Hooks/UseAuth';
 
+
 const ProductPage = () => {
     const { id } = useParams();
     const { userId, isAuthenticated } = useAuth();
-    
-    const [productData, setProductData] = useState(null); // переименовали для ясности
+    const [productData, setProductData] = useState(null);
+    const [reviewsData, setReviewsData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [reviewsLoading, setReviewsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [isFavorite, setIsFavorite] = useState(false);
@@ -22,34 +24,24 @@ const ProductPage = () => {
     const [mainImage, setMainImage] = useState('');
     const [showImageModal, setShowImageModal] = useState(false);
     const [favorites, setFavorites] = useState([]);
-
-    const reviews = [
-        {
-            name: "Анна К.",
-            date: "21 мая 2025",
-            rating: 5,
-            title: "Лучшее масло лаванды!",
-            text: "Покупаю уже второй флакон. Аромат просто волшебный - натуральный, нежный, без химических примесей. Добавляю в ванну вечером и засыпаю как младенец. Также заметила, что помогает снять тревожность.",
-            avatar: "https://i.pravatar.cc/150?img=1"
-        },
-        {
-            name: "Игорь С.",
-            date: "14 апреля 2025",
-            rating: 4.5,
-            title: "Качественный продукт",
-            text: "Использую для ароматизации квартиры и добавления в массажное масло. Аромат держится долго, не вызывает аллергии (у меня чувствительная кожа). Единственное - хотелось бы чуть большего объема флакона, но это совсем не критично."
-        }
-    ];
+    const [reviewForm, setReviewForm] = useState({
+        header: '',
+        comment: '',
+        rating: 0
+    });
+    const [specifications, setSpecifications] = useState([]);
+    const [specsLoading, setSpecsLoading] = useState(true);
+    
 
     useEffect(() => {
         const fetchProduct = async () => {
             try {
                 setIsLoading(true);
                 const response = await apiRequest(`/api/products/${id}`);
-                setProductData(response); 
+                setProductData(response);
                 
-                if (response.product?.images && response.product.images.length > 0) {
-                    setMainImage(`${process.env.REACT_APP_API_URL}${response.product.images[0].url}`);
+                if (response.product?.productImage && response.product.productImage.length > 0) {
+                    setMainImage(`${process.env.REACT_APP_API_URL}${response.product.productImage[0].url}`);
                 }
                 
                 if (userId) {
@@ -61,16 +53,59 @@ const ProductPage = () => {
                     setFavorites(favoriteIds);
                     setIsFavorite(favoriteIds.includes(Number(id)));
                 }
-                
-            } catch (err) {
+                await fetchSpecifications(id);
+
+            } 
+            catch (err) {
                 console.error('Ошибка загрузки данных товара:', err);
                 setError('Не удалось загрузить данные товара');
-            } finally {
+            } 
+            finally {
                 setIsLoading(false);
             }
         };
 
+        const fetchReviews = async () => {
+            try {
+                setReviewsLoading(true);
+                const response = await apiRequest(`/api/reviews/product/${id}`);
+                console.log(response)
+                const reviews = response || [];
+                const totalReviews = reviews.length;
+                const averageRating = totalReviews > 0 
+                    ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
+                    : 0;
+                
+                const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+                reviews.forEach(review => {
+                    const roundedRating = Math.round(review.rating);
+                    if (roundedRating >= 1 && roundedRating <= 5) {
+                        ratingCounts[roundedRating]++;
+                    }
+                });
+                
+                setReviewsData({
+                    reviews,
+                    averageRating,
+                    ratingCounts,
+                    totalReviews
+                });
+                
+            } catch (err) {
+                console.error('Ошибка загрузки отзывов:', err);
+                setReviewsData({
+                    reviews: [],
+                    averageRating: 0,
+                    ratingCounts: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+                    totalReviews: 0
+                });
+            } finally {
+                setReviewsLoading(false);
+            }
+        };
+
         fetchProduct();
+        fetchReviews();
     }, [id, userId, isAuthenticated]);
 
     const handleQuantityChange = (amount) => {
@@ -145,8 +180,26 @@ const ProductPage = () => {
         }
     };
 
+    const fetchSpecifications = async (productId) => {
+        try {
+            setSpecsLoading(true);
+            const response = await apiRequest(`/api/productspecifications/product/${productId}`);
+            setSpecifications(response || []);
+            console.log(response)
+        } catch (err) {
+            console.error('Ошибка загрузки спецификаций:', err);
+            setSpecifications([]);
+        } finally {
+            setSpecsLoading(false);
+        }
+    };
+
     const handleRatingClick = (value) => {
         setRating(value);
+        setReviewForm(prev => ({
+            ...prev,
+            rating: value
+        }));
     };
 
     const handleRatingHover = (value) => {
@@ -181,6 +234,88 @@ const ProductPage = () => {
         return stars;
     };
 
+    const handleReviewSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!isAuthenticated) {
+            alert('Войдите в систему, чтобы оставить отзыв');
+            return;
+        }
+
+        if (!reviewForm.rating) {
+            alert('Пожалуйста, поставьте оценку товару');
+            return;
+        }
+
+        try {
+            const response = await apiRequest('/api/reviews', {
+                method: 'POST',
+                body: {
+                    productId: Number(id),
+                    userId: userId,
+                    rating: reviewForm.rating,
+                    header: reviewForm.header,
+                    comment: reviewForm.comment
+                },
+                authenticated: isAuthenticated
+            });
+
+            if (response) {
+                alert('Ваш отзыв успешно отправлен!');
+                setReviewForm({
+                    header: '',
+                    comment: '',
+                    rating: 0
+                });
+                setRating(0);
+                const reviewsResponse = await apiRequest(`/api/reviews/product/${id}`);
+                const reviews = reviewsResponse || [];
+                const totalReviews = reviews.length;
+                const averageRating = totalReviews > 0 
+                    ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
+                    : 0;
+                
+                const ratingCounts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+                reviews.forEach(review => {
+                    const roundedRating = Math.round(review.rating);
+                    if (roundedRating >= 1 && roundedRating <= 5) {
+                        ratingCounts[roundedRating]++;
+                    }
+                });
+                
+                setReviewsData({
+                    reviews,
+                    averageRating,
+                    ratingCounts,
+                    totalReviews
+                });
+
+                const updatedProduct = await apiRequest(`/api/products/${id}`);
+                setProductData(prev => ({
+                    ...prev,
+                    product: {
+                        ...prev.product,
+                        rating: updatedProduct.product.rating,
+                        reviews: updatedProduct.product.reviews
+                    }
+                }));
+            }
+        } catch (error) {
+            console.error('Ошибка при отправке отзыва:', error);
+            alert('Не удалось отправить отзыв: ' + error.message);
+        }
+    };
+
+    const handleReviewChange = (e) => {
+        const { name, value } = e.target;
+        setReviewForm(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    
+
     if (isLoading) {
         return <div className={styles.loading}>Загрузка...</div>;
     }
@@ -193,6 +328,11 @@ const ProductPage = () => {
         return <div className={styles.error}>Товар не найден</div>;
     }
     const { product } = productData;
+    const reviews = reviewsData?.reviews || [];
+    const averageRating = reviewsData?.averageRating || 0;
+    const ratingCounts = reviewsData?.ratingCounts || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    const totalReviews = reviewsData?.totalReviews || 0;
+
     return (
         <>
         <div className={styles.container}>
@@ -240,7 +380,7 @@ const ProductPage = () => {
                             <div className={styles.stars}>
                                 {renderStars(Math.floor(product.rating || 0), (product.rating || 0) % 1 !== 0)}
                             </div>
-                            <span className={styles.ratingText}>{product.rating?.toFixed(1) || 0} ({product.reviews || 0} отзывов)</span>
+                            <span className={styles.ratingText}>{product.rating?.toFixed(1) || 0} ({product.reviewsNumber || 0} отзывов)</span>
                         </div>
 
                         <div className={styles.features}>
@@ -252,17 +392,13 @@ const ProductPage = () => {
                             ))}
                         </div>
 
-                        <div className={styles.description}>
-                            <p>{product.description}</p>
-
-                            <div className={styles.specs}>
-                                {product.specifications?.map((spec, index) => (
-                                    <div key={index} className={styles.specItem}>
-                                        <span className={styles.specLabel}>{spec.label}:</span>
-                                        <span className={styles.specValue}>{spec.value}</span>
-                                    </div>
-                                ))}
-                            </div>
+                        <div className={styles.specifications}>
+                            {specifications.map((spec, index) => (
+                                <div key={index} className={styles.specItem}>
+                                    <span className={styles.specLabel}>{spec.key}:</span>
+                                    <span className={styles.specValue}>{spec.value}</span>
+                                </div>
+                            ))}
                         </div>
 
                         <div className={styles.priceContainer}>
@@ -394,75 +530,92 @@ const ProductPage = () => {
                 </div>
 
 
-            <div className={styles.reviewsSection}>
-                <h2 className={styles.sectionTitle}>Отзывы покупателей</h2>
+                <div className={styles.reviewsSection}>
+                    <h2 className={styles.sectionTitle}>Отзывы покупателей</h2>
 
-                <div className={styles.overallRating}>
-                    <div className={styles.ratingSummary}>
-                        <div className={styles.averageRating}>4.7</div>
-                        <div className={styles.stars}>
-                            {renderStars(4)}
-                            <FaStarHalfAlt className={`${styles.star} ${styles.starActive}`} />
+                    <div className={styles.overallRating}>
+                        <div className={styles.ratingSummary}>
+                            <div className={styles.averageRating}>{averageRating.toFixed(1)}</div>
+                            <div className={styles.stars}>
+                                {renderStars(Math.floor(averageRating), averageRating % 1 !== 0)}
+                            </div>
+                            <div className={styles.ratingCount}>на основе {totalReviews} отзывов</div>
                         </div>
-                        <div className={styles.ratingCount}>на основе 128 отзывов</div>
+
+                        <div className={styles.ratingBars}>
+                            {[5, 4, 3, 2, 1].map((star) => (
+                                <div key={star} className={styles.ratingBar}>
+                                    <span className={styles.ratingLabel}>{star}</span>
+                                    <FaStar className={`${styles.star} ${styles.starActive} ${styles.smallStar}`} />
+                                    <div className={styles.barContainer}>
+                                        <div
+                                            className={styles.barFill}
+                                            style={{ 
+                                                width: totalReviews > 0 
+                                                    ? `${(ratingCounts[star] / totalReviews) * 100}%` 
+                                                    : '0%'
+                                            }}
+                                        ></div>
+                                    </div>
+                                    <span className={styles.ratingCount}>{ratingCounts[star]}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
-                    <div className={styles.ratingBars}>
-                        {[5, 4, 3, 2, 1].map((star) => (
-                            <div key={star} className={styles.ratingBar}>
-                                <span className={styles.ratingLabel}>{star}</span>
-                                <FaStar className={`${styles.star} ${styles.starActive} ${styles.smallStar}`} />
-                                <div className={styles.barContainer}>
-                                    <div
-                                        className={styles.barFill}
-                                        style={{ width: `${[70, 20, 5, 3, 2][5-star]}%` }}
-                                    ></div>
-                                </div>
-                                <span className={styles.ratingCount}>{[89, 25, 8, 4, 2][5-star]}</span>
+                    {reviewsLoading ? (
+                        <div className={styles.loading}>Загрузка отзывов...</div>
+                    ) : reviews.length > 0 ? (
+                        <>
+                            <div className={styles.reviewsList}>
+                                {reviews.map((review) => (
+                                    <div key={review.id} className={styles.reviewCard}>
+                                        <div className={styles.reviewHeader}>
+                                            <div>
+                                                <div className={styles.reviewAuthor}>
+                                                    {review.user.firstName || `Аноним`} {review.user.lastName.charAt(0) + "." || ` `}
+                                                </div>
+                                                <div className={styles.reviewDate}>
+                                                    {new Date(review.createdAt || review.date).toLocaleDateString('ru-RU', {
+                                                        year: 'numeric',
+                                                        month: 'long',
+                                                        day: 'numeric'
+                                                    })}
+                                                </div>
+                                            </div>
+                                            <div className={styles.stars}>
+                                                {renderStars(Math.floor(review.rating), review.rating % 1 !== 0)}
+                                            </div>
+                                        </div>
+                                        <h3 className={styles.reviewTitle}>{review.header || 'Без заголовка'}</h3>
+                                        <p className={styles.reviewText}>{review.text || review.comment || 'Нет текста отзыва'}</p>
+                                        {/* Если есть изображения в отзыве */}
+                                        {review.images && review.images.length > 0 && (
+                                            <div className={styles.reviewImages}>
+                                                {review.images.map((image, imgIndex) => (
+                                                    <img 
+                                                        key={imgIndex} 
+                                                        src={`${process.env.REACT_APP_API_URL}${image.url}`} 
+                                                        alt="Фото из отзыва" 
+                                                        className={styles.reviewImage} 
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-
-                    <button className={styles.reviewButton}>
-                        Оставить отзыв
-                    </button>
+                        </>
+                    ) : (
+                        <div className={styles.noReviews}>Пока нет отзывов. Будьте первым!</div>
+                    )}
                 </div>
-
-                <div className={styles.reviewsList}>
-                    {reviews.map((review, index) => (
-                        <div key={index} className={styles.reviewCard}>
-                            <div className={styles.reviewHeader}>
-                                <div>
-                                    <div className={styles.reviewAuthor}>{review.name}</div>
-                                    <div className={styles.reviewDate}>{review.date}</div>
-                                </div>
-                                <div className={styles.stars}>
-                                    {renderStars(Math.floor(review.rating), review.rating % 1 !== 0)}
-                                </div>
-                            </div>
-                            <h3 className={styles.reviewTitle}>{review.title}</h3>
-                            <p className={styles.reviewText}>{review.text}</p>
-                            {review.avatar && (
-                                <div className={styles.reviewImages}>
-                                    <img src={review.avatar} alt="Фото пользователя" className={styles.reviewImage} />
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-
-                <div className={styles.moreReviews}>
-                    <button className={styles.moreButton}>
-                        Показать еще отзывы
-                    </button>
-                </div>
-            </div>
 
             <div className={styles.reviewForm}>
                 <h2 className={styles.sectionTitle}>Оставить отзыв</h2>
                 <p className={styles.formDescription}>Расскажите о вашем опыте использования этого товара</p>
 
-                <form>
+                <form onSubmit={handleReviewSubmit}>
                     <div className={styles.formGroup}>
                         <label className={styles.formLabel}>Ваша оценка</label>
                         <div className={styles.ratingInput}>
@@ -470,8 +623,8 @@ const ProductPage = () => {
                                 <button
                                     key={star}
                                     type="button"
-                                    className={`${styles.starButton} ${star <= (hoverRating || rating) ? styles.starButtonActive : ''}`}
-                                    onClick={() => setRating(star)}
+                                    className={`${styles.starButton} ${star <= (hoverRating || reviewForm.rating) ? styles.starButtonActive : ''}`}
+                                    onClick={() => handleRatingClick(star)}
                                     onMouseEnter={() => setHoverRating(star)}
                                     onMouseLeave={() => setHoverRating(0)}
                                 >
@@ -481,48 +634,32 @@ const ProductPage = () => {
                         </div>
                     </div>
 
-                    <div className={styles.formGrid}>
-                        <div className={styles.formGroup}>
-                            <label htmlFor="name" className={styles.formLabel}>Имя</label>
-                            <input type="text" id="name" className={styles.formInput} />
-                        </div>
-                        <div className={styles.formGroup}>
-                            <label htmlFor="email" className={styles.formLabel}>Email (не будет опубликован)</label>
-                            <input type="email" id="email" className={styles.formInput} />
-                        </div>
-                    </div>
-
                     <div className={styles.formGroup}>
-                        <label htmlFor="title" className={styles.formLabel}>Заголовок отзыва</label>
+                        <label htmlFor="header" className={styles.formLabel}>Заголовок отзыва</label>
                         <input
                             type="text"
-                            id="title"
+                            id="header"
+                            name="header"
                             className={styles.formInput2}
                             placeholder="Например: 'Отличное качество'"
+                            value={reviewForm.header}
+                            onChange={handleReviewChange}
+                            required
                         />
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="review" className={styles.formLabel}>Ваш отзыв</label>
+                        <label htmlFor="comment" className={styles.formLabel}>Ваш отзыв</label>
                         <textarea
-                            id="review"
+                            id="comment"
+                            name="comment"
                             rows="5"
                             className={styles.formTextarea}
                             placeholder="Расскажите о ваших впечатлениях"
+                            value={reviewForm.comment}
+                            onChange={handleReviewChange}
+                            required
                         ></textarea>
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.formLabel}>Добавить фото (по желанию)</label>
-                        <div className={styles.uploadContainer}>
-                            <label htmlFor="dropzone-file" className={styles.uploadLabel}>
-                                <div className={styles.uploadContent}>
-                                    <FaCloudUploadAlt className={styles.uploadIcon} />
-                                    <p className={styles.uploadText}>Перетащите фото сюда или нажмите для выбора</p>
-                                </div>
-                                <input id="dropzone-file" type="file" className={styles.uploadInput} />
-                            </label>
-                        </div>
                     </div>
 
                     <button type="submit" className={styles.submitButton}>
