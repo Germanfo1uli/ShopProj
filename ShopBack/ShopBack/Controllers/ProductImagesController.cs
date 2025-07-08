@@ -24,7 +24,7 @@ namespace ShopBack.Controllers
             await _productImageService.AddAsync(productImage);
             return CreatedAtAction(
                actionName: nameof(GetById),
-               routeValues: new { id = productImage.Id },
+               routeValues: new { imageId = productImage.Id },
                value: productImage
            );
         }
@@ -47,33 +47,19 @@ namespace ShopBack.Controllers
         [HttpGet("{imageId}")]
         public async Task<ActionResult<ProductImages>> GetById(int imageId)
         {
-            try
-            {
-                var result = await _productImageService.GetByIdAsync(imageId);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _productImageService.GetByIdAsync(imageId);
+            return Ok(result);
         }
 
         [HttpPut("{imageId}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ProductImages>> Update(int imageId, [FromBody] ImagesData updateDto)
         {
-            try
-            {
-                var image = await _productImageService.GetByIdAsync(imageId);
-                image.ImageUrl = updateDto.ImageUrl;
-                image.IsMain = updateDto.IsMain;
-                await _productImageService.UpdateAsync(image);
-                return Ok(image);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var image = await _productImageService.GetByIdAsync(imageId);
+            image.ImageUrl = updateDto.ImageUrl;
+            image.IsMain = updateDto.IsMain;
+            await _productImageService.UpdateAsync(image);
+            return Ok(image);
         }
     }
 

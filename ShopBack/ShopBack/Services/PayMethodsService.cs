@@ -17,7 +17,7 @@ namespace ShopBack.Services
             var method = await _payMethodsRepository.GetByIdAsync(id);
             if (method == null) throw new KeyNotFoundException();
 
-            var userMethods = await _payMethodsRepository.GetByUserIdAsync(id);
+            var userMethods = await _payMethodsRepository.GetByUserIdAsync(method.UserId);
             foreach (var m in userMethods)
             {
                 m.IsDefault = false;
