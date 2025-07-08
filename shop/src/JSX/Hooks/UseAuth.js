@@ -15,25 +15,37 @@ const useToken = () => {
         isLoading: true
     });
 
-    const login = useCallback((token, refreshToken, userId) => {
+    const decodeToken = (token) => {
         try {
             const decoded = jwtDecode(token);
-            localStorage.setItem('authToken', token);
-            localStorage.setItem('refreshToken', refreshToken);
-            localStorage.setItem('userId', userId);
-
-            setAuth({
-                isAuthenticated: true,
-                userId: Number(userId),
+            return {
+                userId: Number(decoded.userId || decoded.sub || localStorage.getItem('userId') || 0),
                 email: decoded.email || decoded.Email || 'Пользователь',
-                roleId: Number(decoded.roleId || decoded.role || 0),
-                token,
-                refreshToken,
-                isLoading: false
-            });
+                roleId: Number(decoded.roleId || decoded.role || 0)
+            };
         } catch (error) {
             console.error('Ошибка декодирования токена:', error);
+            return null;
         }
+    };
+
+    const login = useCallback((token, refreshToken, userId) => {
+        const decoded = decodeToken(token);
+        if (!decoded) return;
+
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('userId', userId || decoded.userId);
+
+        setAuth({
+            isAuthenticated: true,
+            userId: Number(userId || decoded.userId),
+            email: decoded.email,
+            roleId: decoded.roleId,
+            token,
+            refreshToken,
+            isLoading: false
+        });
     }, []);
     
     const logout = useCallback(() => {
@@ -54,18 +66,16 @@ const useToken = () => {
     
     const refreshTokens = useCallback(async () => {
         try {
+            console.log('Получение нового токена...');
             const refreshToken = localStorage.getItem('refreshToken');
             if (!refreshToken) {
                 console.error('Refresh token not found');
                 return null;
             }
             
-            console.log('Attempting to refresh tokens...');
             const response = await apiRequest('/api/users/generatetokens', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: { token: refreshToken }
             });
 
@@ -73,17 +83,22 @@ const useToken = () => {
             const newRefreshToken = response.refreshToken || response?.message?.refreshToken;
 
             if (!newToken || !newRefreshToken) {
-                console.error('Invalid token refresh response format');
                 throw new Error('Invalid token refresh response');
+            }
+
+            const decoded = decodeToken(newToken);
+            if (!decoded) {
+                throw new Error('Failed to decode new token');
             }
 
             localStorage.setItem('authToken', newToken);
             localStorage.setItem('refreshToken', newRefreshToken);
-
-            console.log('Tokens successfully refreshed');
+            localStorage.setItem('userId', decoded.userId);
+            console.log('Токен получен для:', decoded.userId);
             return {
                 token: newToken,
-                refreshToken: newRefreshToken
+                refreshToken: newRefreshToken,
+                userId: decoded.userId
             };
         } catch (error) {
             console.error('Token refresh failed:', error);
@@ -101,33 +116,35 @@ const useToken = () => {
             try {
                 const decoded = jwtDecode(token);
                 const expiresIn = (decoded.exp * 1000) - Date.now();
+                
                 if (expiresIn < 60000) {
                     const newTokens = await refreshTokens();
                     if (newTokens) {
-                        const newDecoded = jwtDecode(newTokens.token);
-                        setAuth(prev => ({
-                            ...prev,
+                        const decodedNew = decodeToken(newTokens.token);
+                        if (!decodedNew) {
+                            logout();
+                            return;
+                        }
+
+                        setAuth({
+                            isAuthenticated: true,
+                            userId: decodedNew.userId,
+                            email: decodedNew.email,
+                            roleId: decodedNew.roleId,
                             token: newTokens.token,
                             refreshToken: newTokens.refreshToken,
-                            isAuthenticated: true,
-                            userId: Number(newDecoded.userId || newDecoded.sub),
-                            email: newDecoded.email || newDecoded.Email || 'Пользователь',
-                            roleId: Number(newDecoded.roleId || newDecoded.role || 0)
-                        }));
+                            isLoading: false
+                        });
                         
-                        const newExpiresIn = (newDecoded.exp * 1000) - Date.now();
+                        const newExpiresIn = (jwtDecode(newTokens.token).exp * 1000) - Date.now();
                         timer = setTimeout(checkTokenExpiration, newExpiresIn - 60000);
-                        return;
-                    } 
-                    else {
+                    } else {
                         logout();
                     }
-                } 
-                else {
+                } else {
                     timer = setTimeout(checkTokenExpiration, expiresIn - 60000);
                 }
-            } 
-            catch (error) {
+            } catch (error) {
                 console.error('Ошибка проверки токена:', error);
                 logout();
             }
@@ -144,33 +161,29 @@ const useToken = () => {
         const initAuth = async () => {
             const token = localStorage.getItem('authToken');
             const refreshToken = localStorage.getItem('refreshToken');
-            const userId = localStorage.getItem('userId');
+            const storedUserId = localStorage.getItem('userId');
 
             if (token) {
-                try {
-                    const decoded = jwtDecode(token);
-                    const email = decoded.email || decoded.Email || decoded.sub;
-                    const roleId = decoded.roleId || decoded.role || 
-                                 decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 
-                                 decoded.RoleId || 0;
-                    
-                    setAuth({
-                        isAuthenticated: true,
-                        userId: Number(userId || decoded.userId || decoded.sub),
-                        email: email || 'Пользователь',
-                        roleId: Number(roleId),
-                        token,
-                        refreshToken,
-                        isLoading: false
-                    });
-                } 
-                catch (error) {
-                    console.error('Ошибка декодирования токена:', error);
+                const decoded = decodeToken(token);
+                if (!decoded) {
                     const newTokens = await refreshTokens();
                     if (!newTokens) logout();
+                    return;
                 }
-            } 
-            else {
+
+                // Используем userId из localStorage, если в токене его нет
+                const userId = decoded.userId || Number(storedUserId);
+                
+                setAuth({
+                    isAuthenticated: true,
+                    userId: Number(userId),
+                    email: decoded.email,
+                    roleId: decoded.roleId,
+                    token,
+                    refreshToken,
+                    isLoading: false
+                });
+            } else {
                 setAuth(prev => ({ ...prev, isLoading: false }));
             }
         };
@@ -182,7 +195,7 @@ const useToken = () => {
         ...auth,
         login,
         logout,
-        refreshTokens // Экспортируем для ручного обновления при необходимости
+        refreshTokens
     };
 };
 

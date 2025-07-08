@@ -69,7 +69,6 @@ const ProductPage = () => {
             try {
                 setReviewsLoading(true);
                 const response = await apiRequest(`/api/reviews/product/${id}`);
-                console.log(response)
                 const reviews = response || [];
                 const totalReviews = reviews.length;
                 const averageRating = totalReviews > 0 
@@ -185,7 +184,6 @@ const ProductPage = () => {
             setSpecsLoading(true);
             const response = await apiRequest(`/api/productspecifications/product/${productId}`);
             setSpecifications(response || []);
-            console.log(response)
         } catch (err) {
             console.error('Ошибка загрузки спецификаций:', err);
             setSpecifications([]);

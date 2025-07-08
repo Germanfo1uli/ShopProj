@@ -81,17 +81,6 @@ const AddCardForm = ({ onSuccess, onCancel, userId  }) => {
           <Form>
             <h3 className={styles.formTitle}>Добавить новую карту</h3>
 
-            {/* <div className={styles.formGroup}>
-              <label htmlFor="cardName">Имя на карте</label>
-              <Field
-                type="text"
-                name="cardName"
-                placeholder="IVAN IVANOV"
-                className={styles.formInput}
-              />
-              <ErrorMessage name="cardName" component="div" className={styles.errorMessage} />
-            </div> */}
-
             <div className={styles.formGroup}>
               <label>Данные карты</label>
               <div className={styles.cardElementWrapper}>
