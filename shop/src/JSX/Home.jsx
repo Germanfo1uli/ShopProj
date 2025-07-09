@@ -44,7 +44,6 @@ const Home = () => {
                     }
                     imagesByProduct[image.productId].push(image);
                 });
-                
                 setProductImages(imagesByProduct);
 
                 const formattedProducts = productsData.map(product => ({
@@ -56,8 +55,8 @@ const Home = () => {
                         ? Math.round((1 - product.price / product.oldPrice) * 100).toString()
                         : null,
                     specs: product.description ? product.description.substring(0, 50) + '...' : 'Нет описания',
-                    rating: product.rating || 0,  
-                    reviews: product.reviewsNumber || 0, 
+                    rating: product.rating || 0,
+                    reviews: product.reviewsNumber || 0,
                     image: 'https://via.placeholder.com/300'
                 }));
 
@@ -95,6 +94,10 @@ const Home = () => {
         setCurrentSlide(prev => (prev === slides.length - 1 ? 0 : prev + 1));
     };
 
+    const popularProducts = [...products]
+    .sort((a, b) => b.reviews - a.reviews) // Сортировка по убыванию количества отзывов
+    .slice(0, 8);
+
     if (loading) {
         return <LoadingSpinner message="Загружаем товары..." status="loading" />;
     }
@@ -124,12 +127,16 @@ const Home = () => {
                             key={i}
                             className={i < Math.floor(product.rating) ? styles.starFilled : styles.starEmpty}
                         >
-                            ★
+                            {i < Math.floor(product.rating) ? '★' : '☆'}
                         </span>
                     ))}
                 </div>
-                <span className={styles.ratingValue}>{product.rating.toFixed(1)}</span>
-                <span className={styles.reviews}>({product.reviews})</span>
+                <span className={styles.ratingValue}>
+                    {product.rating > 0 ? product.rating.toFixed(1) : '0'}
+                </span>
+                {product.reviews > 0 && (
+                    <span className={styles.reviews}>({product.reviews})</span>
+                )}
             </div>
         );
     };
@@ -192,7 +199,7 @@ const Home = () => {
                     </Link>
                 </div>
                 <div className={styles.productGrid}>
-                    {products.slice(0, 8).map(product => (
+                    {popularProducts.map(product => (
                         <Link
                             to={`/product/${product.id}`}
                             key={`popular-${product.id}`}

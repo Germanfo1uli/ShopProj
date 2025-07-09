@@ -26,6 +26,8 @@ const Catalog = () => {
     const [categories, setCategories] = useState([]);
     const [products, setProducts] = useState([]);
     const [productImages, setProductImages] = useState({}); 
+    const [availableSizes, setAvailableSizes] = useState([]);
+    const [allSpecifications, setAllSpecifications] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const {userId, isAuthenticated, logout } = useAuth();
@@ -62,6 +64,25 @@ const Catalog = () => {
         setHoverTimeout(timer);
     };
 
+    const fetchAllSizes = async () => {
+        try {
+            const allSpecs = await apiRequest('/api/productspecifications');
+            const allSizeValues = allSpecs
+                .filter(spec => spec.key === "Размер")
+                .flatMap(spec => 
+                    spec.value.split(',')
+                    .map(s => s.trim())
+                    .filter(s => s)
+                );
+            
+            const uniqueSizes = [...new Set(allSizeValues)].sort();
+            setAvailableSizes(uniqueSizes);
+        } catch (err) {
+            console.error('Ошибка загрузки размеров:', err);
+            setAvailableSizes([]);
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -76,9 +97,20 @@ const Catalog = () => {
                     
                     const favoriteIds = userFavorites.map(fav => Number(fav.id)); 
                     setFavorites(favoriteIds);
+                    fetchAllSizes();
                 } else {
                     setFavorites([]);
                 }
+                
+                const specs = await apiRequest('/api/productspecifications');
+                const specsMap = {};
+                specs.forEach(spec => {
+                    if (!specsMap[spec.productId]) {
+                        specsMap[spec.productId] = [];
+                    }
+                    specsMap[spec.productId].push(spec);
+                });
+                setAllSpecifications(specsMap);
 
                 const categoriesStructure = parentCategories.map(parent => {
                     const children = allCategories.filter(
@@ -207,19 +239,6 @@ const Catalog = () => {
         result = result.filter(p =>
             p.price >= priceRange[0] && p.price <= priceRange[1]
         );
-
-        if (selectedSizes.length > 0) {
-            result = result.filter(p =>
-                p.sizes && p.sizes.some(size => selectedSizes.includes(size))
-            );
-        }
-
-        if (selectedColors.length > 0) {
-            result = result.filter(p =>
-                p.color && selectedColors.includes(p.color)
-            );
-        }
-
         if (activeCategory === 'Спецпредложения') {
             result.sort((a, b) => {
                 const discountA = a.oldPrice ? ((a.oldPrice - a.price) / a.oldPrice) * 100 : 0;
@@ -235,24 +254,24 @@ const Catalog = () => {
         } else {
             result = sortProducts(result, sortOption);
         }
-        setFilteredProducts(result);
-    }, [activeCategory, activeSubcategory, priceRange, selectedSizes, selectedColors, sortOption, products, categories]);
 
-    const ViewHistoryAdd = async (productId) => {
-        if (!userId) return; 
-        console.log(userId,productId)
-        try {
-            await apiRequest(`/api/productviewhistory`, {
-                method: 'POST',
-                body: { userId: userId, productId: productId },
-                authenticated: isAuthenticated  
+        if (selectedSizes.length) {
+            result = result.filter(product => {
+                const productSpecs = allSpecifications[product.id] || [];
+                const sizeSpec = productSpecs.find(spec => spec.key === "Размер");
+                if (!sizeSpec) return false;
+                
+                const productSizes = sizeSpec.value.split(',')
+                    .map(s => s.trim())
+                    .filter(s => s);
+                    
+                return productSizes.some(size => selectedSizes.includes(size));
             });
-        } 
-        
-        catch (error) {
-            console.error('Ошибка при добавлении в историю просмотров:', error);
         }
-    };
+
+        setFilteredProducts(result);
+    }, [activeCategory, activeSubcategory, priceRange, selectedSizes, selectedColors, sortOption, products, categories, allSpecifications]);
+
     const sortProducts = (products, option) => {
         const sorted = [...products];
         switch(option) {
@@ -294,12 +313,6 @@ const Catalog = () => {
             selectCategory(category.name);
         }
     };
-
-    const handleFilterCategoryClick = (categoryName) => {
-        selectCategory(categoryName);
-        setExpandedFilterCategory(null);
-    };
-
 
     const toggleFavorite = async (productId) => {
         const numericProductId = Number(productId);
@@ -377,14 +390,6 @@ const Catalog = () => {
             prev.includes(size)
                 ? prev.filter(s => s !== size)
                 : [...prev, size]
-        );
-    };
-
-    const toggleColorSelection = (color) => {
-        setSelectedColors(prev =>
-            prev.includes(color)
-                ? prev.filter(c => c !== color)
-                : [...prev, color]
         );
     };
 
@@ -633,7 +638,6 @@ const Catalog = () => {
                                                 </div>
                                                 <button 
                                                     className={styles.addToCart} 
-                                                    onClick={() => ViewHistoryAdd(product.id)}
                                                 >
                                                     <Link to={`/product/${product.id}`} className={styles.linkToCart}>
                                                         <FaSearch className={styles.cartIcon} />

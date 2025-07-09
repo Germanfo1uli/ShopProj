@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import styles from '../CSS/ProductPage.module.css';
 import { FaStar, FaStarHalfAlt, FaHeart, FaShoppingCart, FaMinus, FaPlus, FaBoxOpen, FaShippingFast, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
@@ -35,6 +35,20 @@ const ProductPage = () => {
     const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
     const [showCartNotification, setShowCartNotification] = useState(false);
     const [priceChanged, setPriceChanged] = useState(false);
+
+    const viewTracked = useRef(false);
+
+    useEffect(() => {
+        if (viewTracked.current || !userId || !isAuthenticated) return;
+        viewTracked.current = true; 
+
+        apiRequest(`/api/productviewshistory`, {
+            method: 'POST',
+            body: { userId, productId: Number(id) },
+            authenticated: isAuthenticated,
+        }).catch(console.error);
+    }, [id, userId, isAuthenticated]);
+
 
     useEffect(() => {
          const fetchProduct = async () => {
