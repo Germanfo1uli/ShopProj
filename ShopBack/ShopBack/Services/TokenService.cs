@@ -32,9 +32,9 @@ namespace ShopBack.Services
             return await _tokensRepository.GenerateTokensAsync(user, roleName.Name);
         }
 
-        public async Task<ClaimsPrincipal?> ValidateJwtTokenAsync(string token)
+        public ClaimsPrincipal? ValidateJwtTokenAsync(string token)
         {
-            return await _tokensRepository.ValidateJwtTokenAsync(token);
+            return _tokensRepository.ValidateJwtTokenAsync(token);
         }
 
         public async Task<bool> IsRefreshTokenValidAsync(string token)
