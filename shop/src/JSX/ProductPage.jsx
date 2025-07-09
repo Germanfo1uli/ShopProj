@@ -479,8 +479,12 @@ const ProductPage = () => {
                                 )}
                                 </div>
                                 <div className={styles.stock}>
-                                <FaBoxOpen className={styles.stockIcon} />
-                                <span>В наличии {product.quantityInStock} шт.</span>
+                                    <FaBoxOpen className={styles.stockIcon} />
+                                    <span>
+                                    {product.quantityInStock > 0
+                                        ? `В наличии ${product.quantityInStock} шт.`
+                                        : 'Нет в наличии :('}
+                                         </span>
                                 </div>
                             </div>
                             <div className={styles.shipping}>
@@ -504,7 +508,7 @@ const ProductPage = () => {
                                 </button>
                             </div>
                             <button
-                                className={styles.addToCart}
+                                className={`${styles.addToCart} ${(!product.quantityInStock || product.quantityInStock <= 0) ? styles.outOfStock : ''}`}
                                 onClick={addToCart}
                                 disabled={!product.quantityInStock || product.quantityInStock <= 0}
                             >

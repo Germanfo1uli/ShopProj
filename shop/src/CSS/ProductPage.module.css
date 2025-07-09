@@ -1225,7 +1225,29 @@
         height: 100%;
     }
 }
+/* Out of stock styles */
+.outOfStock {
+    background-color: #9ca3af !important;
+    cursor: not-allowed !important;
+}
 
+.outOfStock:hover {
+    background-color: #9ca3af !important;
+}
+
+.stock.outOfStock {
+    color: #ef4444;
+}
+
+/* Disabled quantity buttons */
+.disabledButton {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.disabledButton:hover {
+    background-color: var(--tab-bg, #f3f4f6) !important;
+}
 /* Animation for favorite button */
 @keyframes heartPulse {
     0% {
