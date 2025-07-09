@@ -62,10 +62,9 @@ namespace ShopBack.Services
 
                 return new PaymentGatewayResult(paymentResult.IsSuccess, payment.Id.ToString());
             }
-            catch (Exception ex)
+            catch 
             {
                 await transaction.RollbackAsync();
-
                 throw;
             }
         }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace ShopBack.Controllers
 {
@@ -64,6 +65,7 @@ namespace ShopBack.Controllers
 
     public class RoleDate
     {
-        public string Name { get; set; }
+        [Required(ErrorMessage = "Name is required")]
+        public string Name { get; set; } = default!;
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace ShopBack.Controllers
 {
@@ -66,7 +67,8 @@ namespace ShopBack.Controllers
     public class ImagesData
     {
         public int ProductId { get; set; }
-        public string ImageUrl { get; set; }
+        [Required(ErrorMessage = "ImageUrl is required")]
+        public string ImageUrl { get; set; } = default!;
         public bool IsMain { get; set; } = false;
     }
 }

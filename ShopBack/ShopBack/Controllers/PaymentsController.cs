@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace ShopBack.Controllers
@@ -27,7 +28,14 @@ namespace ShopBack.Controllers
         [Authorize]
         public async Task<ActionResult<Payments>> GetById(int id)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID claim не найдено");
+            }
+
+            var currentUserId = int.Parse(userIdClaim);
 
             bool isAdmin = User.IsInRole("Admin");
 
@@ -43,9 +51,9 @@ namespace ShopBack.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Payments>> Create([FromBody] PaymentsCreate createDto)
+        public Task<ActionResult<Payments>> Create([FromBody] PaymentsCreate createDto)
         {
-            return new StatusCodeResult(405);
+            throw new NotImplementedException("Этот метод не поддерживается, используйте payments/process");
         }
 
         [HttpPut("{id}")]
@@ -88,7 +96,9 @@ namespace ShopBack.Controllers
         public int OrderId { get; set; }
         public decimal Amount { get; set; }
         public int PaymentMethodId { get; set; }
-        public string Status { get; set; }
+
+        [Required(ErrorMessage = "Status is required")]
+        public string Status { get; set; } = default!;
         public string? TransactionId { get; set; }
     }
 
