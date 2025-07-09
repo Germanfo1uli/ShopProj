@@ -35,5 +35,11 @@ namespace ShopBack.Repositories
                 .AsNoTracking()
                 .ToListAsync();
         }
+
+        public async Task<ProductReviews> FindAsync(int userId, int productId)
+        {
+            return await _context.ProductReviews
+                .FirstOrDefaultAsync(pr => pr.UserId == userId && pr.ProductId == productId);
+        }
     }
 }

@@ -129,14 +129,6 @@ namespace ShopBack.Controllers
             return Ok(payment);
         }
 
-        [HttpPut("{userId}/reserve")]
-        [Authorize(Policy = "SelfOrAdminAccess")]
-        public async Task<ActionResult<Orders>> ReserveOrder(int userId)
-        {
-            var orderId = await _ordersService.GetUserCartOrderIdAsync(userId);
-            return Ok(orderId);
-        }
-
         [HttpPut("{orderId}/status")]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, [FromBody] string status)
         {

@@ -51,5 +51,14 @@ namespace ShopBack.Services
             var (averageRating, reviewCount) = await _analyticsService.GetReviewStatsAsync(productId);
             await _productsService.AssignmentRating(productId, (decimal)averageRating, reviewCount);
         }
+
+        public async Task IfReviewExist(int userId, int productId)
+        {
+            var review = await _reviewsRepository.FindAsync(userId, productId);
+            if (review != null)
+            {
+                throw new ArgumentException("Вы уже оставляли отзыв на этот товар");
+            }
+        }
     }
 }
