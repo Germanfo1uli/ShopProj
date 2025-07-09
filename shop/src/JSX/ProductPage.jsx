@@ -40,7 +40,7 @@ const ProductPage = () => {
 
     useEffect(() => {
         if (viewTracked.current || !userId || !isAuthenticated) return;
-        viewTracked.current = true; 
+        viewTracked.current = true;
 
         apiRequest(`/api/productviewshistory`, {
             method: 'POST',
@@ -51,7 +51,7 @@ const ProductPage = () => {
 
 
     useEffect(() => {
-         const fetchProduct = async () => {
+        const fetchProduct = async () => {
             try {
                 setIsLoading(true);
                 const response = await apiRequest(`/api/products/${id}`);
@@ -72,11 +72,11 @@ const ProductPage = () => {
                 }
                 await fetchSpecifications(id);
 
-            } 
+            }
             catch (err) {
                 console.error('Ошибка загрузки данных товара:', err);
                 setError('Не удалось загрузить данные товара');
-            } 
+            }
             finally {
                 setIsLoading(false);
             }
@@ -126,7 +126,7 @@ const ProductPage = () => {
 
     const handleQuantityChange = (amount) => {
         const newQuantity = quantity + amount;
-        
+
         if (newQuantity >= 1 && newQuantity <= product.quantityInStock) {
             setQuantity(newQuantity);
             setPriceChanged(true);
@@ -256,13 +256,13 @@ const ProductPage = () => {
     };
 
     const calculateTotalPrice = () => {
-    if (!productData?.product) return { totalPrice: 0, totalOldPrice: 0 };
+        if (!productData?.product) return { totalPrice: 0, totalOldPrice: 0 };
 
-    const { price, oldPrice } = productData.product;
-    return {
-        totalPrice: (price * quantity).toFixed(2),
-        totalOldPrice: oldPrice ? (oldPrice * quantity).toFixed(2) : null
-    };
+        const { price, oldPrice } = productData.product;
+        return {
+            totalPrice: (price * quantity).toFixed(2),
+            totalOldPrice: oldPrice ? (oldPrice * quantity).toFixed(2) : null
+        };
     };
     const { totalPrice, totalOldPrice } = calculateTotalPrice();
 
@@ -468,15 +468,15 @@ const ProductPage = () => {
                         <div className={styles.priceContainer}>
                             <div className={styles.priceRow}>
                                 <div>
-                                <span className={styles.currentPrice}>{totalPrice} ₽</span>
-                                {totalOldPrice && totalOldPrice > 0 && (
-                                    <>
-                                    <span className={styles.oldPrice}>{totalOldPrice} ₽</span>
-                                    {product.discount && (
-                                        <span className={styles.discountBadge}>-{product.discount}%</span>
+                                    <span className={styles.currentPrice}>{totalPrice} ₽</span>
+                                    {totalOldPrice && totalOldPrice > 0 && (
+                                        <>
+                                            <span className={styles.oldPrice}>{totalOldPrice} ₽</span>
+                                            {product.discount && (
+                                                <span className={styles.discountBadge}>-{product.discount}%</span>
+                                            )}
+                                        </>
                                     )}
-                                    </>
-                                )}
                                 </div>
                                 <div className={styles.stock}>
                                     <FaBoxOpen className={styles.stockIcon} />
@@ -499,11 +499,11 @@ const ProductPage = () => {
                                     <FaMinus />
                                 </button>
                                 <span>{quantity}</span>
-                                <button 
+                                <button
                                     onClick={() => handleQuantityChange(1)}
                                     disabled={quantity >= product.quantityInStock}
                                     className={quantity >= product.quantityInStock ? styles.disabledButton : ''}
-                                    >
+                                >
                                     <FaPlus />
                                 </button>
                             </div>
@@ -676,7 +676,16 @@ const ProductPage = () => {
                             </div>
                         </>
                     ) : (
-                        <div className={styles.noReviews}>Пока нет отзывов. Будьте первым!</div>
+                        <div className={styles.emptyReviews}>
+                            <div className={styles.emptyReviewsIcon}>
+                                <FaStar className={styles.starIcon} />
+                                <FaStarHalfAlt className={styles.halfStarIcon} />
+                            </div>
+                            <h3 className={styles.emptyReviewsTitle}>Здесь пока нет отзывов</h3>
+                            <p className={styles.emptyReviewsText}>
+                                Будьте первым, кто поделится своим мнением об этом товаре!
+                            </p>
+                        </div>
                     )}
                 </div>
 
@@ -689,16 +698,14 @@ const ProductPage = () => {
                             <label className={styles.formLabel}>Ваша оценка</label>
                             <div className={styles.ratingInput}>
                                 {[1, 2, 3, 4, 5].map((star) => (
-                                    <button
+                                    <FaStar
                                         key={star}
-                                        type="button"
-                                        className={`${styles.starButton} ${star <= (hoverRating || reviewForm.rating) ? styles.starButtonActive : ''}`}
-                                        onClick={() => handleRatingClick(star)}
+                                        className={`${styles.star} ${star <= (hoverRating || reviewForm.rating) ? styles.starActive : ''}`}
+                                        onClick={() => setReviewForm(prev => ({ ...prev, rating: star }))}
                                         onMouseEnter={() => setHoverRating(star)}
                                         onMouseLeave={() => setHoverRating(0)}
-                                    >
-                                        <FaStar className={styles.starIcon} />
-                                    </button>
+                                        size={24}
+                                    />
                                 ))}
                             </div>
                         </div>
