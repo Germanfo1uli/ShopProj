@@ -145,15 +145,8 @@ namespace ShopBack.Controllers
         [HttpGet("{productId}/stats")]
         public async Task<ActionResult> GetProductStats(int productId)
         {
-            try
-            {
-                var result = await _analyticsService.GetProductStatsAsync(productId);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var result = await _analyticsService.GetProductStatsAsync(productId);
+            return Ok(result);
         }
     }
 

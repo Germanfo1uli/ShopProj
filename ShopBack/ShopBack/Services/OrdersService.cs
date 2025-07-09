@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using ShopBack.Data;
 using ShopBack.Models;
 using ShopBack.Repositories;
@@ -7,17 +8,16 @@ namespace ShopBack.Services
 {
     public class OrdersService(IOrdersRepository repository, 
                                IProductsRepository productsRepository, 
-                               IRepository<OrderItems> orderItemsRepository,
-                               IUnitOfWork unitOfWork) : Service<Orders>(repository)
+                               IRepository<OrderItems> orderItemsRepository)
+                               : Service<Orders>(repository)
     {
         private readonly IOrdersRepository _ordersRepository = repository;
         private readonly IProductsRepository _productsRepository = productsRepository;
         private readonly IRepository<OrderItems> _orderItemsRepository = orderItemsRepository;
-        private readonly IUnitOfWork _unitOfWork = unitOfWork;
       
         public async Task<Orders> GetUserCartOrderAsync(int userId)
         {
-            return await _ordersRepository.GetUserCartOrderAsync(userId); ;
+            return await _ordersRepository.GetUserCartOrderAsync(userId);
         }
 
         public async Task<int> GetUserCartOrderIdAsync(int userId)
@@ -46,21 +46,42 @@ namespace ShopBack.Services
 
             foreach (var item in orderItems)
             {
-                if (item.Product == null)
-                    throw new InvalidOperationException($"Товар с ID {item.ProductId} не найден");
+                var product = await _productsRepository.GetByIdAsync(item.ProductId);
 
-                if (item.Product.QuantityInStock < item.Quantity)
+                if (product.QuantityInStock < item.Quantity)
                     throw new InvalidOperationException(
-                        $"Недостаточно товара {item.Product.Name} на складе. Доступно: {item.Product.QuantityInStock}, требуется: {item.Quantity}");
+                        $"Недостаточно товара {product.Name} на складе. Доступно: {product.QuantityInStock}, требуется: {item.Quantity}");
 
-                item.Product.QuantityInStock -= item.Quantity;
-                await _productsRepository.UpdateAsync(item.Product);
+                product.QuantityInStock -= item.Quantity;
+                await _productsRepository.UpdateAsync(product);
             }
 
             await UpdateOrderStatusAsync(orderId, "Paid");
             await _ordersRepository.CreateCart(order.UserId);
             order.Status = "Paid";
             return order;
+        }
+
+        public async Task CheckQuantityAsync(int orderId)
+        {
+            var orderItems = await _ordersRepository.GetOrderItemsByOrderIdAsync(orderId);
+
+            foreach (var item in orderItems)
+            {
+                if (item.Product == null)
+                    throw new InvalidOperationException($"Товар с ID {item.ProductId} не найден");
+
+                if (item.Product.QuantityInStock < item.Quantity)
+                    throw new InvalidOperationException(
+                        $"Недостаточно товара {item.Product.Name} на складе. Доступно: {item.Product.QuantityInStock}, требуется: {item.Quantity}");
+            }
+        }
+
+        public async Task<bool> IfOrderItemExist(int productId, int orderId)
+        {
+            var orderItems = await _ordersRepository.GetOrderItemsByOrderIdAsync(orderId);
+            var item = orderItems.FirstOrDefault(oi => oi.ProductId == productId) ?? null;
+            return item != null;
         }
 
         public async Task ClearCartAsync(int userId)
@@ -84,6 +105,14 @@ namespace ShopBack.Services
             var saleSum = await _ordersRepository.GetOrderSumSaleAsync(orderId);
             var sum = await _ordersRepository.GetOrderSumAsync(orderId);
             await _ordersRepository.AssignmentOrderPrice(orderId, saleSum, sum);
+        }
+
+        public async Task<(int orderCount, decimal totalSavings)> GetOrderStatsAsync(int userId)
+        { 
+            var orders = await GetUserOrdersAsync(userId);
+            int orderCount = orders.Count();
+            decimal totalSavings = orders.Sum(o => o.AmountWOSale - o.TotalAmount);
+            return (orderCount, totalSavings);
         }
     }
 }

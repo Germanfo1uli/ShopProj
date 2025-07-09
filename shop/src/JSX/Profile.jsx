@@ -15,24 +15,25 @@ import {useNavigate} from "react-router-dom";
 import AdminPanel from "./ProfileComponents/AdminPanel";
 
 const Profile = () => {
-    const { isAuthenticated, userId, token, logout,  isLoading: authLoading } = useAuth();
+    const { isAuthenticated, userId, token, logout, isLoading: authLoading } = useAuth();
     
     const [profileData, setProfileData] = useState({
         firstName: '',
         lastName: '',
         middleName: '',
-        // birthDate: '',
         email: '',
         phoneNumber: '',
-        // preferences: []
     });
     
     const [isEditing, setIsEditing] = useState(false);
-    const [newPreference, setNewPreference] = useState('');
     const [activeMenu, setActiveMenu] = useState('profile');
     const [activeTab, setActiveTab] = useState('orders');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [userStats, setUserStats] = useState({
+        totalOrders: 0,
+        totalSavings: 0
+    });
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -59,6 +60,15 @@ const Profile = () => {
                     email: data.email || '',
                     phoneNumber: data.phoneNumber || '',
                 });
+
+                const ordersResponse = await apiRequest(`/api/orders/${userId}/stats`, {
+                    authenticated: isAuthenticated
+                });
+
+                setUserStats({
+                    totalOrders: ordersResponse.orderCount || 0,
+                    totalSavings: ordersResponse.totalSavings || 0,
+                });
                 
             } catch (err) {
                 console.error('Ошибка загрузки данных пользователя:', err);
@@ -71,9 +81,6 @@ const Profile = () => {
         fetchUserData();
     }, [isAuthenticated, userId, token, authLoading]);
 
-
-
-    //ТУТ ЛОГИКУ С ВЫХОДОМ!!!!
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -172,16 +179,7 @@ const renderProfileInfo = () => {
                                         className={styles.editInput}
                                     />
                                 </div>
-                                {/* <div>
-                                    <p className={styles.infoLabel}>Дата рождения</p>
-                                    <input
-                                        type="date"
-                                        name="birthDate"
-                                        value={profileData.birthDate}
-                                        onChange={handleInputChange}
-                                        className={styles.editInput}
-                                    />
-                                </div> */}
+                             
                             </div>
                         </div>
 
@@ -234,12 +232,7 @@ const renderProfileInfo = () => {
                                 <p className={styles.infoLabel}>Отчество</p>
                                 <p className={styles.infoValue}>{profileData.middleName}</p>
                             </div>
-                            <div>
-                                {/* <p className={styles.infoLabel}>Дата рождения</p> */}
-                                {/* <p className={styles.infoValue}>
-                                    {profileData.birthDate ? new Date(profileData.birthDate).toLocaleDateString() : 'Не указана'}
-                                </p> */}
-                            </div>
+                           
                         </div>
                     </div>
 
@@ -261,54 +254,6 @@ const renderProfileInfo = () => {
         }
     };
 
-    // const renderPreferences = () => {
-    //     if (isEditing) {
-    //         return (
-    //             <div className={styles.preferencesSection}>
-    //                 <h3 className={styles.sectionTitle}>Предпочтения</h3>
-    //                 <div className={styles.preferencesTags}>
-    //                     {profileData.preferences.map((pref, index) => (
-    //                         <span key={index} className={styles.tag}>
-    //                         {pref}
-    //                             <button
-    //                                 onClick={() => handleRemovePreference(pref)}
-    //                                 className={styles.removeTagButton}
-    //                             >
-    //                             <i className="fas fa-times"></i>
-    //                         </button>
-    //                     </span>
-    //                     ))}
-    //                     <div className={styles.addPreferenceContainer}>
-    //                         <input
-    //                             type="text"
-    //                             value={newPreference}
-    //                             onChange={(e) => setNewPreference(e.target.value)}
-    //                             placeholder="Добавить предпочтение"
-    //                             className={styles.addPreferenceInput}
-    //                         />
-    //                         <button
-    //                             onClick={handleAddPreference}
-    //                             className={styles.addTagButton}
-    //                         >
-    //                             <i className="fas fa-plus"></i> Добавить
-    //                         </button>
-    //                     </div>
-    //                 </div>
-    //             </div>
-    //         );
-    //     } else {
-    //         return (
-    //             <div className={styles.preferencesSection}>
-    //                 <h3 className={styles.sectionTitle}>Предпочтения</h3>
-    //                 <div className={styles.preferencesTags}>
-    //                     {profileData.preferences.map((pref, index) => (
-    //                         <span key={index} className={styles.tag}>{pref}</span>
-    //                     ))}
-    //                 </div>
-    //             </div>
-    //         );
-    //     }
-    // };
 
     const renderMenuContent = () => {
         switch (activeMenu) {
@@ -364,7 +309,7 @@ const renderProfileInfo = () => {
                                 <div className={styles.statContent}>
                                     <div>
                                         <p className={styles.statLabel}>Заказов</p>
-                                        <p className={styles.statValue}>24</p>
+                                        <p className={styles.statValue}>{userStats.totalOrders}</p>
                                     </div>
                                     <div className={styles.statIcon}>
                                         <i className="fas fa-box"></i>
@@ -374,19 +319,10 @@ const renderProfileInfo = () => {
                             <div className={styles.statCard}>
                                 <div className={styles.statContent}>
                                     <div>
-                                        <p className={styles.statLabel}>Бонусов</p>
-                                        <p className={styles.statValue}>8,725</p>
-                                    </div>
-                                    <div className={styles.statIcon}>
-                                        <i className="fas fa-coins"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className={styles.statCard}>
-                                <div className={styles.statContent}>
-                                    <div>
                                         <p className={styles.statLabel}>Экономия</p>
-                                        <p className={styles.statValue}>34.560 ₽</p>
+                                        <p className={styles.statValue}>
+                                            {userStats.totalSavings.toLocaleString('ru-RU')} ₽
+                                        </p>
                                     </div>
                                     <div className={styles.statIcon}>
                                         <i className="fas fa-piggy-bank"></i>
@@ -394,6 +330,7 @@ const renderProfileInfo = () => {
                                 </div>
                             </div>
                         </div>
+
 
                         <div className={styles.ordersCard}>
                             <div className={styles.tabsContainer}>
@@ -404,7 +341,7 @@ const renderProfileInfo = () => {
                                     >
                                         Заказы
                                     </button>
-                                    <button
+                                    {/* <button
                                         className={`${styles.tab} ${activeTab === 'returns' ? styles.activeTab : ''}`}
                                         onClick={() => setActiveTab('returns')}
                                     >
@@ -415,24 +352,11 @@ const renderProfileInfo = () => {
                                         onClick={() => setActiveTab('subscriptions')}
                                     >
                                         Подписки
-                                    </button>
+                                    </button> */}
                                 </div>
                             </div>
 
                             {renderTabContent()}
-                        </div>
-
-                        <div className={styles.recommendationsCard}>
-                            <h2 className={styles.recommendationsTitle}>Рекомендуем вам</h2>
-                            <p className={styles.recommendationsSubtitle}>На основе ваших покупок и просмотров</p>
-
-                            <div className={styles.productsGrid}>
-                                {/* Product cards remain the same */}
-                            </div>
-
-                            <button className={styles.allRecommendationsButton}>
-                                Все рекомендации
-                            </button>
                         </div>
                     </>
                 );

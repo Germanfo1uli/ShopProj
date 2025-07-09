@@ -24,6 +24,7 @@ namespace ShopBack.Services
 
             try
             {
+                await _ordersService.CheckQuantityAsync(orderId);
                 var order = await _ordersRepository.GetByIdNoTrackingAsync(orderId);
                 var paymentMethod = await _payMethodsRepository.GetByIdAsync(paymentMethodId);
 

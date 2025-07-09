@@ -9,10 +9,11 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] //api/orderitems
     [ApiController]
-    public class OrderItemsController(IService<OrderItems> orderItemsService, OrdersService ordersService) : ControllerBase, IController<OrderItems, OrderItemsCreate, OrderItemsUpdate>
+    public class OrderItemsController(IService<OrderItems> orderItemsService, OrdersService ordersService, ProductsService productsService) : ControllerBase, IController<OrderItems, OrderItemsCreate, OrderItemsUpdate>
     {
         private readonly IService<OrderItems> _orderItemsService = orderItemsService;
         private readonly OrdersService _ordersService = ordersService;
+        private readonly ProductsService _productsService = productsService;
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
@@ -43,6 +44,13 @@ namespace ShopBack.Controllers
                 Quantity = createDto.Quantity,
             };
 
+            if (await _ordersService.IfOrderItemExist(createDto.ProductId, orderId))
+                return BadRequest("Этот товар уже находится в корзине");
+
+            var product = await _productsService.GetByIdAsync(item.ProductId);
+            if (product.QuantityInStock < item.Quantity)
+                return BadRequest($"Недостаточно товара {product.Name} на складе. Доступно: {product.QuantityInStock}, требуется: {item.Quantity}");
+
             await _orderItemsService.AddAsync(item);
             await _ordersService.RecalculateTotalAmountAsync(orderId);
             return CreatedAtAction(
@@ -57,6 +65,10 @@ namespace ShopBack.Controllers
         public async Task<ActionResult<OrderItems>> Update(int id, [FromBody] OrderItemsUpdate updateDto)
         {
             var item = await _orderItemsService.GetByIdAsync(id);
+
+            var product = await _productsService.GetByIdAsync(item.ProductId);
+            if (product.QuantityInStock < item.Quantity)
+                return BadRequest($"Недостаточно товара {item.Product.Name} на складе. Доступно: {item.Product.QuantityInStock}, требуется: {item.Quantity}");
 
             if (updateDto.Quantity.HasValue)
                 item.Quantity = updateDto.Quantity.Value;
