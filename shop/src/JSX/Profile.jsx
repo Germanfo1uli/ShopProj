@@ -66,7 +66,7 @@ const Profile = () => {
                 });
 
                 setUserStats({
-                    totalOrders: ordersResponse.totalOrders || 0,
+                    totalOrders: ordersResponse.orderCount || 0,
                     totalSavings: ordersResponse.totalSavings || 0,
                 });
                 
@@ -341,7 +341,7 @@ const renderProfileInfo = () => {
                                     >
                                         Заказы
                                     </button>
-                                    <button
+                                    {/* <button
                                         className={`${styles.tab} ${activeTab === 'returns' ? styles.activeTab : ''}`}
                                         onClick={() => setActiveTab('returns')}
                                     >
@@ -352,24 +352,11 @@ const renderProfileInfo = () => {
                                         onClick={() => setActiveTab('subscriptions')}
                                     >
                                         Подписки
-                                    </button>
+                                    </button> */}
                                 </div>
                             </div>
 
                             {renderTabContent()}
-                        </div>
-
-                        <div className={styles.recommendationsCard}>
-                            <h2 className={styles.recommendationsTitle}>Рекомендуем вам</h2>
-                            <p className={styles.recommendationsSubtitle}>На основе ваших покупок и просмотров</p>
-
-                            <div className={styles.productsGrid}>
-                                {/* Product cards remain the same */}
-                            </div>
-
-                            <button className={styles.allRecommendationsButton}>
-                                Все рекомендации
-                            </button>
                         </div>
                     </>
                 );

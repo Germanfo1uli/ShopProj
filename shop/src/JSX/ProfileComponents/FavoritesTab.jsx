@@ -143,7 +143,7 @@ const FavoritesTab = () => {
                                     <div className={styles.stars}>
                                         {renderStars(item.rating || 0)}
                                     </div>
-                                    <span className={styles.reviewsCount}>({item.reviewsCount || 0})</span>
+                                    <span className={styles.reviewsCount}>({item.reviewsNumber || 0})</span>
                                 </div>
                                 <Link
                                     to={`/product/${item.id}`}
