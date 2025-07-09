@@ -106,5 +106,13 @@ namespace ShopBack.Services
             var sum = await _ordersRepository.GetOrderSumAsync(orderId);
             await _ordersRepository.AssignmentOrderPrice(orderId, saleSum, sum);
         }
+
+        public async Task<(int orderCount, decimal totalSavings)> GetOrderStatsAsync(int userId)
+        { 
+            var orders = await GetUserOrdersAsync(userId);
+            int orderCount = orders.Count();
+            decimal totalSavings = orders.Sum(o => o.AmountWOSale - o.TotalAmount);
+            return (orderCount, totalSavings);
+        }
     }
 }

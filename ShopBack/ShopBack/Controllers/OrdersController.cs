@@ -146,6 +146,14 @@ namespace ShopBack.Controllers
             await _ordersService.UpdateOrderStatusAsync(orderId, status);
             return Ok(status);
         }
+
+        [HttpGet("{userId}/stats")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
+        public async Task<ActionResult<OrdersStats>> GetOrderStats(int userId)
+        {
+            (int orderCount, decimal totalSavings) = await _ordersService.GetOrderStatsAsync(userId);
+            return Ok(new OrdersStats { OrderCount = orderCount, TotalSavings = totalSavings});
+        }
     }
 
     public class OrdersCreate
@@ -166,5 +174,11 @@ namespace ShopBack.Controllers
         public string? ShippingAddress { get; set; }
         public string? ContactPhone { get; set; }
         public string? Notes { get; set; }
+    }
+
+    public class OrdersStats
+    {
+        public int OrderCount { get; set; }
+        public decimal TotalSavings { get; set; }
     }
 }
