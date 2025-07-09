@@ -54,7 +54,7 @@ const Catalog = () => {
             setHoverTimeout(null);
         }
     };
-
+   
     const handleMouseLeaveSubmenu = () => {
         const timer = setTimeout(() => {
             setExpandedMainCategory(null);
@@ -238,7 +238,21 @@ const Catalog = () => {
         setFilteredProducts(result);
     }, [activeCategory, activeSubcategory, priceRange, selectedSizes, selectedColors, sortOption, products, categories]);
 
-
+    const ViewHistoryAdd = async (productId) => {
+        if (!userId) return; 
+        console.log(userId,productId)
+        try {
+            await apiRequest(`/api/productviewhistory`, {
+                method: 'POST',
+                body: { userId: userId, productId: productId },
+                authenticated: isAuthenticated  
+            });
+        } 
+        
+        catch (error) {
+            console.error('Ошибка при добавлении в историю просмотров:', error);
+        }
+    };
     const sortProducts = (products, option) => {
         const sorted = [...products];
         switch(option) {
@@ -617,7 +631,10 @@ const Catalog = () => {
                                                     {renderStars(product.rating || 0)}
                                                     <span className={styles.reviewsNumber}>({product.reviewsNumber || 0})</span>
                                                 </div>
-                                                <button className={styles.addToCart}>
+                                                <button 
+                                                    className={styles.addToCart} 
+                                                    onClick={() => ViewHistoryAdd(product.id)}
+                                                >
                                                     <Link to={`/product/${product.id}`} className={styles.linkToCart}>
                                                         <FaSearch className={styles.cartIcon} />
                                                         Перейти к товару

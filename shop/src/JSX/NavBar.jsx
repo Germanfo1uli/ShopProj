@@ -12,6 +12,7 @@ const NavBar = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [showResults, setShowResults] = useState(false);
+    const [productImages, setProductImages] = useState({});
     const navigate = useNavigate();
 
     const {
@@ -20,7 +21,6 @@ const NavBar = () => {
         isLoading: authLoading
     } = useAuth();
 
-    // Поиск товаров
     const searchProducts = useCallback(async (term) => {
         if (term.trim() === '') {
             setSearchResults([]);
@@ -29,6 +29,17 @@ const NavBar = () => {
 
         try {
             const results = await apiRequest(`/api/products/search?term=${encodeURIComponent(term)}`);
+            const imagesResponse = await apiRequest('/api/productimages');
+            const imagesByProduct = {};
+            
+            imagesResponse.forEach(image => {
+                if (!imagesByProduct[image.productId]) {
+                    imagesByProduct[image.productId] = [];
+                }
+                imagesByProduct[image.productId].push(image);
+            });
+
+            setProductImages(imagesByProduct);
             setSearchResults(results);
         } catch (error) {
             console.error('Ошибка поиска:', error);
@@ -36,7 +47,6 @@ const NavBar = () => {
         }
     }, []);
 
-    // Обработчик изменения поискового запроса
     const handleSearchChange = (e) => {
         const term = e.target.value;
         setSearchTerm(term);
@@ -49,7 +59,6 @@ const NavBar = () => {
         }
     };
 
-    // Обработчик выбора товара
     const handleProductSelect = (productId) => {
         navigate(`/product/${productId}`);
         setSearchTerm('');
@@ -58,7 +67,6 @@ const NavBar = () => {
         closeMenu();
     };
 
-    // Закрытие результатов при клике вне области поиска
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (e.target.closest(`.${st.searchContainer}`) === null &&
@@ -104,29 +112,39 @@ const NavBar = () => {
         return (
             <div className={isMobile ? st.mobileSearchResults : st.searchResults}>
                 {searchResults.length > 0 ? (
-                    searchResults.map(product => (
-                        <div
-                            key={product.id}
-                            className={isMobile ? st.mobileSearchResultItem : st.searchResultItem}
-                            onClick={() => handleProductSelect(product.id)}
-                        >
-                            <div className={isMobile ? st.mobileSearchResultImage : st.searchResultImage}>
-                                {product.mainImage && product.mainImage.url ? (
-                                    <img
-                                        src={`${API_BASE_URL}${product.mainImage.url}`}
-                                        alt={product.name}
-                                        onError={(e) => {
-                                            e.target.style.display = 'none'; // Скрыть сломанное изображение
-                                        }}
-                                    />
-                                ) : null}
+                    searchResults.map(product => {
+                        const images = productImages[product.id] || [];
+                        const mainImage = images.find(img => img.isMain) || images[0];
+                        
+                        return (
+                            <div
+                                key={product.id}
+                                className={isMobile ? st.mobileSearchResultItem : st.searchResultItem}
+                                onClick={() => handleProductSelect(product.id)}
+                            >
+                                <div className={isMobile ? st.mobileSearchResultImage : st.searchResultImage}>
+                                    {mainImage ? (
+                                        <img
+                                            src={mainImage.imageUrl}
+                                            alt={product.name}
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = 'https://via.placeholder.com/100';
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className={st.placeholderImage}>
+                                            <FaBoxOpen className={st.placeholderIcon} />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className={isMobile ? st.mobileSearchResultInfo : st.searchResultInfo}>
+                                    <h4>{product.name}</h4>
+                                    <p>{product.price.toLocaleString('ru-RU')} ₽</p>
+                                </div>
                             </div>
-                            <div className={isMobile ? st.mobileSearchResultInfo : st.searchResultInfo}>
-                                <h4>{product.name}</h4>
-                                <p>{product.price.toLocaleString()} ₽</p>
-                            </div>
-                        </div>
-                    ))
+                        );
+                    })
                 ) : (
                     <div className={st.noResults}>
                         {searchTerm.length > 1 ? 'Ничего не найдено' : 'Введите запрос для поиска'}

@@ -21,10 +21,8 @@ const Profile = () => {
         firstName: '',
         lastName: '',
         middleName: '',
-        // birthDate: '',
         email: '',
         phoneNumber: '',
-        // preferences: []
     });
     
     const [isEditing, setIsEditing] = useState(false);
@@ -71,9 +69,6 @@ const Profile = () => {
         fetchUserData();
     }, [isAuthenticated, userId, token, authLoading]);
 
-
-
-    //ТУТ ЛОГИКУ С ВЫХОДОМ!!!!
     const navigate = useNavigate();
 
     const handleLogout = () => {
