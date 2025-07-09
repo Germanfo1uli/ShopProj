@@ -34,6 +34,7 @@ const ProductPage = () => {
     const [specsLoading, setSpecsLoading] = useState(true);
     const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
     const [showCartNotification, setShowCartNotification] = useState(false);
+    const [priceChanged, setPriceChanged] = useState(false);
 
     useEffect(() => {
          const fetchProduct = async () => {
@@ -110,8 +111,11 @@ const ProductPage = () => {
 
     const handleQuantityChange = (amount) => {
         const newQuantity = quantity + amount;
-        if (newQuantity > 0) {
+        
+        if (newQuantity >= 1 && newQuantity <= product.quantityInStock) {
             setQuantity(newQuantity);
+            setPriceChanged(true);
+            setTimeout(() => setPriceChanged(false), 300);
         }
     };
 
@@ -235,6 +239,17 @@ const ProductPage = () => {
         }
         return stars;
     };
+
+    const calculateTotalPrice = () => {
+    if (!productData?.product) return { totalPrice: 0, totalOldPrice: 0 };
+
+    const { price, oldPrice } = productData.product;
+    return {
+        totalPrice: (price * quantity).toFixed(2),
+        totalOldPrice: oldPrice ? (oldPrice * quantity).toFixed(2) : null
+    };
+    };
+    const { totalPrice, totalOldPrice } = calculateTotalPrice();
 
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
@@ -428,19 +443,19 @@ const ProductPage = () => {
                         <div className={styles.priceContainer}>
                             <div className={styles.priceRow}>
                                 <div>
-                                    <span className={styles.currentPrice}>{product.price} ₽</span>
-                                    {product.oldPrice && product.oldPrice > 0 && (
-                                        <>
-                                            <span className={styles.oldPrice}>{product.oldPrice} ₽</span>
-                                            {product.discount && (
-                                                <span className={styles.discountBadge}>-{product.discount}%</span>
-                                            )}
-                                        </>
+                                <span className={styles.currentPrice}>{totalPrice} ₽</span>
+                                {totalOldPrice && totalOldPrice > 0 && (
+                                    <>
+                                    <span className={styles.oldPrice}>{totalOldPrice} ₽</span>
+                                    {product.discount && (
+                                        <span className={styles.discountBadge}>-{product.discount}%</span>
                                     )}
+                                    </>
+                                )}
                                 </div>
                                 <div className={styles.stock}>
-                                    <FaBoxOpen className={styles.stockIcon} />
-                                    <span>В наличии {product.quantityInStock} шт.</span>
+                                <FaBoxOpen className={styles.stockIcon} />
+                                <span>В наличии {product.quantityInStock} шт.</span>
                                 </div>
                             </div>
                             <div className={styles.shipping}>
@@ -455,7 +470,11 @@ const ProductPage = () => {
                                     <FaMinus />
                                 </button>
                                 <span>{quantity}</span>
-                                <button onClick={() => handleQuantityChange(1)}>
+                                <button 
+                                    onClick={() => handleQuantityChange(1)}
+                                    disabled={quantity >= product.quantityInStock}
+                                    className={quantity >= product.quantityInStock ? styles.disabledButton : ''}
+                                    >
                                     <FaPlus />
                                 </button>
                             </div>

@@ -31,6 +31,7 @@ const Catalog = () => {
     const {userId, isAuthenticated, logout } = useAuth();
     const [favorites, setFavorites] = useState([]);
     const [hoverTimeout, setHoverTimeout] = useState(null);
+    
 
     const handleMouseEnterCategory = (categoryName) => {
         if (hoverTimeout) {
@@ -61,7 +62,7 @@ const Catalog = () => {
         setHoverTimeout(timer);
     };
 
-        useEffect(() => {
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
@@ -135,9 +136,19 @@ const Catalog = () => {
 
                 setCategories([...specialCategories, ...categoriesStructure]);
                 const productsData = await apiRequest('/api/products');
-                setProducts(productsData);
+                const enhancedProducts = productsData.map(product => {
+                    const isSpecial = Boolean(product.oldPrice); 
+                    const isPopular = product.reviewsNumber >= 5;     
+                    const isRecommended = Math.random() < 0.3;   
 
-                // Загружаем изображения для всех продуктов
+                    return {
+                        ...product,
+                        isSpecial,
+                        isPopular,
+                        isRecommended
+                    };
+                });
+                setProducts(enhancedProducts);
                 const imagesResponse = await apiRequest('/api/productimages');
                 const imagesByProduct = {};
                 
@@ -161,76 +172,72 @@ const Catalog = () => {
         fetchData();
     }, [userId, isAuthenticated]);
 
+    
     useEffect(() => {
-    if (products.length === 0 || categories.length === 0) return;
+        if (products.length === 0 || categories.length === 0) return;
 
-    let result = [...products];
+        let result = [...products];
 
-    if (activeCategory !== 'Все товары') {
-        const category = categories.find(cat => cat.name === activeCategory);
-        if (category) {
-        if (category.isPopular) {
-            result = result.filter(product => product.isPopular);
-        } 
-        else if (category.isRecommended) {
-            result = result.filter(product => product.isRecommended);
-        } 
-        else if (category.isSpecial) {
-            result = result.filter(product => product.isSpecial);
-        } 
-        else {
-            const categoryIds = [category.id, ...category.subcategories?.map(sub => sub.id) || []];
-            result = result.filter(product => categoryIds.includes(product.categoryId));
-        }
-        }
-    }
-
-    if (activeSubcategory) {
-        const subcategory = categories
-        .flatMap(cat => cat.subcategories || [])
-        .find(sub => sub.name === activeSubcategory);
-        
-        if (subcategory) {
-        result = result.filter(product => product.categoryId === subcategory.id);
-        }
-    }
-
-    result = result.filter(product =>
-        product.price >= priceRange[0] && product.price <= priceRange[1]
-    );
-
-    if (selectedSizes.length > 0) {
-        result = result.filter(product =>
-        product.sizes && product.sizes.some(size => selectedSizes.includes(size))
-        );
-    }
-
-    if (selectedColors.length > 0) {
-        result = result.filter(product =>
-        product.color && selectedColors.includes(product.color)
-        );
-    }
-    result = sortProducts(result, sortOption);
-    setFilteredProducts(result);
-    }, [activeCategory, activeSubcategory, priceRange, selectedSizes, selectedColors, sortOption, products, categories]);
-
-    useEffect(() => {
-        if (location.state?.filter) {
-            switch(location.state.filter) {
-                case 'popular':
-                    setActiveCategory('Популярные товары');
-                    break;
-                case 'recommended':
-                    setActiveCategory('Рекомендации для вас');
-                    break;
-                case 'special':
-                    setActiveCategory('Спецпредложения');
-                    break;
-                default:
-                    setActiveCategory('Все товары');
+        if (activeCategory !== 'Все товары') {
+            const category = categories.find(cat => cat.name === activeCategory);
+            if (category) {
+                if (category.isPopular) {
+                    result = result.filter(p => p.isPopular);
+                } else if (category.isRecommended) {
+                    result = result.filter(p => p.isRecommended);
+                } else if (category.isSpecial) {
+                    result = result.filter(p => p.isSpecial);
+                } else {
+                    const categoryIds = [category.id, ...(category.subcategories?.map(s => s.id) || [])];
+                    result = result.filter(p => categoryIds.includes(p.categoryId));
+                }
             }
         }
-    }, [location.state]);
+
+        if (activeSubcategory) {
+            const subcategory = categories
+                .flatMap(cat => cat.subcategories || [])
+                .find(sub => sub.name === activeSubcategory);
+
+            if (subcategory) {
+                result = result.filter(p => p.categoryId === subcategory.id);
+            }
+        }
+
+        result = result.filter(p =>
+            p.price >= priceRange[0] && p.price <= priceRange[1]
+        );
+
+        if (selectedSizes.length > 0) {
+            result = result.filter(p =>
+                p.sizes && p.sizes.some(size => selectedSizes.includes(size))
+            );
+        }
+
+        if (selectedColors.length > 0) {
+            result = result.filter(p =>
+                p.color && selectedColors.includes(p.color)
+            );
+        }
+
+        if (activeCategory === 'Спецпредложения') {
+            result.sort((a, b) => {
+                const discountA = a.oldPrice ? ((a.oldPrice - a.price) / a.oldPrice) * 100 : 0;
+                const discountB = b.oldPrice ? ((b.oldPrice - b.price) / b.oldPrice) * 100 : 0;
+                return discountB - discountA; 
+            });
+        } else if (activeCategory === 'Популярные товары') {
+            result.sort((a, b) => (b.reviews || 0) - (a.reviews || 0));
+        } else if (activeCategory === 'Рекомендации для вас') {
+            if (result.length > 20) {
+                result = [...result].sort(() => 0.5 - Math.random()).slice(0, 20);
+            }
+        } else {
+            result = sortProducts(result, sortOption);
+        }
+        setFilteredProducts(result);
+    }, [activeCategory, activeSubcategory, priceRange, selectedSizes, selectedColors, sortOption, products, categories]);
+
 
     const sortProducts = (products, option) => {
         const sorted = [...products];
@@ -666,7 +673,7 @@ const Catalog = () => {
                                                 </div>
                                                 <div className={styles.productRating}>
                                                     {renderStars(product.rating || 0)}
-                                                    <span className={styles.reviews}>({product.reviews || 0})</span>
+                                                    <span className={styles.reviewsNumber}>({product.reviewsNumber || 0})</span>
                                                 </div>
                                                 <button className={styles.addToCart}>
                                                     <Link to={`/product/${product.id}`} className={styles.linkToCart}>
