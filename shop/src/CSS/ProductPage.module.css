@@ -92,7 +92,7 @@
 .mainImage {
     max-width: 100%;
     max-height: 500px;
-    border-radius: 20rem;
+    border-radius: 1rem;
     border: 1px solid var(--card-border);
     width: auto;
     height: auto;

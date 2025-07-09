@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes, FaCreditCard, FaApplePay, FaGooglePay, FaCheckCircle} from 'react-icons/fa';
+import { FaTimes, FaCreditCard, FaApplePay, FaGooglePay, FaCheckCircle } from 'react-icons/fa';
 import styles from '../../CSS/PaymentModal.module.css';
 import MirIconSvg from '../../CSS/image/miricon.svg';
 import { loadStripe } from '@stripe/stripe-js';
@@ -8,12 +8,13 @@ import { useAuth } from '../Hooks/UseAuth';
 import { useNavigate } from 'react-router-dom';
 
 const PaymentModal = ({
-    isOpen,
-    onClose,
-    totalAmount,
-    orderId,
-    refreshCart
-}) => {
+                          isOpen,
+                          onClose,
+                          totalAmount,
+                          orderId,
+                          refreshCart,
+                          onPaymentComplete
+                      }) => {
     const { userId, isAuthenticated } = useAuth();
     const [paymentMethod, setPaymentMethod] = useState('card');
     const [isProcessing, setIsProcessing] = useState(false);
@@ -23,11 +24,11 @@ const PaymentModal = ({
     const [isLoadingCards, setIsLoadingCards] = useState(false);
 
     const navigate = useNavigate();
-    
+
     useEffect(() => {
         const fetchSavedCards = async () => {
             if (!isOpen || !isAuthenticated || !userId) return;
-            
+
             setIsLoadingCards(true);
             try {
                 const response = await apiRequest(`/api/paymethods/user/${userId}`, {
@@ -44,7 +45,7 @@ const PaymentModal = ({
                 setIsLoadingCards(false);
             }
         };
-        
+
         fetchSavedCards();
     }, [isOpen, isAuthenticated, userId]);
 
@@ -79,36 +80,38 @@ const PaymentModal = ({
                     const { error } = await stripe.confirmCardPayment(
                         result.paymentIntentClientSecret
                     );
-                    
+
                     if (error) {
                         throw error;
                     }
                 }
-                
-                setIsSuccess(true);
-                
+
+                // Убираем setIsSuccess(true) и сразу закрываем модальное окно
                 if (refreshCart) {
                     await refreshCart();
                 }
-                
+
+                onClose(); // Немедленно закрываем модальное окно
+                onPaymentComplete(true, `Оплата прошла успешно! Номер вашего заказа: #${orderId}`);
             }
-        } 
+        }
         catch (error) {
             console.error('Ошибка платежа:', error);
-            alert(`Ошибка оплаты: ${error.message}`);
-        } 
+            onClose(); // Закрываем модальное окно даже при ошибке
+            onPaymentComplete(false, `Ошибка оплаты: ${error.message || 'Неизвестная ошибка'}`);
+        }
         finally {
             setIsProcessing(false);
         }
     };
-    
+
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'auto';
         }
-        
+
         return () => {
             document.body.style.overflow = 'auto';
         };
@@ -118,7 +121,6 @@ const PaymentModal = ({
         onClose();
         navigate('/profile');
     };
-
 
     if (!isOpen) return null;
 
@@ -257,5 +259,3 @@ const PaymentModal = ({
 };
 
 export default PaymentModal;
-
-

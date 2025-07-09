@@ -8,19 +8,24 @@ import LoadingSpinner from './Components/LoadingSpinner';
 import AuthModal from './Components/AuthModal';
 import { useNavigate } from 'react-router-dom';
 import PaymentModal from '../JSX/Components/PaymentModal';
-import { FaShoppingCart, FaTrashAlt, FaTimes, FaMinus, FaPlus, FaCreditCard, FaGift, FaSignInAlt } from 'react-icons/fa';
+import { FaShoppingCart, FaTrashAlt, FaTimes, FaMinus, FaPlus, FaCreditCard, FaGift, FaSignInAlt, FaCheckCircle } from 'react-icons/fa';
 import { FaApplePay, FaGooglePay, FaCcPaypal } from 'react-icons/fa';
 
 const CartPage = () => {
     const [cart, setCart] = useState(null);
-    const [productImages, setProductImages] = useState({}); 
+    const [productImages, setProductImages] = useState({});
     const [isLoading, setIsLoading] = useState(true);
+    const [paymentMethod, setPaymentMethod] = useState('card');
     const [error, setError] = useState(null);
     const { userId, isAuthenticated, login } = useAuth();
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const navigate = useNavigate();
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState('card');
+    const [notification, setNotification] = useState({
+        show: false,
+        success: false,
+        message: ''
+    });
 
     const togglePaymentModal = useCallback(() => {
         const newState = !isPaymentModalOpen;
@@ -33,6 +38,22 @@ const CartPage = () => {
         setIsAuthModalOpen(newState);
         document.body.style.overflow = newState ? 'hidden' : 'auto';
     }, [isAuthModalOpen]);
+
+    const showNotification = useCallback((success, message) => {
+        setNotification({
+            show: true,
+            success,
+            message
+        });
+
+        setTimeout(() => {
+            setNotification({
+                show: false,
+                success: false,
+                message: ''
+            });
+        }, 5000);
+    }, []);
 
     const handleLoginSuccess = useCallback((token, refreshToken, userId) => {
         login(token, refreshToken, userId);
@@ -61,7 +82,7 @@ const CartPage = () => {
             if (cartResponse?.orderItem?.length > 0) {
                 const productIds = cartResponse.orderItem.map(item => item.product.id);
                 const imagesResponse = await apiRequest('/api/productimages');
-                
+
                 const imagesByProduct = {};
                 imagesResponse.forEach(image => {
                     if (productIds.includes(image.productId)) {
@@ -73,11 +94,11 @@ const CartPage = () => {
                 });
                 setProductImages(imagesByProduct);
             }
-        } 
+        }
         catch (err) {
             console.error('Error fetching cart:', err);
             setError('Не удалось загрузить данные корзины');
-        } 
+        }
         finally {
             setIsLoading(false);
         }
@@ -92,7 +113,7 @@ const CartPage = () => {
             const mainImage = productImages[productId].find(img => img.isMain) || productImages[productId][0];
             return mainImage.imageUrl;
         }
-        return 'https://via.placeholder.com/300'; // Заглушка, если изображений нет
+        return 'https://via.placeholder.com/300';
     };
 
     const totalItems = cart?.orderItem?.reduce((sum, item) => sum + item.quantity, 0) || 0;
@@ -132,7 +153,7 @@ const CartPage = () => {
             });
         } catch (error) {
             console.error('Error updating quantity:', error);
-            alert('Не удалось обновить количество');
+            showNotification(false, 'Не удалось обновить количество');
         }
     };
 
@@ -156,7 +177,7 @@ const CartPage = () => {
             });
         } catch (error) {
             console.error('Error removing item:', error);
-            alert('Не удалось удалить товар из корзины');
+            showNotification(false, 'Не удалось удалить товар из корзины');
         }
     };
 
@@ -179,9 +200,10 @@ const CartPage = () => {
                 totalAmount: 0,
                 amountWOSale: 0
             }));
+            showNotification(true, 'Корзина успешно очищена');
         } catch (error) {
             console.error('Error clearing cart:', error);
-            alert('Не удалось очистить корзину');
+            showNotification(false, 'Не удалось очистить корзину');
         }
     };
 
@@ -420,14 +442,31 @@ const CartPage = () => {
                     )}
                 </div>
             </main>
+
             <PaymentModal
                 isOpen={isPaymentModalOpen}
                 onClose={togglePaymentModal}
                 totalAmount={total}
                 orderId={cart?.id || '0000'}
-                handleFastPayment={handleFastPayment}
-                refreshCart={fetchCart} 
+                refreshCart={fetchCart}
+                onPaymentComplete={(success, message) => {
+                    showNotification(success, message);
+                }}
             />
+
+            {notification.show && (
+                <div className={`${styles.notification} ${notification.success ? styles.success : styles.error}`}>
+                    <div className={styles.notificationContent}>
+                        {notification.success ? (
+                            <FaCheckCircle className={styles.notificationIcon} />
+                        ) : (
+                            <FaTimes className={styles.notificationIcon} />
+                        )}
+                        <span>{notification.message}</span>
+                    </div>
+                </div>
+            )}
+
             <Footer/>
         </div>
     );
