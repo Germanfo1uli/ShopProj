@@ -4,6 +4,8 @@ namespace ShopBack.Repositories
 {
     public interface IOrdersRepository : IRepository<Orders>
     {
+        Task<Orders> GetByIdNoTrackingAsync(int id); // Получить по айди без трекинга
+
         Task CreateCart(int userId); // Создает новую корзину (Нужно для нового пользователя)
 
         Task<Orders> GetUserCartOrderAsync(int userId); // Получает корзину пользователя
@@ -21,5 +23,7 @@ namespace ShopBack.Repositories
         Task AssignmentOrderPrice(int orderId, decimal sumSale, decimal sum); // Присваивает значения сумм заказу
 
         Task UpdateOrderStatusAsync(int orderId, string status); // Изменяет статус заказа ("Processing" → "Completed")
+
+        Task <IEnumerable<OrderItems>> GetOrderItemsByOrderIdAsync(int orderId); // Получает все товары в заказе
     }
 }

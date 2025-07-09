@@ -11,7 +11,6 @@ import Footer from "./Components/Footer";
 import { Link } from "react-router-dom";
 import { apiRequest } from './Api/ApiRequest';
 import { useAuth} from './Hooks/UseAuth.js';
-import LoadingSpinner from './Components/LoadingSpinner';
 
 const Catalog = () => {
     const location = useLocation();
@@ -26,14 +25,15 @@ const Catalog = () => {
     const [sortOption, setSortOption] = useState('popularity');
     const [categories, setCategories] = useState([]);
     const [products, setProducts] = useState([]);
+    const [productImages, setProductImages] = useState({}); 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const {userId, isAuthenticated, logout } = useAuth();
     const [favorites, setFavorites] = useState([]);
     const [hoverTimeout, setHoverTimeout] = useState(null);
+    
 
     const handleMouseEnterCategory = (categoryName) => {
-        // Очищаем предыдущий таймер, если он есть
         if (hoverTimeout) {
             clearTimeout(hoverTimeout);
             setHoverTimeout(null);
@@ -42,7 +42,6 @@ const Catalog = () => {
     };
 
     const handleMouseLeaveCategory = () => {
-        // Устанавливаем таймер на закрытие через 300мс
         const timer = setTimeout(() => {
             setExpandedMainCategory(null);
         }, 300);
@@ -50,7 +49,6 @@ const Catalog = () => {
     };
 
     const handleMouseEnterSubmenu = () => {
-        // Отменяем закрытие при наведении на подменю
         if (hoverTimeout) {
             clearTimeout(hoverTimeout);
             setHoverTimeout(null);
@@ -58,7 +56,6 @@ const Catalog = () => {
     };
 
     const handleMouseLeaveSubmenu = () => {
-        // Закрываем подменю через небольшой промежуток времени
         const timer = setTimeout(() => {
             setExpandedMainCategory(null);
         }, 300);
@@ -79,10 +76,10 @@ const Catalog = () => {
                     
                     const favoriteIds = userFavorites.map(fav => Number(fav.id)); 
                     setFavorites(favoriteIds);
-                }
-                else {
+                } else {
                     setFavorites([]);
                 }
+
                 const categoriesStructure = parentCategories.map(parent => {
                     const children = allCategories.filter(
                         cat => cat.parentCategoryId === parent.id
@@ -139,7 +136,30 @@ const Catalog = () => {
 
                 setCategories([...specialCategories, ...categoriesStructure]);
                 const productsData = await apiRequest('/api/products');
-                setProducts(productsData);
+                const enhancedProducts = productsData.map(product => {
+                    const isSpecial = Boolean(product.oldPrice); 
+                    const isPopular = product.reviewsNumber >= 5;     
+                    const isRecommended = Math.random() < 0.3;   
+
+                    return {
+                        ...product,
+                        isSpecial,
+                        isPopular,
+                        isRecommended
+                    };
+                });
+                setProducts(enhancedProducts);
+                const imagesResponse = await apiRequest('/api/productimages');
+                const imagesByProduct = {};
+                
+                imagesResponse.forEach(image => {
+                    if (!imagesByProduct[image.productId]) {
+                        imagesByProduct[image.productId] = [];
+                    }
+                    imagesByProduct[image.productId].push(image);
+                });
+
+                setProductImages(imagesByProduct);
                 
             } catch (err) {
                 console.error('Ошибка загрузки данных:', err);
@@ -150,89 +170,75 @@ const Catalog = () => {
         };
 
         fetchData();
-    }, [userId,  isAuthenticated]);
+    }, [userId, isAuthenticated]);
 
+    
     useEffect(() => {
-    if (products.length === 0 || categories.length === 0) return;
+        if (products.length === 0 || categories.length === 0) return;
 
-    let result = [...products];
+        let result = [...products];
 
-    if (activeCategory !== 'Все товары') {
-        const category = categories.find(cat => cat.name === activeCategory);
-        if (category) {
-        if (category.isPopular) {
-            result = result.filter(product => product.isPopular);
-        } 
-        else if (category.isRecommended) {
-            result = result.filter(product => product.isRecommended);
-        } 
-        else if (category.isSpecial) {
-            result = result.filter(product => product.isSpecial);
-        } 
-        else {
-            const categoryIds = [category.id, ...category.subcategories?.map(sub => sub.id) || []];
-            result = result.filter(product => categoryIds.includes(product.categoryId));
-        }
-        }
-    }
-
-    if (activeSubcategory) {
-        const subcategory = categories
-        .flatMap(cat => cat.subcategories || [])
-        .find(sub => sub.name === activeSubcategory);
-        
-        if (subcategory) {
-        result = result.filter(product => product.categoryId === subcategory.id);
-        }
-    }
-
-    result = result.filter(product =>
-        product.price >= priceRange[0] && product.price <= priceRange[1]
-    );
-
-    if (selectedSizes.length > 0) {
-        result = result.filter(product =>
-        product.sizes && product.sizes.some(size => selectedSizes.includes(size))
-        );
-    }
-
-    if (selectedColors.length > 0) {
-        result = result.filter(product =>
-        product.color && selectedColors.includes(product.color)
-        );
-    }
-    result = sortProducts(result, sortOption);
-    setFilteredProducts(result);
-    }, [activeCategory, activeSubcategory, priceRange, selectedSizes, selectedColors, sortOption, products, categories]);
-
-    useEffect(() => {
-        if (location.state?.filter) {
-            switch(location.state.filter) {
-                case 'popular':
-                    setActiveCategory('Популярные товары');
-                    break;
-                case 'recommended':
-                    setActiveCategory('Рекомендации для вас');
-                    break;
-                case 'special':
-                    setActiveCategory('Спецпредложения');
-                    break;
-                default:
-                    setActiveCategory('Все товары');
+        if (activeCategory !== 'Все товары') {
+            const category = categories.find(cat => cat.name === activeCategory);
+            if (category) {
+                if (category.isPopular) {
+                    result = result.filter(p => p.isPopular);
+                } else if (category.isRecommended) {
+                    result = result.filter(p => p.isRecommended);
+                } else if (category.isSpecial) {
+                    result = result.filter(p => p.isSpecial);
+                } else {
+                    const categoryIds = [category.id, ...(category.subcategories?.map(s => s.id) || [])];
+                    result = result.filter(p => categoryIds.includes(p.categoryId));
+                }
             }
         }
-    }, [location.state]);
-    if (isLoading) {
-        return <LoadingSpinner message="Загружаем каталог..." status="loading" />;
-    }
 
-    if (error) {
-        return <LoadingSpinner message={error} status="error" />;
-    }
+        if (activeSubcategory) {
+            const subcategory = categories
+                .flatMap(cat => cat.subcategories || [])
+                .find(sub => sub.name === activeSubcategory);
 
-    if (products.length === 0 && !isLoading) {
-        return <LoadingSpinner message="Товары не найдены" status="empty" />;
-    }
+            if (subcategory) {
+                result = result.filter(p => p.categoryId === subcategory.id);
+            }
+        }
+
+        result = result.filter(p =>
+            p.price >= priceRange[0] && p.price <= priceRange[1]
+        );
+
+        if (selectedSizes.length > 0) {
+            result = result.filter(p =>
+                p.sizes && p.sizes.some(size => selectedSizes.includes(size))
+            );
+        }
+
+        if (selectedColors.length > 0) {
+            result = result.filter(p =>
+                p.color && selectedColors.includes(p.color)
+            );
+        }
+
+        if (activeCategory === 'Спецпредложения') {
+            result.sort((a, b) => {
+                const discountA = a.oldPrice ? ((a.oldPrice - a.price) / a.oldPrice) * 100 : 0;
+                const discountB = b.oldPrice ? ((b.oldPrice - b.price) / b.oldPrice) * 100 : 0;
+                return discountB - discountA; 
+            });
+        } else if (activeCategory === 'Популярные товары') {
+            result.sort((a, b) => (b.reviews || 0) - (a.reviews || 0));
+        } else if (activeCategory === 'Рекомендации для вас') {
+            if (result.length > 20) {
+                result = [...result].sort(() => 0.5 - Math.random()).slice(0, 20);
+            }
+        } else {
+            result = sortProducts(result, sortOption);
+        }
+        setFilteredProducts(result);
+    }, [activeCategory, activeSubcategory, priceRange, selectedSizes, selectedColors, sortOption, products, categories]);
+
+
     const sortProducts = (products, option) => {
         const sorted = [...products];
         switch(option) {
@@ -437,51 +443,6 @@ const Catalog = () => {
                 <div className={styles.content}>
                     <aside className={styles.filters}>
                         <div className={styles.filterSection}>
-                            <h3 className={styles.filterTitle}>Категории</h3>
-                            <ul className={styles.categoryList}>
-                                {categories.map((category) => (
-                                    <li key={category.id}>
-                                        <div 
-                                            className={`${styles.categoryLink} ${
-                                                activeCategory === category.name ? styles.active : ''
-                                            }`}
-                                            onMouseEnter={() => category.subcategories.length > 0 && setExpandedFilterCategory(category.name)}
-                                            onMouseLeave={() => setExpandedFilterCategory(null)}
-                                            onClick={() => handleFilterCategoryClick(category.name)}
-                                        >
-                                            <span>{category.name}</span>
-                                            {category.subcategories.length > 0 && (
-                                                <span className={styles.categoryArrow}>
-                                                    {expandedFilterCategory === category.name ? 
-                                                        <FaChevronUp /> : <FaChevronDown />
-                                                    }
-                                                </span>
-                                            )}
-                                        </div>
-                                        
-                                        {category.subcategories.length > 0 && expandedFilterCategory === category.name && (
-                                            <ul className={styles.subcategoryList}>
-                                                {category.subcategories.map(subcategory => (
-                                                    <li key={subcategory.id}>
-                                                        <div
-                                                            className={`${styles.subcategoryLink} ${
-                                                                activeSubcategory === subcategory.name ? styles.active : ''
-                                                            }`}
-                                                            onClick={() => selectCategory(category.name, subcategory.name)}
-                                                        >
-                                                            {subcategory.name}
-                                                        </div>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        {/* Остальные фильтры остаются без изменений */}
-                        <div className={styles.filterSection}>
                             <h3 className={styles.filterTitle}>Цена</h3>
                             <div className={styles.priceRange}>
                                 <span>0 ₽</span>
@@ -539,21 +500,7 @@ const Catalog = () => {
                             </div>
                         </div>
 
-                        <div className={styles.filterSection}>
-                            <h3 className={styles.filterTitle}>Цвет</h3>
-                            <div className={styles.colorGrid}>
-                                {colors.map((color) => (
-                                    <button
-                                        key={color}
-                                        className={`${styles.colorButton} ${
-                                            selectedColors.includes(color) ? styles.colorButtonActive : ''
-                                        }`}
-                                        style={{ backgroundColor: color }}
-                                        onClick={() => toggleColorSelection(color)}
-                                    />
-                                ))}
-                            </div>
-                        </div>
+                       
 
                         <button
                             className={styles.resetFilters}
@@ -617,65 +564,69 @@ const Catalog = () => {
                         </div>
                         <div className={styles.products}>
                             {filteredProducts.length > 0 ? (
-                                filteredProducts.map((product) => (
-                                    <div key={product.id} className={styles.productCard}>
-                                        <div className={styles.productImage}>
-                                            {/* Основное изображение продукта */}
-                                            {product.mainImage && (
-                                                <img 
-                                                    src={`${process.env.REACT_APP_API_URL}${product.mainImage.url}`} 
-                                                    alt={product.name}
-                                                />
-                                            )}
-                                            
-                                            {/* Бейдж, если есть */}
-                                            {product.badge && (
-                                                <span className={`${styles.badge} ${styles[product.badgeColor || 'blue']}`}>
-                                                    {product.badge}
-                                                </span>
-                                            )}
-                                            
-                                            {/* Кнопка избранного */}
-                                            <button
-                                                className={styles.favoriteButton}
-                                                onClick={() => toggleFavorite(Number(product.id))} 
-                                                disabled={!userId} 
-                                                title={!userId ? "Войдите, чтобы добавить в избранное" : ""}
-                                                >
-                                                {favorites.includes(Number(product.id)) ? ( 
-                                                    <FaHeart className={styles.favoriteIconActive} />
+                                filteredProducts.map((product) => {
+                                    const images = productImages[product.id] || [];
+                                    const mainImage = images.find(img => img.isMain) || images[0];
+
+                                    return (
+                                        <div key={product.id} className={styles.productCard}>
+                                            <div className={styles.productImage}>
+                                                {mainImage ? (
+                                                    <img 
+                                                        src={mainImage.imageUrl} 
+                                                        alt={product.name}
+                                                        className={styles.productImage}
+                                                    />
                                                 ) : (
-                                                    <FaRegHeart className={styles.favoriteIcon} />
+                                                    <div className={styles.imagePlaceholder}>Нет изображения</div>
                                                 )}
-                                            </button>
-                                        </div>
-                                        
-                                        <div className={styles.productInfo}>
-                                            <h3 className={styles.productName}>{product.name}</h3>
-                                             <div className={styles.productPrice}>
-                                                <span className={styles.currentPrice}>
-                                                    {product.price.toLocaleString('ru-RU')} ₽
-                                                </span>
-                                                {/* Исправленная проверка на oldPrice */}
-                                                {product.oldPrice && product.oldPrice > 0 && (
-                                                    <del className={styles.oldPrice}>
-                                                    {product.oldPrice.toLocaleString('ru-RU')} ₽
-                                                    </del>
+                                                
+                                                {product.badge && (
+                                                    <span className={`${styles.badge} ${styles[product.badgeColor || 'blue']}`}>
+                                                        {product.badge}
+                                                    </span>
                                                 )}
-                                                </div>
-                                            <div className={styles.productRating}>
-                                                {renderStars(product.rating || 0)}
-                                                <span className={styles.reviews}>({product.reviews || 0})</span>
+                                                
+                                                <button
+                                                    className={styles.favoriteButton}
+                                                    onClick={() => toggleFavorite(Number(product.id))} 
+                                                    disabled={!userId} 
+                                                    title={!userId ? "Войдите, чтобы добавить в избранное" : ""}
+                                                >
+                                                    {favorites.includes(Number(product.id)) ? ( 
+                                                        <FaHeart className={styles.favoriteIconActive} />
+                                                    ) : (
+                                                        <FaRegHeart className={styles.favoriteIcon} />
+                                                    )}
+                                                </button>
                                             </div>
-                                            <button className={styles.addToCart}>
-                                                <Link to={`/product/${product.id}`} className={styles.linkToCart}>
-                                                    <FaSearch className={styles.cartIcon} />
-                                                    Перейти к товару
-                                                </Link>
-                                            </button>
+                                            
+                                            <div className={styles.productInfo}>
+                                                <h3 className={styles.productName}>{product.name}</h3>
+                                                <div className={styles.productPrice}>
+                                                    <span className={styles.currentPrice}>
+                                                        {product.price.toLocaleString('ru-RU')} ₽
+                                                    </span>
+                                                    {product.oldPrice && product.oldPrice > 0 && (
+                                                        <del className={styles.oldPrice}>
+                                                            {product.oldPrice.toLocaleString('ru-RU')} ₽
+                                                        </del>
+                                                    )}
+                                                </div>
+                                                <div className={styles.productRating}>
+                                                    {renderStars(product.rating || 0)}
+                                                    <span className={styles.reviewsNumber}>({product.reviewsNumber || 0})</span>
+                                                </div>
+                                                <button className={styles.addToCart}>
+                                                    <Link to={`/product/${product.id}`} className={styles.linkToCart}>
+                                                        <FaSearch className={styles.cartIcon} />
+                                                        Перейти к товару
+                                                    </Link>
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))
+                                    );
+                                })
                             ) : (
                                 <div className={styles.noResults}>
                                     <FaSearch className={styles.noResultsIcon} />
@@ -689,7 +640,7 @@ const Catalog = () => {
                                     </button>
                                 </div>
                             )}
-                        </div>
+                        </div>`
 
                         {filteredProducts.length > 0 && (
                             <div className={styles.pagination}>

@@ -7,9 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Diagnostics;
-using Newtonsoft.Json.Linq;
 using ShopBack.Authorization;
 using System.Text.Json.Serialization;
 
@@ -32,9 +30,13 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
-    });
-});
 
+        policy.WithOrigins("https://js.stripe.com", "https://merchant-ui-api.stripe.com")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+
+});
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -71,6 +73,7 @@ builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
 builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
 builder.Services.AddScoped<ITokensRepository, TokensRepository>();
 builder.Services.AddScoped<IPayMethodsRepository, PayMethodsRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 //Подключение сервисов 
 builder.Services.AddScoped(typeof(IService<>), typeof(Service<>));
@@ -82,7 +85,9 @@ builder.Services.AddScoped<ProductsService>();
 builder.Services.AddScoped<ReviewsService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<PayMethodsRepository>();
+builder.Services.AddScoped<PayMethodsService>();
+builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<IPaymentGateway, StripePaymentGateway>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -154,7 +159,7 @@ using (var scope = app.Services.CreateScope())
         if (!db.UserRoles.Any(u => u.RoleId == 1))
         {
             Console.WriteLine("Creating admin user...");
-            var adminLogin = "Admin";
+            var adminLogin = "Admin@ya.ru";
             var adminPassword = "Password";
 
             var userService = scope.ServiceProvider.GetRequiredService<UserService>();
@@ -211,10 +216,11 @@ app.UseExceptionHandler(appError => // использование глобального обработчика оши
         context.Response.ContentType = "application/json";
         var (statusCode, message) = exception switch // обрабатываем статус ошибки
         {
-            KeyNotFoundException => (StatusCodes.Status404NotFound, "Ресурс не найден"),
-            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Доступ запрещен"),
-            ArgumentException => (StatusCodes.Status400BadRequest, "Неверные параметры запроса"),
-            _ => (StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера")
+            KeyNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
+            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, exception.Message),
+            ArgumentException => (StatusCodes.Status400BadRequest, exception.Message),
+            InvalidOperationException => (StatusCodes.Status400BadRequest, exception.Message),
+            _ => (StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера"),
         };
 
         context.Response.StatusCode = statusCode;
@@ -222,7 +228,6 @@ app.UseExceptionHandler(appError => // использование глобального обработчика оши
         {
             StatusCode = statusCode,
             Message = message,
-            Details = exception?.Message
         });
     });
 });

@@ -10,6 +10,7 @@ const FavoritesTab = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { userId, isAuthenticated } = useAuth();
+    const [productImages, setProductImages] = useState({}); 
 
     useEffect(() => {
         const fetchFavorites = async () => {
@@ -21,6 +22,17 @@ const FavoritesTab = () => {
                     authenticated: isAuthenticated 
                 });
                 setFavorites(response || []);
+                const images = {};
+                for (const item of response) {
+                    try {
+                        const imageResponse = await apiRequest(`/api/products/${item.id}/main`);
+                        images[item.id] = imageResponse?.imageUrl || 'https://via.placeholder.com/150';
+                    } catch (err) {
+                        console.error(`Error fetching image for product ${item.id}:`, err);
+                        images[item.id] = 'https://via.placeholder.com/150';
+                    }
+                }
+                setProductImages(images);
             } catch (err) {
                 setError(err.message || 'Failed to fetch favorites');
                 console.error('Error fetching favorites:', err);
@@ -44,7 +56,13 @@ const FavoritesTab = () => {
                 },
                 authenticated: isAuthenticated
             });
+            
             setFavorites(favorites.filter(item => item.id !== productId));
+            setProductImages(prev => {
+                const newImages = {...prev};
+                delete newImages[productId];
+                return newImages;
+            });
         } 
         catch (err) {
             console.error('Error removing favorite:', err);
@@ -105,9 +123,12 @@ const FavoritesTab = () => {
                                     <FaHeart className={styles.favoriteIconActive} />
                                 </button>
                                 <img
-                                    src={item.imageUrl || 'https://via.placeholder.com/150'}
+                                    src={productImages[item.id] || 'https://via.placeholder.com/150'}
                                     alt={item.name}
                                     className={styles.productImage}
+                                    onError={(e) => {
+                                        e.target.src = 'https://via.placeholder.com/150';
+                                    }}
                                 />
                             </div>
                             <div className={styles.productDetails}>

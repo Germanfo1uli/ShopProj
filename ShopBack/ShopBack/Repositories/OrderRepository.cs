@@ -12,8 +12,6 @@ namespace ShopBack.Repositories
         {
             return await _context.Orders
                 .Include(o => o.OrderItem)
-                    .ThenInclude(oi => oi.Product)
-                    .AsNoTracking()
                 .Include(o => o.Payment)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(o => o.Id == id)
@@ -33,6 +31,7 @@ namespace ShopBack.Repositories
             return await _context.Orders
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
+                    .AsNoTracking()
                 .Include(o => o.Payment)
                 .AsNoTracking()
                 .OrderByDescending(o => o.OrderTime)
@@ -93,7 +92,7 @@ namespace ShopBack.Repositories
         {
             var order = await _context.Orders
                 .AsNoTracking()
-                .FirstOrDefaultAsync(o => o.UserId == userId);
+                .FirstOrDefaultAsync(o => o.UserId == userId && o.Status == "Cart");
             if (order == null)
             {
                 await CreateCart(userId);
@@ -128,6 +127,7 @@ namespace ShopBack.Repositories
                 ?? throw new KeyNotFoundException($"Заказ с ID {orderId} не найден");
             order.Status = status;
             order.UpdatedAt = DateTime.UtcNow;
+            _context.Orders.Update(order);
             await _context.SaveChangesAsync();
         }
         public async Task<decimal> GetOrderSumSaleAsync(int orderId)
@@ -155,6 +155,15 @@ namespace ShopBack.Repositories
             order.UpdatedAt = DateTime.UtcNow;
 
             await UpdateAsync(order);
+        }
+
+        public async Task<IEnumerable<OrderItems>> GetOrderItemsByOrderIdAsync(int orderId)
+        {
+            return await _context.OrderItems
+                .Where(oi => oi.OrderId == orderId)
+                .Include(oi => oi.Product)
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

@@ -1,6 +1,6 @@
 @host = http://localhost:5000
 @contentType = application/json
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjkiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJBZG1pbiIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzUxNjIwMzc1fQ.V0BD6sJInUqjRAD1Ngdr86FxhcEe1vZGjg4AzZzXV-I
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjkiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJBZG1pbiIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluIiwiZXhwIjoxNzUxOTcyNzgwfQ.5ZuIFg-rBL7iefDMDP_rH87s0bHSqhCZSez773t6rO4
 @userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjgiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJnZXJtYW5AbWFpbC5ydSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJleHAiOjE3NTE4NzUwODN9.lg2pdqMTqJuoAwgxaa4JpXObmIS3gB3tyPglab1n3X0
 @refreshToken = 
 
@@ -1538,4 +1538,846 @@ Authorization: Bearer {{userToken}}
   "rating": 2,
   "header": "Bad",
   "comment": "Плохо, очень плохо"
+}
+
+### Создание Спецификаций ###
+
+### ProductId = 1 ###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 1,
+"key": "Артикул",
+"value": "2025 01"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 1,
+"key": "Состав",
+"value": "100% хлопок"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 1,
+"key": "Пол",
+"value": "Женский"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 1,
+"key": "Размер",
+"value": "S, M, L, XL"
+}
+
+### ProductId = 2 ###
+
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 2,
+"key": "Артикул",
+"value": "2025 02"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 2,
+"key": "Состав",
+"value": "65% полиэстер, 35% вискоза"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 2,
+"key": "Пол",
+"value": "Женский"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 2,
+"key": "Размер",
+"value": "XS, S, M, L"
+}
+
+### ProductId = 3 ###
+
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 3,
+"key": "Артикул",
+"value": "2025 03"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 3,
+"key": "Состав",
+"value": "80% хлопок, 20% полиэстер"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 3,
+"key": "Пол",
+"value": "Мужской"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 3,
+"key": "Размер",
+"value": "40, 42, 44, 46, 48"
+}
+
+### ProductId = 4 ###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 4,
+"key": "Артикул",
+"value": "2025 04"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 4,
+"key": "Состав",
+"value": "98% хлопок, 2% эластан"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 4,
+"key": "Пол",
+"value": "Мужской"
+}
+
+###
+POST {{host}}/api/productspecifications
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+"productId": 4,
+"key": "Размер",
+"value": "28/30, 30/32, 32/34, 34/36"
+}
+
+### Создание картинок для продуктов ###
+
+### Изображение для продукта 1: Платье летнее хлопковое
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 1,
+  "imageUrl": "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8ZHJlc3N8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 2: Блузка офисная
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 2,
+  "imageUrl": "https://images.unsplash.com/photo-1608234807905-4466023792f5?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8YmxvdXNlfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 3: Рубашка классическая
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 3,
+  "imageUrl": "https://images.unsplash.com/photo-1621072156002-e2fccdc0b176?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHNoaXJ0fGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 4: Джинсы прямого кроя
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 4,
+  "imageUrl": "https://images.unsplash.com/photo-1475178626620-a4d074967452?q=80&w=686&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 5: Комплект для новорожденного
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 5,
+  "imageUrl": "https://images.unsplash.com/photo-1672863279585-f50438c73b62?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8YmFieSUyMHN1aXR8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 6: Футболка детская с принтом
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 6,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1693242804074-20a78966f4e6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fGNoaWxkcmVuJ3MlMjB0JTIwc2hpcnR8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 7: Спортивные штаны
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 7,
+  "imageUrl": "https://images.unsplash.com/photo-1650461970708-7bf32499516d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c3dlYXRwYW50c3xlbnwwfHwwfHx8MA%3D%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 8: Спортивная футболка
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 8,
+  "imageUrl": "https://images.unsplash.com/photo-1573798484153-da43eda898f6?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 9: Халат махровый
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 9,
+  "imageUrl": "https://images.unsplash.com/photo-1609535904959-aaa9d01fb5a4?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8YmF0aHJvYmV8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 10: Пижамный комплект
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 10,
+  "imageUrl": "https://images.unsplash.com/photo-1654512462970-8191bc8742bd?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8cGlqYW1hfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 11: Пальто демисезонное
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 11,
+  "imageUrl": "https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Q29hdHxlbnwwfHwwfHx8MA%3D%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 12: Куртка зимняя
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 12,
+  "imageUrl": "https://images.unsplash.com/photo-1613322800337-581785ea9f33?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8d2ludGVyJTIwamFja2V0fGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 13: Сковорода антипригарная
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 13,
+  "imageUrl": "https://images.unsplash.com/photo-1592156328757-ae2941276b2c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZnJ5aW5nJTIwcGFufGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 14: Кастрюля набор 3 шт
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 14,
+  "imageUrl": "https://images.unsplash.com/photo-1616748794038-54158b61c076?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 15: Набор тарелок 6 персон
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 15,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1709560427534-4c7947768b4b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8MyUyMHBsYXRlc3xlbnwwfHwwfHx8MA%3D%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 16: Салатник керамический
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 16,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1664478283448-94d7b72a23ed?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8U2FsYWQlMjBib3dsfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 17: Набор бокалов для вина
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 17,
+  "imageUrl": "https://images.unsplash.com/photo-1560145725-8cbf9768b73a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHdpbmUlMjBnbGFzc2VzfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 18: Графин для напитков
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 18,
+  "imageUrl": "https://images.unsplash.com/photo-1561668137-58955d51a5fb?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8RGVjYW50ZXJ8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 19: Сервировочный поднос
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 19,
+  "imageUrl": "https://images.unsplash.com/photo-1559849326-d991ccc826d0?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8U2VydmluZyUyMHRyYXl8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 20: Набор столовых приборов
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 20,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1714675739908-77cb49698469?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8U2V0JTIwb2YlMjBjdXRsZXJ5fGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 21: Форма для выпечки
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 21,
+  "imageUrl": "https://images.unsplash.com/photo-1631174930522-c68839f47bcb?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFraW5nJTIwc2hhcGV8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 22: Кухонные ножи набор
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 22,
+  "imageUrl": "https://images.unsplash.com/photo-1609467334293-030ac6448fd8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8a2l0Y2hlbiUyMGtuaXZlc3xlbnwwfHwwfHx8MA%3D%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 23: Набор контейнеров для хранения
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 23,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1701213306452-8b059d440489?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Zm9vZCUyMHN0b3JhZ2UlMjBjb250YWluZXJzfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 24: Банка для сыпучих продуктов
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 24,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1664007755672-52d27e1766da?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Z2xhc3MlMjBqYXJ8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 25: Комод 3-х ярусный
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 25,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1683705132597-1d8c724f415a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Q2hlc3QlMjBvZiUyMGRyYXdlcnN8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 26: Журнальный столик
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 26,
+  "imageUrl": "https://images.unsplash.com/photo-1647967527216-adea2f078e07?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Q29mZmVlJTIwdGFibGV8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 27: Декоративная ваза
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 27,
+  "imageUrl": "https://images.unsplash.com/photo-1722356541579-c5c6b0a42789?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8ZGVjb3JhdGl2ZSUyMHZhc2V8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 28: Статуэтка интерьерная
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 28,
+  "imageUrl": "https://images.unsplash.com/photo-1641308311822-2e7e986b2fba?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8SW50ZXJpb3IlMjBmaWd1cmluZXxlbnwwfHwwfHx8MA%3D%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 29: Настольная лампа
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 29,
+  "imageUrl": "https://images.unsplash.com/photo-1585128719715-46776b56a0d1?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGxhbXB8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 30: Подвесной светильник
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 30,
+  "imageUrl": "https://images.unsplash.com/photo-1636368208791-17b81ed832d2?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fGxhbXB8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 31: Зеркало настенное
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 31,
+  "imageUrl": "https://images.unsplash.com/photo-1556020685-ae41abfc9365?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8V2FsbCUyMG1pcnJvcnxlbnwwfHwwfHx8MA%3D%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 32: Зеркало с подсветкой
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 32,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1676823570845-d2dd715c9967?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8V2FsbCUyMG1pcnJvciUyMHdpdGglMjBsaWdodHxlbnwwfHwwfHx8MA%3D%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 33: Картина на холсте
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 33,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1676668707201-326e7f17a143?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fHBhaW50aW5nJTIwb24lMjBjYW52YXN8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 34: Постер в рамке
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 34,
+  "imageUrl": "https://images.unsplash.com/photo-1606840342018-8f1c049681bf?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8RnJhbWVkJTIwcG9zdGVyfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 35: Настенные часы
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 35,
+  "imageUrl": "https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8d2FsbCUyMGNsb2NrfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 36: Будильник цифровой
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 36,
+  "imageUrl": "https://images.unsplash.com/photo-1747224317387-ee2e7eaa865d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fERpZ2l0YWwlMjBhbGFybSUyMGNsb2NrfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 37: Комплект постельного белья
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 37,
+  "imageUrl": "https://images.unsplash.com/photo-1609587639086-b4cbf85e4355?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8YmVkJTIwc2V0fGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 38: Детский комплект белья
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 38,
+  "imageUrl": "https://images.unsplash.com/photo-1633699124189-17c808027f4a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NzV8fGNoaWxkcmVuJTIwdW5kZXJwYW50c3xlbnwwfHwwfHx8MA%3D%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 39: Плед вязаный
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 39,
+  "imageUrl": "https://images.unsplash.com/photo-1674475761180-5f32f30902f4?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8S25pdHRlZCUyMGJsYW5rZXR8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 40: Покрывало на кровать
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 40,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1670869816739-8fedc7f97e6e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8QmVkc3ByZWFkfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 41: Шторы черные
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 41,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1661939943653-4219a85bdc4e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzN8fEJsYWNrJTIwQ3VydGFpbnN8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 42: Тюль прозрачный
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 42,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1661631071058-d1268c5d38f7?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8VHVsbGV8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 43: Банное полотенце
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 43,
+  "imageUrl": "https://images.unsplash.com/photo-1616663717839-2fea42e1a1f6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8QmF0aCUyMHRvd2VsfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 44: Набор полотенец 3 шт
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 44,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1684445034670-b36aca25c25a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8QmF0aCUyMHRvd2VsfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 45: Ковер для гостиной
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 45,
+  "imageUrl": "https://images.unsplash.com/photo-1597665863042-47e00964d899?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Y2FycGV0fGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 46: Коврик для прихожей
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 46,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1683141559030-e04e92021aab?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTAyfHxydWd8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 47: Скатерть праздничная
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 47,
+  "imageUrl": "https://images.unsplash.com/photo-1647507146394-ea471abc800d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fFRhYmxlY2xvdGh8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 48: Салфетки тканевые
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 48,
+  "imageUrl": "https://images.unsplash.com/photo-1581954804617-b13c31f9f745?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Q2xvdGglMjBuYXBraW5zfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 49: Женская сумка через плечо
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 49,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1673384389943-d891095cd331?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8V29tZW4ncyUyMFNob3VsZGVyJTIwQmFnfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 50: Рюкзак городской
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 50,
+  "imageUrl": "https://images.unsplash.com/photo-1511405946472-a37e3b5ccd47?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8YmFnfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 51: Ремень кожаный мужской
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 51,
+  "imageUrl": "https://images.unsplash.com/photo-1705493655920-20c572928501?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8bGVhdGhlciUyMGJlbHR8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 52: Ремень женский
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 52,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1724075829638-7a4d3f2eb235?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8d29tZW4ncyUyMGJlbHR8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 53: Шапка вязаная
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 53,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1697183203326-5523b57a8ca4?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8S25pdHRlZCUyMGhhdHxlbnwwfHwwfHx8MA%3D%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 54: Кепка бейсболка
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 54,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1680859126205-1c593bb4f9e8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Y2FwfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 55: Шарф шерстяной
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 55,
+  "imageUrl": "https://images.unsplash.com/photo-1485527691629-8e370684924c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8c2NhcmZ8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 56: Шелковый платок
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 56,
+  "imageUrl": "https://images.unsplash.com/photo-1566534335938-05f1f2949435?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8U2lsayUyMHNjYXJmfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 57: Колье золотистое
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 57,
+  "imageUrl": "https://plus.unsplash.com/premium_photo-1681276170423-2c60b95094b4?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8R29sZCUyMG5lY2tsYWNlfGVufDB8fDB8fHww",
+  "isMain": true
+}
+
+### Изображение для продукта 58: Браслет серебристый
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 58,
+  "imageUrl": "https://images.unsplash.com/photo-1658278474610-2195cb139185?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8U2lsdmVyJTIwYnJhY2VsZXR8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 59: Зонт автоматический
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 59,
+  "imageUrl": "https://images.unsplash.com/photo-1499678450342-29ebee16d1ab?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8VW1icmVsbGF8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
+}
+
+### Изображение для продукта 60: Зонт большой
+POST {{host}}/api/productimages
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "productId": 60,
+  "imageUrl": "https://images.unsplash.com/photo-1717844519003-50a7ea282e27?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8YmlnJTIwVW1icmVsbGF8ZW58MHx8MHx8fDA%3D",
+  "isMain": true
 }

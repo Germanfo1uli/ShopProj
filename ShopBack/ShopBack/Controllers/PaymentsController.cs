@@ -8,9 +8,11 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] //api/payments
     [ApiController]
-    public class PaymentsController(IService<Payments> paymentsService, OrdersService ordersService) : ControllerBase, IController<Payments, PaymentsCreate, PaymentsUpdate>
+    public class PaymentsController(PaymentService paymentsService,
+                                    OrdersService ordersService) : ControllerBase,
+                                    IController<Payments, PaymentsCreate, PaymentsUpdate>
     {
-        private readonly IService<Payments> _paymentsService = paymentsService;
+        private readonly PaymentService _paymentsService = paymentsService;
         private readonly OrdersService _ordersService = ordersService;
 
         [HttpGet]
@@ -93,6 +95,19 @@ namespace ShopBack.Controllers
             await _paymentsService.DeleteAsync(id);
             return NoContent();
         }
+
+        [HttpPost("process")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
+        public async Task<IActionResult> ProcessPayment([FromBody] ProcessPaymentRequest request)
+        {
+            var result = await _paymentsService.ProcessPaymentAsync(
+                request.OrderId,
+                request.PaymentMethodId);
+
+            return result.IsSuccess
+                ? Ok( result.PaymentId )
+                : BadRequest("Оплата не прошла");
+        }
     }
 
     public class PaymentsCreate
@@ -108,5 +123,12 @@ namespace ShopBack.Controllers
     {
         public string? Status { get; set; }
         public string? TransactionId { get; set; }
+    }
+
+    public class ProcessPaymentRequest
+    {
+        public int UserId { get; set; }
+        public int OrderId { get; set; } 
+        public int PaymentMethodId { get; set; }
     }
 }

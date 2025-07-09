@@ -7,6 +7,7 @@ import sb from "../CSS/Breadcrumbs.module.css";
 import { apiRequest } from './Api/ApiRequest';
 import { useAuth } from './Hooks/UseAuth';
 
+
 const ProductPage = () => {
     const { id } = useParams();
     const { userId, isAuthenticated } = useAuth();
@@ -19,6 +20,7 @@ const ProductPage = () => {
     const [isFavorite, setIsFavorite] = useState(false);
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
+    const [productImages, setProductImages] = useState([]);
     const [activeTab, setActiveTab] = useState('description');
     const [mainImage, setMainImage] = useState('');
     const [showImageModal, setShowImageModal] = useState(false);
@@ -28,20 +30,22 @@ const ProductPage = () => {
         comment: '',
         rating: 0
     });
+    const [specifications, setSpecifications] = useState([]);
+    const [specsLoading, setSpecsLoading] = useState(true);
     const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
     const [showCartNotification, setShowCartNotification] = useState(false);
+    const [priceChanged, setPriceChanged] = useState(false);
 
     useEffect(() => {
-        const fetchProduct = async () => {
+         const fetchProduct = async () => {
             try {
                 setIsLoading(true);
                 const response = await apiRequest(`/api/products/${id}`);
                 setProductData(response);
-
-                if (response.product?.productImage && response.product.productImage.length > 0) {
-                    setMainImage(`${process.env.REACT_APP_API_URL}${response.product.productImage[0].url}`);
-                }
-
+                const imagesResponse = await apiRequest(`/api/products/${id}/images`);
+                setProductImages(imagesResponse || []);
+                const mainImgResponse = await apiRequest(`/api/products/${id}/main`);
+                setMainImage(mainImgResponse?.imageUrl || '');
                 if (userId) {
                     const userFavorites = await apiRequest(`/api/userfavorites/${userId}`, {
                         authenticated: isAuthenticated
@@ -51,11 +55,14 @@ const ProductPage = () => {
                     setFavorites(favoriteIds);
                     setIsFavorite(favoriteIds.includes(Number(id)));
                 }
+                await fetchSpecifications(id);
 
-            } catch (err) {
+            } 
+            catch (err) {
                 console.error('Ошибка загрузки данных товара:', err);
                 setError('Не удалось загрузить данные товара');
-            } finally {
+            } 
+            finally {
                 setIsLoading(false);
             }
         };
@@ -64,7 +71,6 @@ const ProductPage = () => {
             try {
                 setReviewsLoading(true);
                 const response = await apiRequest(`/api/reviews/product/${id}`);
-                console.log(response)
                 const reviews = response || [];
                 const totalReviews = reviews.length;
                 const averageRating = totalReviews > 0
@@ -105,8 +111,11 @@ const ProductPage = () => {
 
     const handleQuantityChange = (amount) => {
         const newQuantity = quantity + amount;
-        if (newQuantity > 0) {
+        
+        if (newQuantity >= 1 && newQuantity <= product.quantityInStock) {
             setQuantity(newQuantity);
+            setPriceChanged(true);
+            setTimeout(() => setPriceChanged(false), 300);
         }
     };
 
@@ -178,6 +187,19 @@ const ProductPage = () => {
         }
     };
 
+    const fetchSpecifications = async (productId) => {
+        try {
+            setSpecsLoading(true);
+            const response = await apiRequest(`/api/productspecifications/product/${productId}`);
+            setSpecifications(response || []);
+        } catch (err) {
+            console.error('Ошибка загрузки спецификаций:', err);
+            setSpecifications([]);
+        } finally {
+            setSpecsLoading(false);
+        }
+    };
+
     const handleRatingClick = (value) => {
         setRating(value);
         setReviewForm(prev => ({
@@ -217,6 +239,17 @@ const ProductPage = () => {
         }
         return stars;
     };
+
+    const calculateTotalPrice = () => {
+    if (!productData?.product) return { totalPrice: 0, totalOldPrice: 0 };
+
+    const { price, oldPrice } = productData.product;
+    return {
+        totalPrice: (price * quantity).toFixed(2),
+        totalOldPrice: oldPrice ? (oldPrice * quantity).toFixed(2) : null
+    };
+    };
+    const { totalPrice, totalOldPrice } = calculateTotalPrice();
 
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
@@ -366,13 +399,13 @@ const ProductPage = () => {
                             </div>
                         )}
                         <div className={styles.thumbnails}>
-                            {product.images?.map((image, index) => (
+                            {productImages.map((image, index) => (
                                 <div
                                     key={index}
-                                    className={`${styles.thumbnail} ${mainImage.includes(image.url) ? styles.thumbnailActive : ''}`}
-                                    onClick={() => setMainImage(`${process.env.REACT_APP_API_URL}${image.url}`)}
+                                    className={`${styles.thumbnail} ${mainImage === image.imageUrl ? styles.thumbnailActive : ''}`}
+                                    onClick={() => setMainImage(image.imageUrl)}
                                 >
-                                    <img src={`${process.env.REACT_APP_API_URL}${image.url}`} alt={`Миниатюра ${index + 1}`} />
+                                    <img src={image.imageUrl} alt={`Миниатюра ${index + 1}`} />
                                 </div>
                             ))}
                         </div>
@@ -398,44 +431,31 @@ const ProductPage = () => {
                             <span className={styles.ratingText}>{product.rating?.toFixed(1) || 0} ({product.reviewsNumber || 0} отзывов)</span>
                         </div>
 
-                        <div className={styles.features}>
-                            {product.features?.map((feature, index) => (
-                                <div key={index} className={styles.featureItem}>
-                                    <FaCheckCircle className={styles.featureIcon} />
-                                    <span>{feature}</span>
+                        <div className={styles.specifications}>
+                            {specifications.map((spec, index) => (
+                                <div key={index} className={styles.specItem}>
+                                    <span className={styles.specLabel}>{spec.key}:</span>
+                                    <span className={styles.specValue}>{spec.value}</span>
                                 </div>
                             ))}
-                        </div>
-
-                        <div className={styles.description}>
-                            <p>{product.description}</p>
-
-                            <div className={styles.specs}>
-                                {product.specifications?.map((spec, index) => (
-                                    <div key={index} className={styles.specItem}>
-                                        <span className={styles.specLabel}>{spec.label}:</span>
-                                        <span className={styles.specValue}>{spec.value}</span>
-                                    </div>
-                                ))}
-                            </div>
                         </div>
 
                         <div className={styles.priceContainer}>
                             <div className={styles.priceRow}>
                                 <div>
-                                    <span className={styles.currentPrice}>{product.price} ₽</span>
-                                    {product.oldPrice && product.oldPrice > 0 && (
-                                        <>
-                                            <span className={styles.oldPrice}>{product.oldPrice} ₽</span>
-                                            {product.discount && (
-                                                <span className={styles.discountBadge}>-{product.discount}%</span>
-                                            )}
-                                        </>
+                                <span className={styles.currentPrice}>{totalPrice} ₽</span>
+                                {totalOldPrice && totalOldPrice > 0 && (
+                                    <>
+                                    <span className={styles.oldPrice}>{totalOldPrice} ₽</span>
+                                    {product.discount && (
+                                        <span className={styles.discountBadge}>-{product.discount}%</span>
                                     )}
+                                    </>
+                                )}
                                 </div>
                                 <div className={styles.stock}>
-                                    <FaBoxOpen className={styles.stockIcon} />
-                                    <span>В наличии {product.quantityInStock} шт.</span>
+                                <FaBoxOpen className={styles.stockIcon} />
+                                <span>В наличии {product.quantityInStock} шт.</span>
                                 </div>
                             </div>
                             <div className={styles.shipping}>
@@ -450,7 +470,11 @@ const ProductPage = () => {
                                     <FaMinus />
                                 </button>
                                 <span>{quantity}</span>
-                                <button onClick={() => handleQuantityChange(1)}>
+                                <button 
+                                    onClick={() => handleQuantityChange(1)}
+                                    disabled={quantity >= product.quantityInStock}
+                                    className={quantity >= product.quantityInStock ? styles.disabledButton : ''}
+                                    >
                                     <FaPlus />
                                 </button>
                             </div>
@@ -684,11 +708,6 @@ const ProductPage = () => {
                     </form>
                 </div>
 
-                {showImageModal && (
-                    <div className={styles.imageModal} onClick={() => setShowImageModal(false)}>
-                        <img src={mainImage} alt="Увеличенное изображение" className={styles.modalImage} />
-                    </div>
-                )}
             </div>
             <Footer/>
         </>

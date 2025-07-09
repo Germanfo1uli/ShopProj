@@ -8,19 +8,25 @@ import LoadingSpinner from './Components/LoadingSpinner';
 import AuthModal from './Components/AuthModal';
 import { useNavigate } from 'react-router-dom';
 import PaymentModal from '../JSX/Components/PaymentModal';
-import { FaShoppingCart, FaTrashAlt, FaTimes, FaMinus, FaPlus, FaCreditCard, FaGift, FaSignInAlt } from 'react-icons/fa';
+import { FaShoppingCart, FaTrashAlt, FaTimes, FaMinus, FaPlus, FaCreditCard, FaGift, FaSignInAlt, FaCheckCircle } from 'react-icons/fa';
 import { FaApplePay, FaGooglePay, FaCcPaypal } from 'react-icons/fa';
 import MirIconSvg from '../CSS/image/miricon.svg';
 
 const CartPage = () => {
     const [cart, setCart] = useState(null);
+    const [productImages, setProductImages] = useState({});
     const [isLoading, setIsLoading] = useState(true);
+    const [paymentMethod, setPaymentMethod] = useState('card');
     const [error, setError] = useState(null);
     const { userId, isAuthenticated, login } = useAuth();
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const navigate = useNavigate();
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState('card');
+    const [notification, setNotification] = useState({
+        show: false,
+        success: false,
+        message: ''
+    });
 
     const togglePaymentModal = useCallback(() => {
         const newState = !isPaymentModalOpen;
@@ -34,6 +40,22 @@ const CartPage = () => {
         document.body.style.overflow = newState ? 'hidden' : 'auto';
     }, [isAuthModalOpen]);
 
+    const showNotification = useCallback((success, message) => {
+        setNotification({
+            show: true,
+            success,
+            message
+        });
+
+        setTimeout(() => {
+            setNotification({
+                show: false,
+                success: false,
+                message: ''
+            });
+        }, 5000);
+    }, []);
+
     const handleLoginSuccess = useCallback((token, refreshToken, userId) => {
         login(token, refreshToken, userId);
         setIsAuthModalOpen(false);
@@ -45,49 +67,65 @@ const CartPage = () => {
         togglePaymentModal();
     }, [togglePaymentModal]);
 
-    useEffect(() => {
-        const fetchCart = async () => {
-            if (!isAuthenticated || !userId) {
-                setIsLoading(false);
-                return;
-            }
+    const fetchCart = useCallback(async () => {
+        if (!isAuthenticated || !userId) {
+            setIsLoading(false);
+            return;
+        }
 
-            try {
-                setIsLoading(true);
-                const cartResponse = await apiRequest(`/api/orders/${userId}/cart`, {
-                    authenticated: isAuthenticated
+        try {
+            setIsLoading(true);
+            const cartResponse = await apiRequest(`/api/orders/${userId}/cart`, {
+                authenticated: isAuthenticated
+            });
+            setCart(cartResponse);
+
+            if (cartResponse?.orderItem?.length > 0) {
+                const productIds = cartResponse.orderItem.map(item => item.product.id);
+                const imagesResponse = await apiRequest('/api/productimages');
+
+                const imagesByProduct = {};
+                imagesResponse.forEach(image => {
+                    if (productIds.includes(image.productId)) {
+                        if (!imagesByProduct[image.productId]) {
+                            imagesByProduct[image.productId] = [];
+                        }
+                        imagesByProduct[image.productId].push(image);
+                    }
                 });
-
-                setCart(cartResponse);
-
-            } catch (err) {
-                console.error('Error fetching cart:', err);
-                setError('Не удалось загрузить данные корзины');
-            } finally {
-                setIsLoading(false);
+                setProductImages(imagesByProduct);
             }
-        };
-
-        fetchCart();
+        }
+        catch (err) {
+            console.error('Error fetching cart:', err);
+            setError('Не удалось загрузить данные корзины');
+        }
+        finally {
+            setIsLoading(false);
+        }
     }, [userId, isAuthenticated]);
+
+    useEffect(() => {
+        fetchCart();
+    }, [fetchCart]);
+
+    const getProductImage = (productId) => {
+        if (productImages[productId] && productImages[productId].length > 0) {
+            const mainImage = productImages[productId].find(img => img.isMain) || productImages[productId][0];
+            return mainImage.imageUrl;
+        }
+        return 'https://via.placeholder.com/300';
+    };
 
     const totalItems = cart?.orderItem?.reduce((sum, item) => sum + item.quantity, 0) || 0;
     const subtotal = cart?.amountWOSale || cart?.orderItem?.reduce((sum, item) => sum + (item.product.price * item.quantity), 0) || 0;
-    const discount = cart ? (cart.amountWOSale - cart.totalAmount) : 0;
+    const discount = cart?.amountWOSale ? (cart.amountWOSale - cart.totalAmount) : 0;
     const total = cart?.totalAmount || 0;
 
     const handleQuantityChange = async (id, newQuantity) => {
         if (newQuantity < 1) return;
 
         try {
-            await apiRequest(`/api/orderitems/${id}`, {
-                method: 'PUT',
-                body: {
-                    quantity: newQuantity
-                },
-                authenticated: isAuthenticated
-            });
-
             setCart(prev => {
                 const updatedItems = prev.orderItem.map(item =>
                     item.id === id ? { ...item, quantity: newQuantity } : item
@@ -98,7 +136,6 @@ const CartPage = () => {
 
                 const newAmountWOSale = updatedItems.reduce((sum, item) =>
                     sum + (item.product.oldPrice * item.quantity), 0);
-
                 return {
                     ...prev,
                     orderItem: updatedItems,
@@ -108,7 +145,7 @@ const CartPage = () => {
             });
         } catch (error) {
             console.error('Error updating quantity:', error);
-            alert('Не удалось обновить количество');
+            showNotification(false, 'Не удалось обновить количество');
         }
     };
 
@@ -132,7 +169,7 @@ const CartPage = () => {
             });
         } catch (error) {
             console.error('Error removing item:', error);
-            alert('Не удалось удалить товар из корзины');
+            showNotification(false, 'Не удалось удалить товар из корзины');
         }
     };
 
@@ -155,9 +192,10 @@ const CartPage = () => {
                 totalAmount: 0,
                 amountWOSale: 0
             }));
+            showNotification(true, 'Корзина успешно очищена');
         } catch (error) {
             console.error('Error clearing cart:', error);
-            alert('Не удалось очистить корзину');
+            showNotification(false, 'Не удалось очистить корзину');
         }
     };
 
@@ -234,13 +272,11 @@ const CartPage = () => {
                                         <div key={item.id} className={styles.productCard}>
                                             <div className={styles.productContent}>
                                                 <div className={styles.productImageContainer}>
-                                                    {item.product?.productImage?.length > 0 && (
-                                                        <img
-                                                            src={`${process.env.REACT_APP_API_URL}${item.product.productImage[0].url}`}
-                                                            alt={item.product.name}
-                                                            className={styles.productImage}
-                                                        />
-                                                    )}
+                                                    <img
+                                                        src={getProductImage(item.product.id)}
+                                                        alt={item.product.name}
+                                                        className={styles.productImage}
+                                                    />
                                                 </div>
 
                                                 <div className={styles.productInfo}>
@@ -266,6 +302,7 @@ const CartPage = () => {
                                                             <button
                                                                 className={styles.quantityButton}
                                                                 onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                                                                disabled={item.quantity <= 1}
                                                             >
                                                                 <FaMinus className={styles.quantityIcon} />
                                                             </button>
@@ -273,6 +310,9 @@ const CartPage = () => {
                                                             <button
                                                                 className={styles.quantityButton}
                                                                 onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                                                disabled={item.quantity >= item.product.quantityInStock}
+                                                                title={item.quantity >= item.product.quantityInStock ? 
+                                                                    `Максимальное количество: ${item.product.quantityInStock}` : ''}
                                                             >
                                                                 <FaPlus className={styles.quantityIcon} />
                                                             </button>
@@ -281,7 +321,7 @@ const CartPage = () => {
                                                         <div className={styles.priceContainer}>
                                                             {item.product.oldPrice && (
                                                                 <span className={styles.oldPrice}>
-                                                                    {item.product.oldPrice.toLocaleString('ru-RU')} ₽
+                                                                    {(item.product.oldPrice * item.quantity).toLocaleString('ru-RU')} ₽
                                                                 </span>
                                                             )}
                                                             <p className={styles.price}>
@@ -398,13 +438,31 @@ const CartPage = () => {
                     )}
                 </div>
             </main>
+
             <PaymentModal
                 isOpen={isPaymentModalOpen}
                 onClose={togglePaymentModal}
                 totalAmount={total}
                 orderId={cart?.id || '0000'}
-                handleFastPayment={handleFastPayment}
+                refreshCart={fetchCart}
+                onPaymentComplete={(success, message) => {
+                    showNotification(success, message);
+                }}
             />
+
+            {notification.show && (
+                <div className={`${styles.notification} ${notification.success ? styles.success : styles.error}`}>
+                    <div className={styles.notificationContent}>
+                        {notification.success ? (
+                            <FaCheckCircle className={styles.notificationIcon} />
+                        ) : (
+                            <FaTimes className={styles.notificationIcon} />
+                        )}
+                        <span>{notification.message}</span>
+                    </div>
+                </div>
+            )}
+
             <Footer/>
         </div>
     );

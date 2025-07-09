@@ -87,6 +87,14 @@ namespace ShopBack.Controllers
             return NoContent();
         }
 
+        [HttpPut("{userId}/clearcart")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
+        public async Task<IActionResult> ClearCart(int userId)
+        {
+            await _ordersService.ClearCartAsync(userId);
+            return NoContent();
+        }
+
         [HttpGet("{userId}/cart")]
         [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<ActionResult<Orders>> GetUserCartOrder(int userId)
@@ -121,23 +129,12 @@ namespace ShopBack.Controllers
             return Ok(payment);
         }
 
-        [HttpPut("{orderId}/book")]
-        public async Task<IActionResult> BookOrder(int orderId)
+        [HttpPut("{userId}/reserve")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
+        public async Task<ActionResult<Orders>> ReserveOrder(int userId)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-
-            bool isAdmin = User.IsInRole("Admin");
-
-            var order = await _ordersService.GetByIdAsync(orderId);
-
-            if (order.UserId != currentUserId && !isAdmin)
-            {
-                return Forbid();
-            }
-
-
-
-            return Ok();
+            var orderId = await _ordersService.GetUserCartOrderIdAsync(userId);
+            return Ok(orderId);
         }
 
         [HttpPut("{orderId}/status")]

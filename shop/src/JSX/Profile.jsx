@@ -35,8 +35,6 @@ const Profile = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        console.log('Текущий userId:', userId);
-
         const fetchUserData = async () => {
             if (!isAuthenticated || authLoading || !userId) {
                 setLoading(false);
@@ -54,18 +52,14 @@ const Profile = () => {
                         'Content-Type': 'application/json'
                     }
                 });
-                console.log(data)
                 setProfileData({
                     firstName: data.firstName || '',
                     lastName: data.lastName || '',
                     middleName: data.middleName || '',
-                    // birthDate: data.birthDate || '',
                     email: data.email || '',
                     phoneNumber: data.phoneNumber || '',
-                    // preferences: data.preferences || []
                 });
                 
-                console.log('Data:', data);
             } catch (err) {
                 console.error('Ошибка загрузки данных пользователя:', err);
                 setError('Не удалось загрузить данные пользователя');
@@ -105,7 +99,6 @@ const Profile = () => {
         try {
             setLoading(true);
             setError(null);
-            console.log(profileData)
             const updatedData = await apiRequest(`/api/users/${userId}`, {
                 method: 'PUT',
                 headers: {
@@ -124,23 +117,6 @@ const Profile = () => {
             setLoading(false);
         }
     };
-
-    // const handleAddPreference = () => {
-    //     if (newPreference.trim() && !profileData.preferences.includes(newPreference)) {
-    //         setProfileData(prev => ({
-    //             ...prev,
-    //             preferences: [...prev.preferences, newPreference.trim()]
-    //         }));
-    //         setNewPreference('');
-    //     }
-    // };
-
-    // const handleRemovePreference = (prefToRemove) => {
-    //     setProfileData(prev => ({
-    //         ...prev,
-    //         preferences: prev.preferences.filter(pref => pref !== prefToRemove)
-    //     }));
-    // };
 
     const renderTabContent = () => {
         switch (activeTab) {

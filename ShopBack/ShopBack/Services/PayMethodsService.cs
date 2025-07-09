@@ -11,5 +11,20 @@ namespace ShopBack.Services
         {
             return await _payMethodsRepository.GetByUserIdAsync(userId);
         }
+
+        public async Task SetDefaultAsync(int id)
+        {
+            var method = await _payMethodsRepository.GetByIdAsync(id);
+            if (method == null) throw new KeyNotFoundException();
+
+            var userMethods = await _payMethodsRepository.GetByUserIdAsync(method.UserId);
+            foreach (var m in userMethods)
+            {
+                m.IsDefault = false;
+                await _payMethodsRepository.UpdateAsync(m);
+            }
+            method.IsDefault = true;
+            await _payMethodsRepository.UpdateAsync(method);
+        }
     }
 }
