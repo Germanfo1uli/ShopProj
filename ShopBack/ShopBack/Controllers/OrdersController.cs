@@ -21,6 +21,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Orders>> GetById(int id)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
@@ -112,6 +113,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpGet("{orderId}/payment")]
+        [Authorize]
         public async Task<ActionResult<Payments>> GetOrderPayment(int orderId)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
@@ -130,6 +132,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpPut("{orderId}/status")]
+        [Authorize]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, [FromBody] string status)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
