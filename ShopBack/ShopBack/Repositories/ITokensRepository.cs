@@ -8,7 +8,7 @@ namespace ShopBack.Repositories
     {
         Task<TokenPair> GenerateTokensAsync(Users user, string roleName); // Генерирует 2 токена
 
-        Task<ClaimsPrincipal?> ValidateJwtTokenAsync(string token); // Валидует и извлекает данные из JWT
+        ClaimsPrincipal? ValidateJwtTokenAsync(string token); // Валидует и извлекает данные из JWT
 
         Task<RefreshTokens> GetRefreshTokenAsync(string token); // Находит refresh-токен по строке токена
 

@@ -4,12 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ShopBack.Repositories
 {
-    public class UsersRepository : Repository<Users>, IUsersRepository
+    public class UsersRepository(ShopDbContext context) : Repository<Users>(context), IUsersRepository
     {
-        public UsersRepository(ShopDbContext context) : base(context)
-        {
-        }
-
         public async Task<Users?> GetByEmailAsync(string email)
         {
             return await _context.Users
