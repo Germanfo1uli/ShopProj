@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import styles from '../CSS/ProductPage.module.css';
-import { FaStar, FaStarHalfAlt, FaHeart, FaShoppingCart, FaMinus, FaPlus, FaBoxOpen, FaShippingFast, FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
+import { FaStar, FaStarHalfAlt, FaHeart, FaShoppingCart, FaMinus, FaPlus, FaBoxOpen, FaShippingFast, FaCheckCircle, FaInfoCircle, FaEye } from 'react-icons/fa';
 import Footer from "./Components/Footer";
 import sb from "../CSS/Breadcrumbs.module.css";
 import { apiRequest } from './Api/ApiRequest';
@@ -55,6 +55,7 @@ const ProductPage = () => {
             try {
                 setIsLoading(true);
                 const response = await apiRequest(`/api/products/${id}`);
+                console.log(response)
                 setProductData(response);
                 const imagesResponse = await apiRequest(`/api/products/${id}/images`);
                 setProductImages(imagesResponse || []);
@@ -442,7 +443,17 @@ const ProductPage = () => {
                             <div className={styles.stars}>
                                 {renderStars(Math.floor(product.rating || 0), (product.rating || 0) % 1 !== 0)}
                             </div>
-                            <span className={styles.ratingText}>{product.rating?.toFixed(1) || 0} ({product.reviewsNumber || 0} отзывов)</span>
+                            <span className={styles.ratingText}>
+                                {product.rating?.toFixed(1) || 0} ({product.reviewsNumber || 0} отзывов)
+                            </span>
+                            <div className={styles.additionalStats}>
+                                <span className={styles.statItem}>
+                                    <FaEye className={styles.statIcon} /> {productData.viewCount || 0} просмотров
+                                </span>
+                                <span className={styles.statItem}>
+                                    <FaHeart className={styles.statIcon} /> {productData.favoriteCount || 0} в избранном
+                                </span>
+                            </div>
                         </div>
 
                         <div className={styles.specifications}>

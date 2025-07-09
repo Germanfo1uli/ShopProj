@@ -303,6 +303,24 @@
     border-radius: 0.25rem;
 }
 
+.additionalStats {
+    display: flex;
+    padding-left: 12px ;
+    gap: 15px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.statItem {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.statIcon {
+    font-size: 0.9rem;
+}
+
 .stock {
     display: flex;
     align-items: center;
