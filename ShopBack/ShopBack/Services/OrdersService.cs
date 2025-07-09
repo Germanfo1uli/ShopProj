@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using ShopBack.Data;
 using ShopBack.Models;
 using ShopBack.Repositories;
@@ -7,17 +8,16 @@ namespace ShopBack.Services
 {
     public class OrdersService(IOrdersRepository repository, 
                                IProductsRepository productsRepository, 
-                               IRepository<OrderItems> orderItemsRepository,
-                               IUnitOfWork unitOfWork) : Service<Orders>(repository)
+                               IRepository<OrderItems> orderItemsRepository)
+                               : Service<Orders>(repository)
     {
         private readonly IOrdersRepository _ordersRepository = repository;
         private readonly IProductsRepository _productsRepository = productsRepository;
         private readonly IRepository<OrderItems> _orderItemsRepository = orderItemsRepository;
-        private readonly IUnitOfWork _unitOfWork = unitOfWork;
       
         public async Task<Orders> GetUserCartOrderAsync(int userId)
         {
-            return await _ordersRepository.GetUserCartOrderAsync(userId); ;
+            return await _ordersRepository.GetUserCartOrderAsync(userId);
         }
 
         public async Task<int> GetUserCartOrderIdAsync(int userId)
@@ -77,6 +77,13 @@ namespace ShopBack.Services
             }
         }
 
+        public async Task<bool> IfOrderItemExist(int productId, int orderId)
+        {
+            var orderItems = await _ordersRepository.GetOrderItemsByOrderIdAsync(orderId);
+            var item = orderItems.FirstOrDefault(oi => oi.ProductId == productId) ?? null;
+            return item != null;
+        }
+
         public async Task ClearCartAsync(int userId)
         {
             var orderId = await GetUserCartOrderIdAsync(userId);
@@ -98,6 +105,14 @@ namespace ShopBack.Services
             var saleSum = await _ordersRepository.GetOrderSumSaleAsync(orderId);
             var sum = await _ordersRepository.GetOrderSumAsync(orderId);
             await _ordersRepository.AssignmentOrderPrice(orderId, saleSum, sum);
+        }
+
+        public async Task<(int orderCount, decimal totalSavings)> GetOrderStatsAsync(int userId)
+        { 
+            var orders = await GetUserOrdersAsync(userId);
+            int orderCount = orders.Count();
+            decimal totalSavings = orders.Sum(o => o.AmountWOSale - o.TotalAmount);
+            return (orderCount, totalSavings);
         }
     }
 }

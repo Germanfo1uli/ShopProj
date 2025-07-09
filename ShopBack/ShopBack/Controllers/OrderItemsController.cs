@@ -44,6 +44,9 @@ namespace ShopBack.Controllers
                 Quantity = createDto.Quantity,
             };
 
+            if (await _ordersService.IfOrderItemExist(createDto.ProductId, orderId))
+                return BadRequest("Этот товар уже находится в корзине");
+
             var product = await _productsService.GetByIdAsync(item.ProductId);
             if (product.QuantityInStock < item.Quantity)
                 return BadRequest($"Недостаточно товара {product.Name} на складе. Доступно: {product.QuantityInStock}, требуется: {item.Quantity}");

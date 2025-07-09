@@ -21,6 +21,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Orders>> GetById(int id)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
@@ -112,6 +113,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpGet("{orderId}/payment")]
+        [Authorize]
         public async Task<ActionResult<Payments>> GetOrderPayment(int orderId)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
@@ -130,6 +132,7 @@ namespace ShopBack.Controllers
         }
 
         [HttpPut("{orderId}/status")]
+        [Authorize]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, [FromBody] string status)
         {
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
@@ -145,6 +148,14 @@ namespace ShopBack.Controllers
 
             await _ordersService.UpdateOrderStatusAsync(orderId, status);
             return Ok(status);
+        }
+
+        [HttpGet("{userId}/stats")]
+        [Authorize(Policy = "SelfOrAdminAccess")]
+        public async Task<ActionResult<OrdersStats>> GetOrderStats(int userId)
+        {
+            (int orderCount, decimal totalSavings) = await _ordersService.GetOrderStatsAsync(userId);
+            return Ok(new OrdersStats { OrderCount = orderCount, TotalSavings = totalSavings});
         }
     }
 
@@ -166,5 +177,11 @@ namespace ShopBack.Controllers
         public string? ShippingAddress { get; set; }
         public string? ContactPhone { get; set; }
         public string? Notes { get; set; }
+    }
+
+    public class OrdersStats
+    {
+        public int OrderCount { get; set; }
+        public decimal TotalSavings { get; set; }
     }
 }
