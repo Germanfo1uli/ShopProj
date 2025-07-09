@@ -360,7 +360,7 @@ const ProductPage = () => {
     if (error) {
         return <LoadingSpinner message={error} status="error" />;
     }
-    
+
 
     const { product } = productData;
     const reviews = reviewsData?.reviews || [];
