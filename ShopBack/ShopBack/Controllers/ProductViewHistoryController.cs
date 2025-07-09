@@ -34,7 +34,7 @@ namespace ShopBack.Controllers
                 ViewedAt = DateTime.UtcNow
             };
 
-            await _service.AddAsync(view);
+            await _analyticsService.CreateOrUpdateAsync(view);
             return CreatedAtAction(
                 actionName: nameof(GetById),
                 routeValues: new { id = view.Id },

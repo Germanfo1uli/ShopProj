@@ -33,5 +33,18 @@ namespace ShopBack.Services
             }
             return products;
         }
+
+        public async Task<bool> IfFavoriteExist(int userId, int productId)
+        {
+            try
+            {
+                var favorite = await GetByIdsAsync(userId, productId);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }
