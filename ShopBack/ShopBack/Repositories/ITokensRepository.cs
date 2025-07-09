@@ -1,4 +1,5 @@
 ﻿using ShopBack.Models;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace ShopBack.Repositories
@@ -27,8 +28,10 @@ namespace ShopBack.Repositories
     }
     public class TokenPair
     {
-        public string JwtToken { get; set; }
-        public string RefreshToken { get; set; }
+        [Required(ErrorMessage = "JwtToken is required")]
+        public string JwtToken { get; set; } = default!;
+        [Required(ErrorMessage = "RefreshToken is required")]
+        public string RefreshToken { get; set; } = default!;
         public DateTime RefreshTokenExpires { get; set; }
     }
 }

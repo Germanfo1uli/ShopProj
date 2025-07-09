@@ -12,8 +12,8 @@ namespace ShopBack.Models
 
         [Required]
         [StringLength(50)]
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
 
-        public ICollection<UserRoles> UserRole { get; set; }
+        public ICollection<UserRoles> UserRole { get; set; } = [];
     }
 }

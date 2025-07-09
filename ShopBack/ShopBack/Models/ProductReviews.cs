@@ -20,8 +20,9 @@ namespace ShopBack.Models
         [Range(1, 5)]
         public int Rating { get; set; }
 
+        [Required]
         [MaxLength(50)]
-        public string Header { get; set; }
+        public string Header { get; set; } = default!;
 
         [MaxLength(1000)]
         public string? Comment { get; set; }
@@ -41,10 +42,10 @@ namespace ShopBack.Models
 
         [ForeignKey("ProductId")]
         [JsonIgnore]
-        public Products Product { get; set; }
+        public Products Product { get; set; } = default!;
 
         [ForeignKey("UserId")]
-        public Users User { get; set; }
+        public Users User { get; set; } = default!;
 
         [ForeignKey("ModeratorId")]
         public Users? Moderator { get; set; }

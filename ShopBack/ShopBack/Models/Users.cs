@@ -13,15 +13,15 @@ namespace ShopBack.Models
 
         [Required]
         [MaxLength(100)]
-        public string Email { get; set; }
+        public string Email { get; set; } = default!;
 
         [Required]
         [MaxLength(255)]
-        public string PasswordHash { get; set; }
+        public string PasswordHash { get; set; } = default!;
 
         [Required]
         [MaxLength(100)]
-        public string Salt { get; set; }
+        public string Salt { get; set; } = default!;
 
         [MaxLength(50)]
         public string? FirstName { get; set; }
@@ -41,13 +41,13 @@ namespace ShopBack.Models
         [Required]
         public bool IsActive { get; set; } = true;
 
-        public ICollection<RefreshTokens> RefreshToken { get; set; } = new List<RefreshTokens>();
-        public ICollection<ProductReviews> ProductReview { get; set; } = new List<ProductReviews>();
-        public ICollection<ProductReviews> ModeratedReview { get; set; } = new List<ProductReviews>();
-        public ICollection<UserFavorites> UserFavorite { get; set; } = new List<UserFavorites>();
-        public ICollection<ProductViewsHistory> ProductViewHistory { get; set; } = new List<ProductViewsHistory>();
-        public ICollection<PayMethods> PayMethods { get; set; } = new List<PayMethods>();
-        public ICollection<Orders> Orders { get; set; } = new List<Orders>();
-        public UserRoles UserRole { get; set; }
+        public ICollection<RefreshTokens> RefreshToken { get; set; } = [];
+        public ICollection<ProductReviews> ProductReview { get; set; } = [];
+        public ICollection<ProductReviews> ModeratedReview { get; set; } = [];
+        public ICollection<UserFavorites> UserFavorite { get; set; } = [];
+        public ICollection<ProductViewsHistory> ProductViewHistory { get; set; } = [];
+        public ICollection<PayMethods> PayMethods { get; set; } = [];
+        public ICollection<Orders> Orders { get; set; } = [];
+        public UserRoles UserRole { get; set; } = default!;
     }
 }

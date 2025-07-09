@@ -15,7 +15,7 @@ namespace ShopBack.Models
 
         [Required]
         [MaxLength(255)]
-        public string Token { get; set; }
+        public string Token { get; set; } = default!;
 
         [Required]
         public DateTime Expires { get; set; }
@@ -29,6 +29,6 @@ namespace ShopBack.Models
         public string? ReplacedByToken { get; set; }
 
         [ForeignKey("UserId")]
-        public Users User { get; set; }
+        public Users User { get; set; } = default!;
     }
 }

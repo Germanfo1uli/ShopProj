@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace ShopBack.Models
@@ -12,7 +12,7 @@ namespace ShopBack.Models
 
         [Required]
         [MaxLength(100)]
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
 
         [Column(TypeName = "text")]
         public string? Description { get; set; }
@@ -44,16 +44,22 @@ namespace ShopBack.Models
         public bool IsActive { get; set; } = true;
 
         [ForeignKey("CategoryId")]
-        public Categories Category { get; set; }
+        public Categories Category { get; set; } = default!;
+
         [JsonIgnore]
-        public ICollection<OrderItems> OrderItems { get; set; } = new List<OrderItems>();
-        public ICollection<ProductImages> ProductImage { get; set; } = new List<ProductImages>();
-        public ICollection<ProductSpecifications> ProductSpecification { get; set; } = new List<ProductSpecifications>();
+        public ICollection<OrderItems> OrderItems { get; set; } = [];
+
+        public ICollection<ProductImages> ProductImage { get; set; } = [];
+
+        public ICollection<ProductSpecifications> ProductSpecification { get; set; } = [];
+
         [JsonIgnore]
-        public ICollection<ProductReviews> ProductReview { get; set; } = new List<ProductReviews>();
+        public ICollection<ProductReviews> ProductReview { get; set; } = [];
+
         [JsonIgnore]
-        public ICollection<UserFavorites> UserFavorite { get; set; } = new List<UserFavorites>();
+        public ICollection<UserFavorites> UserFavorite { get; set; } = [];
+
         [JsonIgnore]
-        public ICollection<ProductViewsHistory> ProductViewHistory { get; set; } = new List<ProductViewsHistory>();
+        public ICollection<ProductViewsHistory> ProductViewHistory { get; set; } = [];
     }
 }
