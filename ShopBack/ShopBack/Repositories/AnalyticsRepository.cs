@@ -21,6 +21,14 @@ namespace ShopBack.Repositories
                 .ToListAsync();
         }
 
+        public async Task<ProductViewsHistory> GetLastViewAsync(int userId, int productId)
+        {
+            return await _context.ProductViewsHistory
+                .Where(v => v.UserId == userId && v.ProductId == productId)
+                .OrderByDescending(v => v.ViewedAt)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<IEnumerable<UserFavorites>> GetUserFavoritesAsync(int userId)
         {
             return await _context.UserFavorites
