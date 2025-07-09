@@ -500,7 +500,7 @@ const Catalog = () => {
                             </div>
                         </div>
 
-                       
+
 
                         <button
                             className={styles.resetFilters}
