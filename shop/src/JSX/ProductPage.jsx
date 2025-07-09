@@ -6,6 +6,7 @@ import Footer from "./Components/Footer";
 import sb from "../CSS/Breadcrumbs.module.css";
 import { apiRequest } from './Api/ApiRequest';
 import { useAuth } from './Hooks/UseAuth';
+import LoadingSpinner from './Components/LoadingSpinner';
 
 
 const ProductPage = () => {
@@ -353,16 +354,13 @@ const ProductPage = () => {
     };
 
     if (isLoading) {
-        return <div className={styles.loading}>Загрузка...</div>;
+        return <LoadingSpinner message="Загружаем товары..." status="loading" />;
     }
 
     if (error) {
-        return <div className={styles.error}>{error}</div>;
+        return <LoadingSpinner message={error} status="error" />;
     }
-
-    if (!productData?.product) {
-        return <div className={styles.error}>Товар не найден</div>;
-    }
+    
 
     const { product } = productData;
     const reviews = reviewsData?.reviews || [];
