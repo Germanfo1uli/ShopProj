@@ -149,6 +149,7 @@ using (var scope = app.Services.CreateScope())
         {
             Console.WriteLine("Applying migrations...");
             db.Database.Migrate();
+            db.EnsureSequencesAreSynced();
         }
         if (!db.Roles.Any()) // Создание ролей, если их нету в бд
         {
