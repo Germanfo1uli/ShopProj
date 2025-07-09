@@ -61,6 +61,60 @@
     color: var(--primary-color);
 }
 
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.cardTitle {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--nav-text);
+    margin: 0;
+}
+
+.editButton {
+    color: #2563eb;
+    font-weight: 500;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    align-self: flex-end; 
+}
+
+.editButton:hover {
+    background-color: rgba(37, 99, 235, 0.1);
+}
+
+.editButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.noCardsContainer {
+    display: flex;
+    flex-direction: column; 
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.noCardsMessage {
+    font-size: 1rem;
+    color: #666;
+    margin: 0; 
+}
+[data-theme="dark"] .noCardsMessage {
+    color: #aaa;
+}
 /* Fast payment buttons */
 .fastPaymentButtons {
     display: flex;

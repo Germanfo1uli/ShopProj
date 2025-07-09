@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes, FaCreditCard, FaApplePay, FaGooglePay, FaCheckCircle } from 'react-icons/fa';
+import { FaTimes, FaCreditCard, FaApplePay, FaGooglePay, FaCheckCircle} from 'react-icons/fa';
 import styles from '../../CSS/PaymentModal.module.css';
 import MirIconSvg from '../../CSS/image/miricon.svg';
 import { loadStripe } from '@stripe/stripe-js';
 import { apiRequest } from '../Api/ApiRequest';
 import { useAuth } from '../Hooks/UseAuth';
+import { useNavigate } from 'react-router-dom';
 
 const PaymentModal = ({
     isOpen,
@@ -21,6 +22,8 @@ const PaymentModal = ({
     const [selectedCard, setSelectedCard] = useState(null);
     const [isLoadingCards, setIsLoadingCards] = useState(false);
 
+    const navigate = useNavigate();
+    
     useEffect(() => {
         const fetchSavedCards = async () => {
             if (!isOpen || !isAuthenticated || !userId) return;
@@ -99,6 +102,24 @@ const PaymentModal = ({
         }
     };
     
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+        
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, [isOpen]);
+
+    const handleAddCardClick = () => {
+        onClose();
+        navigate('/profile');
+    };
+
+
     if (!isOpen) return null;
 
     return (
@@ -201,15 +222,16 @@ const PaymentModal = ({
                                         </div>
                                     </div>
                                 ) : isAuthenticated ? (
-                                    <div className={styles.noCardsMessage}>
-                                        У вас нет сохраненных карт. Хотите добавить карту?
-                                        <button 
-                                            className={styles.addCardButton}
-                                            onClick={() => {
-                                                onClose();
-                                            }}
+                                    <div className={styles.noCardsContainer}>
+                                        <p className={styles.noCardsMessage}>
+                                            У вас нет сохраненных карт. Хотите добавить карту?
+                                        </p>
+                                        <button
+                                            className={styles.editButton}
+                                            onClick={() => handleAddCardClick()}
+                                            disabled={!isAuthenticated}
                                         >
-                                            Добавить карту
+                                            <i className="fas fa-plus"></i> Добавить карту
                                         </button>
                                     </div>
                                 ) : (
