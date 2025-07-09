@@ -118,21 +118,13 @@ const CartPage = () => {
 
     const totalItems = cart?.orderItem?.reduce((sum, item) => sum + item.quantity, 0) || 0;
     const subtotal = cart?.amountWOSale || cart?.orderItem?.reduce((sum, item) => sum + (item.product.price * item.quantity), 0) || 0;
-    const discount = cart ? (cart.amountWOSale - cart.totalAmount) : 0;
+    const discount = cart?.amountWOSale ? (cart.amountWOSale - cart.totalAmount) : 0;
     const total = cart?.totalAmount || 0;
 
     const handleQuantityChange = async (id, newQuantity) => {
         if (newQuantity < 1) return;
 
         try {
-            await apiRequest(`/api/orderitems/${id}`, {
-                method: 'PUT',
-                body: {
-                    quantity: newQuantity
-                },
-                authenticated: isAuthenticated
-            });
-
             setCart(prev => {
                 const updatedItems = prev.orderItem.map(item =>
                     item.id === id ? { ...item, quantity: newQuantity } : item
@@ -143,7 +135,6 @@ const CartPage = () => {
 
                 const newAmountWOSale = updatedItems.reduce((sum, item) =>
                     sum + (item.product.oldPrice * item.quantity), 0);
-
                 return {
                     ...prev,
                     orderItem: updatedItems,
@@ -310,6 +301,7 @@ const CartPage = () => {
                                                             <button
                                                                 className={styles.quantityButton}
                                                                 onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                                                                disabled={item.quantity <= 1}
                                                             >
                                                                 <FaMinus className={styles.quantityIcon} />
                                                             </button>
@@ -317,6 +309,9 @@ const CartPage = () => {
                                                             <button
                                                                 className={styles.quantityButton}
                                                                 onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                                                disabled={item.quantity >= item.product.quantityInStock}
+                                                                title={item.quantity >= item.product.quantityInStock ? 
+                                                                    `Максимальное количество: ${item.product.quantityInStock}` : ''}
                                                             >
                                                                 <FaPlus className={styles.quantityIcon} />
                                                             </button>
@@ -325,7 +320,7 @@ const CartPage = () => {
                                                         <div className={styles.priceContainer}>
                                                             {item.product.oldPrice && (
                                                                 <span className={styles.oldPrice}>
-                                                                    {item.product.oldPrice.toLocaleString('ru-RU')} ₽
+                                                                    {(item.product.oldPrice * item.quantity).toLocaleString('ru-RU')} ₽
                                                                 </span>
                                                             )}
                                                             <p className={styles.price}>

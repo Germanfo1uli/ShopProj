@@ -56,9 +56,8 @@ const Home = () => {
                         ? Math.round((1 - product.price / product.oldPrice) * 100).toString()
                         : null,
                     specs: product.description ? product.description.substring(0, 50) + '...' : 'Нет описания',
-                    rating: 4.5 + Math.random() * 0.5,
-                    reviews: Math.floor(Math.random() * 200),
-                    // Временная заглушка, будет заменена при рендере
+                    rating: product.rating || 0,  
+                    reviews: product.reviewsNumber || 0, 
                     image: 'https://via.placeholder.com/300'
                 }));
 
@@ -113,7 +112,26 @@ const Home = () => {
             const mainImage = productImages[productId].find(img => img.isMain) || productImages[productId][0];
             return mainImage.imageUrl;
         }
-        return 'https://via.placeholder.com/300'; // Заглушка, если изображений нет
+        return 'https://via.placeholder.com/300'; 
+    };
+
+    const renderRating = (product) => {
+        return (
+            <div className={styles.ratingContainer}>
+                <div className={styles.stars}>
+                    {[...Array(5)].map((_, i) => (
+                        <span
+                            key={i}
+                            className={i < Math.floor(product.rating) ? styles.starFilled : styles.starEmpty}
+                        >
+                            ★
+                        </span>
+                    ))}
+                </div>
+                <span className={styles.ratingValue}>{product.rating.toFixed(1)}</span>
+                <span className={styles.reviews}>({product.reviews})</span>
+            </div>
+        );
     };
 
     const recommendedProducts = [...products].sort(() => 0.5 - Math.random()).slice(0, 8);
@@ -200,9 +218,7 @@ const Home = () => {
                                             <span className={styles.oldPrice}>{product.oldPrice}</span>
                                         )}
                                     </div>
-                                    <div className={styles.ratingContainer}>
-                                        {/* ... */}
-                                    </div>
+                                    {renderRating(product)}
                                 </div>
                             </div>
                         </Link>
@@ -251,20 +267,7 @@ const Home = () => {
                                             <span className={styles.oldPrice}>{product.oldPrice}</span>
                                         )}
                                     </div>
-                                    <div className={styles.ratingContainer}>
-                                        <div className={styles.stars}>
-                                            {[...Array(5)].map((_, i) => (
-                                                <span
-                                                    key={i}
-                                                    className={i < Math.floor(product.rating) ? styles.starFilled : styles.starEmpty}
-                                                >
-                  ★
-                </span>
-                                            ))}
-                                        </div>
-                                        <span className={styles.ratingValue}>{product.rating.toFixed(1)}</span>
-                                        <span className={styles.reviews}>({product.reviews})</span>
-                                    </div>
+                                    {renderRating(product)}
                                 </div>
                             </div>
                         </Link>
@@ -314,20 +317,7 @@ const Home = () => {
                                             <span className={styles.oldPrice}>{product.oldPrice}</span>
                                         )}
                                     </div>
-                                    <div className={styles.ratingContainer}>
-                                        <div className={styles.stars}>
-                                            {[...Array(5)].map((_, i) => (
-                                                <span
-                                                    key={i}
-                                                    className={i < Math.floor(product.rating) ? styles.starFilled : styles.starEmpty}
-                                                >
-                    ★
-                  </span>
-                                            ))}
-                                        </div>
-                                        <span className={styles.ratingValue}>{product.rating.toFixed(1)}</span>
-                                        <span className={styles.reviews}>({product.reviews})</span>
-                                    </div>
+                                    {renderRating(product)}
                                 </div>
                             </div>
                         </Link>
