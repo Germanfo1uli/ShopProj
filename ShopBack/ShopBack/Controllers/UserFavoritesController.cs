@@ -25,6 +25,8 @@ namespace ShopBack.Controllers
                 UserId = createDto.UserId,
                 ProductId = createDto.ProductId,
             };
+            if (await _favoritesService.IfFavoriteExist(createDto.UserId, createDto.ProductId))
+                return BadRequest("Вы уже добавили этот товар в избранное");
 
             await _favoritesService.AddAsync(favorite);
             return CreatedAtAction(
