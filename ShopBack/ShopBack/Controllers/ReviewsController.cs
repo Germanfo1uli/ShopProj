@@ -62,6 +62,7 @@ namespace ShopBack.Controllers
                 Approved = true 
             };
 
+            await _reviewsService.IfReviewExist(createDto.UserId, createDto.ProductId);
             await _reviewsService.AddAsync(review);
             await _reviewsService.RecalculateRating(review.ProductId);
             return CreatedAtAction(

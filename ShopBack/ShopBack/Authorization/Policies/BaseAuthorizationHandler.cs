@@ -37,11 +37,10 @@ namespace ShopBack.Authorization.Policies
             return "";
         }
 
-        protected string GetUserIdFromRoute(HttpContext httpContext)
+        protected string? GetUserIdFromRoute(HttpContext httpContext)
         {
             var routeData = httpContext.GetRouteData();
-            return routeData.Values["userId"]?.ToString()
-                ?? throw new InvalidOperationException("User ID from route not found"); ;
+            return routeData.Values["userId"]?.ToString();
         }
     }
 }
