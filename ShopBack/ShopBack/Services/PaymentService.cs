@@ -9,8 +9,7 @@ namespace ShopBack.Services
                                 IPayMethodsRepository payMethodsRepository,
                                 IRepository<Payments> paymentRepository,
                                 IPaymentGateway paymentGateway,
-                                IUnitOfWork unitOfWork,
-                                ILogger<PaymentService> logger) : Service<Payments>(paymentRepository)
+                                IUnitOfWork unitOfWork) : Service<Payments>(paymentRepository)
     {
         private readonly OrdersService _ordersService = ordersService;
         private readonly IOrdersRepository _ordersRepository = ordersRepository;
@@ -18,7 +17,6 @@ namespace ShopBack.Services
         private readonly IPaymentGateway _paymentGateway = paymentGateway;
         private readonly IRepository<Payments> _paymentRepository = paymentRepository;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
-        private readonly ILogger<PaymentService> _logger = logger;
 
         public async Task<PaymentGatewayResult> ProcessPaymentAsync(int orderId, int paymentMethodId)
         {
@@ -43,8 +41,10 @@ namespace ShopBack.Services
                 await _paymentRepository.AddAsync(payment);
 
                 var paymentResult = await _paymentGateway.ChargeAsync(
+                    paymentMethod.Id,
                     paymentMethod.PaymentProviderToken,
                     payment.Amount,
+                    paymentMethod.UserId,
                     $"Оплата заказа #{order.Id}");
 
                 payment.Status = paymentResult.IsSuccess ? "Completed" : "Failed";
@@ -65,7 +65,7 @@ namespace ShopBack.Services
             catch (Exception ex)
             {  
                 await transaction.RollbackAsync();
-                _logger.LogError(ex, "Ошибка при обработке платежа");
+
                 throw;
             }
         }

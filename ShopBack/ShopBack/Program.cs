@@ -159,7 +159,7 @@ using (var scope = app.Services.CreateScope())
         if (!db.UserRoles.Any(u => u.RoleId == 1))
         {
             Console.WriteLine("Creating admin user...");
-            var adminLogin = "Admin";
+            var adminLogin = "Admin@ya.ru";
             var adminPassword = "Password";
 
             var userService = scope.ServiceProvider.GetRequiredService<UserService>();

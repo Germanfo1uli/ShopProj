@@ -32,6 +32,8 @@ namespace ShopBack.Models
         [MaxLength(255)]
         public string PaymentProviderToken { get; set; }
 
+        public string? StripeCustomerId { get; set; }
+
         [Required]
         public bool IsDefault { get; set; } = false;
 
