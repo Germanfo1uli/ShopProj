@@ -46,21 +46,35 @@ namespace ShopBack.Services
 
             foreach (var item in orderItems)
             {
-                if (item.Product == null)
-                    throw new InvalidOperationException($"Товар с ID {item.ProductId} не найден");
+                var product = await _productsRepository.GetByIdAsync(item.ProductId);
 
-                if (item.Product.QuantityInStock < item.Quantity)
+                if (product.QuantityInStock < item.Quantity)
                     throw new InvalidOperationException(
-                        $"Недостаточно товара {item.Product.Name} на складе. Доступно: {item.Product.QuantityInStock}, требуется: {item.Quantity}");
+                        $"Недостаточно товара {product.Name} на складе. Доступно: {product.QuantityInStock}, требуется: {item.Quantity}");
 
-                item.Product.QuantityInStock -= item.Quantity;
-                await _productsRepository.UpdateAsync(item.Product);
+                product.QuantityInStock -= item.Quantity;
+                await _productsRepository.UpdateAsync(product);
             }
 
             await UpdateOrderStatusAsync(orderId, "Paid");
             await _ordersRepository.CreateCart(order.UserId);
             order.Status = "Paid";
             return order;
+        }
+
+        public async Task CheckQuantityAsync(int orderId)
+        {
+            var orderItems = await _ordersRepository.GetOrderItemsByOrderIdAsync(orderId);
+
+            foreach (var item in orderItems)
+            {
+                if (item.Product == null)
+                    throw new InvalidOperationException($"Товар с ID {item.ProductId} не найден");
+
+                if (item.Product.QuantityInStock < item.Quantity)
+                    throw new InvalidOperationException(
+                        $"Недостаточно товара {item.Product.Name} на складе. Доступно: {item.Product.QuantityInStock}, требуется: {item.Quantity}");
+            }
         }
 
         public async Task ClearCartAsync(int userId)
