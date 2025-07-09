@@ -4,11 +4,8 @@ using System.Reflection;
 
 namespace ShopBack.Data
 {
-    public class ShopDbContext : DbContext
+    public class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbContext(options)
     {
-        public ShopDbContext(DbContextOptions<ShopDbContext> options) : base(options)
-        {
-        }
 
         // Пользователи и аутентификация
         public DbSet<Users> Users { get; set; }
