@@ -13,6 +13,10 @@ namespace ShopBack.Repositories
             return await _context.ProductViewsHistory
                 .Where(p => p.UserId == userId)
                 .Include(pvh => pvh.Product)
+                .GroupBy(pvh => new { pvh.UserId, pvh.ProductId })
+                .Select(group => group
+                    .OrderByDescending(pvh => pvh.ViewedAt)
+                    .FirstOrDefault()!)
                 .AsNoTracking()
                 .ToListAsync();
         }

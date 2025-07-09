@@ -43,36 +43,9 @@ namespace ShopBack.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<Payments>> Create([FromBody] PaymentsCreate createDto)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-
-            bool isAdmin = User.IsInRole("Admin");
-
-            var order = await _ordersService.GetByIdAsync(createDto.OrderId);
-
-            if (order.UserId != currentUserId && !isAdmin)
-            {
-                return Forbid();
-            }
-
-            var payment = new Payments
-            {
-                OrderId = createDto.OrderId,
-                Amount = createDto.Amount,
-                PaymentMethodId = createDto.PaymentMethodId,
-                Status = createDto.Status,
-                TransactionId = createDto.TransactionId,
-                PaymentDate = DateTime.UtcNow
-            };
-
-            await _paymentsService.AddAsync(payment);
-            return CreatedAtAction(
-               actionName: nameof(GetById),
-               routeValues: new { id = payment.Id },
-               value: payment
-           );
+            return new StatusCodeResult(405);
         }
 
         [HttpPut("{id}")]
