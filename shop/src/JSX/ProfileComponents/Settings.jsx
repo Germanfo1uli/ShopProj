@@ -137,11 +137,6 @@ const Settings = () => {
                         </button>
                     </div>
                 </div>
-
-                <div className={styles.settingsActions}>
-                    <button className={styles.saveButton}>Сохранить изменения</button>
-                    <button className={styles.cancelButton}>Отменить</button>
-                </div>
             </div>
         </div>
     );

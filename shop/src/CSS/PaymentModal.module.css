@@ -88,7 +88,7 @@
     padding: 8px 12px;
     border-radius: 4px;
     transition: background-color 0.2s;
-    align-self: flex-end; 
+    align-self: flex-end;
 }
 
 .editButton:hover {
@@ -102,7 +102,7 @@
 
 .noCardsContainer {
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     gap: 10px;
     margin-bottom: 20px;
 }
@@ -110,7 +110,7 @@
 .noCardsMessage {
     font-size: 1rem;
     color: #666;
-    margin: 0; 
+    margin: 0;
 }
 [data-theme="dark"] .noCardsMessage {
     color: #aaa;
