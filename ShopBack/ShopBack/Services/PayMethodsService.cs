@@ -14,9 +14,7 @@ namespace ShopBack.Services
 
         public async Task SetDefaultAsync(int id)
         {
-            var method = await _payMethodsRepository.GetByIdAsync(id);
-            if (method == null) throw new KeyNotFoundException();
-
+            var method = await _payMethodsRepository.GetByIdAsync(id) ?? throw new KeyNotFoundException();
             var userMethods = await _payMethodsRepository.GetByUserIdAsync(method.UserId);
             foreach (var m in userMethods)
             {

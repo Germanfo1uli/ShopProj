@@ -23,11 +23,11 @@ namespace ShopBack.Models
 
         [Required]
         [ForeignKey("PayMethod")]
-        public int PaymentMethodId { get; set; } 
+        public int PaymentMethodId { get; set; }
 
         [Required]
         [MaxLength(50)]
-        public string Status { get; set; } 
+        public string Status { get; set; } = default!;
 
         [MaxLength(100)]
         public string? TransactionId { get; set; }

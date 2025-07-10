@@ -1,14 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ShopBack.Models;
 using System.Reflection;
 
 namespace ShopBack.Data
 {
-    public class ShopDbContext : DbContext
+    public class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbContext(options)
     {
-        public ShopDbContext(DbContextOptions<ShopDbContext> options) : base(options)
-        {
-        }
 
         // Пользователи и аутентификация
         public DbSet<Users> Users { get; set; }
@@ -35,6 +34,15 @@ namespace ShopBack.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+            {
+                var idProperty = entity.FindProperty("Id");
+                if (idProperty != null && idProperty.PropertyInfo?.PropertyType == typeof(int))
+                {
+                    idProperty.SetValueGenerationStrategy(NpgsqlValueGenerationStrategy.IdentityAlwaysColumn);
+                }
+            }
+
             base.OnModelCreating(modelBuilder);
 
             ConfigureUserAndRoles(modelBuilder);
@@ -193,6 +201,35 @@ namespace ShopBack.Data
                 .WithMany(u => u.PayMethods) // Навигация из Users
                 .HasForeignKey(pm => pm.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+        }
+
+        public void EnsureSequencesAreSynced() // Проверка синхронизации следующих id таблиц
+        {
+            var entityTypes = Model.GetEntityTypes()
+                .Where(e => e.FindProperty("Id") != null)
+                .ToList();
+
+            foreach (var entityType in entityTypes)
+            {
+                var tableName = entityType.GetTableName();
+                var schema = entityType.GetSchema();
+
+                var sql = @" 
+                    SELECT setval(
+                        pg_get_serial_sequence(@p0, 'Id'), 
+                        COALESCE((SELECT MAX(""Id"") FROM ""{0}""), 1), 
+                        true
+                    )";
+
+                // Форматируем только имя таблицы (без параметров SQL)
+                var fullTableName = string.IsNullOrEmpty(schema)
+                    ? $"\"{tableName}\""
+                    : $"\"{schema}\".\"{tableName}\"";
+
+                Database.ExecuteSqlRaw(
+                    string.Format(sql, fullTableName),
+                    new NpgsqlParameter("@p0", tableName));
+            }
         }
     }
 }

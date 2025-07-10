@@ -40,7 +40,14 @@ namespace ShopBack.Controllers
         [Authorize(Policy = "SelfOrAdminAccess")]
         public async Task<IActionResult> Delete([FromBody] FavoriteData createDto)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID claim не найдено");
+            }
+
+            var currentUserId = int.Parse(userIdClaim);
 
             bool isAdmin = User.IsInRole("Admin");
 

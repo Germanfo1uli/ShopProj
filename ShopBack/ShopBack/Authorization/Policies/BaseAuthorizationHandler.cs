@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json.Linq;
+using ShopBack.Models;
 using System.Security.Claims;
 
 namespace ShopBack.Authorization.Policies
@@ -8,7 +9,8 @@ namespace ShopBack.Authorization.Policies
     {
         protected string GetCurrentUserId(AuthorizationHandlerContext context)
         {
-            return context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? throw new InvalidOperationException("User ID claim not found");
         }
 
         protected bool IsAdmin(AuthorizationHandlerContext context)
@@ -27,17 +29,15 @@ namespace ShopBack.Authorization.Policies
                 if (!string.IsNullOrEmpty(body))
                 {
                     var json = JObject.Parse(body);
-                    return json["userId"]?.ToString();
+                    return json["userId"]?.ToString()
+                        ?? throw new InvalidOperationException("User ID from data not found");
                 }
             }
-            catch
-            {
-                // Игнорируем ошибки парсинга
-            }
-            return null;
+            catch { }
+            return "";
         }
 
-        protected string GetUserIdFromRoute(HttpContext httpContext)
+        protected string? GetUserIdFromRoute(HttpContext httpContext)
         {
             var routeData = httpContext.GetRouteData();
             return routeData.Values["userId"]?.ToString();

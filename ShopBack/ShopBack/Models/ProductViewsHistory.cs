@@ -20,9 +20,9 @@ namespace ShopBack.Models
         public DateTime ViewedAt { get; set; } = DateTime.UtcNow;
 
         [ForeignKey("UserId")]
-        public Users User { get; set; }
+        public Users User { get; set; } = default!;
 
         [ForeignKey("ProductId")]
-        public Products Product { get; set; }
+        public Products Product { get; set; } = default!;
     }
 }

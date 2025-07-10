@@ -15,14 +15,14 @@ namespace ShopBack.Models
 
         [Required]
         [MaxLength(100)]
-        public string Key { get; set; }
+        public string Key { get; set; } = default!;
 
         [Required]
         [MaxLength(255)]
-        public string Value { get; set; }
+        public string Value { get; set; } = default!;
 
         [ForeignKey("ProductId")]
         [JsonIgnore]
-        public Products Product { get; set; }
+        public Products Product { get; set; } = default!;
     }
 }

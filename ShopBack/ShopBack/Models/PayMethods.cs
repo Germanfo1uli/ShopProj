@@ -15,22 +15,21 @@ namespace ShopBack.Models
 
         [Required]
         [MaxLength(20)]
-        public string CardLastFourDigits { get; set; }  // Пример: "4242"
+        public string CardLastFourDigits { get; set; } = default!;
 
         [Required]
         [MaxLength(50)]
-        public string CardBrand { get; set; }  // Пример: "Visa", "Mastercard"
+        public string CardBrand { get; set; } = default!;
 
         [Required]
-        public int ExpiryMonth { get; set; }  // Пример: 12
+        public int ExpiryMonth { get; set; } = default!;
 
         [Required]
-        public int ExpiryYear { get; set; }   // Пример: 2025
+        public int ExpiryYear { get; set; } = default!;
 
-        // Токен от платежного провайдера (Stripe, PayPal и т.д.)
         [Required]
         [MaxLength(255)]
-        public string PaymentProviderToken { get; set; }
+        public string PaymentProviderToken { get; set; } = default!;
 
         public string? StripeCustomerId { get; set; }
 
@@ -41,8 +40,8 @@ namespace ShopBack.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [ForeignKey("UserId")]
-        public virtual Users User { get; set; }
+        public virtual Users User { get; set; } = default!;
 
-        public virtual ICollection<Payments> Payments { get; set; } = new List<Payments>();
+        public virtual ICollection<Payments> Payments { get; set; } = [];
     }
 }

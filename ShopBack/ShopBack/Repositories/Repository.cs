@@ -3,16 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ShopBack.Repositories
 {
-    public class Repository<T> : IRepository<T> where T : class
+    public class Repository<T>(ShopDbContext context) : IRepository<T> where T : class
     {
-        protected readonly ShopDbContext _context;
-        protected readonly DbSet<T> _dbSet;
-
-        public Repository(ShopDbContext context)
-        {
-            _context = context;
-            _dbSet = context.Set<T>();
-        }
+        protected readonly ShopDbContext _context = context;
+        protected readonly DbSet<T> _dbSet = context.Set<T>();
 
         public async Task<T> GetByIdAsync(int id)
         {

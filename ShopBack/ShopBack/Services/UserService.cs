@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Primitives;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.ComponentModel.DataAnnotations;
 
 namespace ShopBack.Services
 {
@@ -133,9 +134,12 @@ namespace ShopBack.Services
         public class AuthResult
         {
             public int UserId { get; set; }
-            public string Email { get; set; }
-            public string JwtToken { get; set; }
-            public string RefreshToken { get; set; }
+            [Required(ErrorMessage = "Email is required")]
+            public string Email { get; set; } = default!;
+            [Required(ErrorMessage = "JwtToken is required")]
+            public string JwtToken { get; set; } = default!;
+            [Required(ErrorMessage = "Refreshtoken is required")]
+            public string RefreshToken { get; set; } = default!;
             public DateTime RefreshTokenExpires { get; set; }
         }
     }

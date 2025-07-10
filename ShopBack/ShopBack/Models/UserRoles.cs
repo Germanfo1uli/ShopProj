@@ -13,9 +13,9 @@ namespace ShopBack.Models
         public int RoleId { get; set; }
 
         [ForeignKey("UserId")]
-        public Users User { get; set; }
+        public Users User { get; set; } = default!;
 
         [ForeignKey("RoleId")]
-        public Roles Role { get; set; }
+        public Roles Role { get; set; } = default!;
     }
 }

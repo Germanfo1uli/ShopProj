@@ -18,7 +18,7 @@ namespace ShopBack.Models
 
         [Required]
         [MaxLength(50)]
-        public string Status { get; set; }
+        public string Status { get; set; } = default!;
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
@@ -42,12 +42,10 @@ namespace ShopBack.Models
 
         [Required]
         public DateTime UpdatedAt { get; set; }
-
         
-        public virtual ICollection<OrderItems> OrderItem { get; set; } = new List<OrderItems>();
+        public virtual ICollection<OrderItems> OrderItem { get; set; } = [];
 
-        
-        public virtual ICollection<Payments> Payment { get; set; } = new List<Payments>();
+        public virtual ICollection<Payments> Payment { get; set; } = [];
 
         [ForeignKey("UserId")]
         

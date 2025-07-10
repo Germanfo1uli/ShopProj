@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace ShopBack.Controllers
 {
@@ -22,9 +23,9 @@ namespace ShopBack.Controllers
             return Ok(activeProducts);
         }
 
-        async Task<ActionResult<Products>> IController<Products, ProductCreate, ProductUpdate>.GetById(int id) // Метод - пустышка
+        Task<ActionResult<Products>> IController<Products, ProductCreate, ProductUpdate>.GetById(int id)
         {
-            return BadRequest(new { Error = "памагити я так не умею" });
+            throw new NotImplementedException();
         }
 
         [HttpGet("{id}")]
@@ -152,7 +153,8 @@ namespace ShopBack.Controllers
 
     public class ProductCreate
     {
-        public string Name { get; set; }
+        [Required(ErrorMessage = "Status is required")]
+        public string Name { get; set; } = default!;
 
         public string? Description { get; set; }
 
@@ -186,7 +188,8 @@ namespace ShopBack.Controllers
 
     public class ProductWithStatsDto
     {
-        public Products Product { get; set; }
+        [Required(ErrorMessage = "Product is required")]
+        public Products Product { get; set; } = default!;
         public int ViewCount { get; set; }
         public int FavoriteCount { get; set; }
     }

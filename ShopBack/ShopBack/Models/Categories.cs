@@ -13,7 +13,7 @@ namespace ShopBack.Models
 
         [Required]
         [MaxLength(100)]
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
 
         [MaxLength(500)]
         public string? Description { get; set; }
@@ -24,9 +24,9 @@ namespace ShopBack.Models
         
         public Categories? ParentCategory { get; set; }
 
-        public ICollection<Categories> ChildCategories { get; set; } = new List<Categories>();
+        public ICollection<Categories> ChildCategories { get; set; } = [];
 
         [JsonIgnore]
-        public ICollection<Products> Products { get; set; } = new List<Products>();
+        public ICollection<Products> Products { get; set; } = [];
     }
 }

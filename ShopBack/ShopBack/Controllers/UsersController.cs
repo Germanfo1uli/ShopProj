@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace ShopBack.Controllers
@@ -27,9 +28,9 @@ namespace ShopBack.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Users>> Create([FromBody] UserRegisterData createDto)
+        public Task<ActionResult<Users>> Create([FromBody] UserRegisterData createDto)
         {
-            return BadRequest(new { Error = "памагити я так не умею"});
+            throw new NotImplementedException("Метод не поддерживается, используйте users/register");
         }
 
         [HttpDelete("{userId}")]
@@ -96,18 +97,25 @@ namespace ShopBack.Controllers
 
     public class UserRegisterData
     {
-        public string Email {  get; set; }
-        public string Password { get; set; }
-        public string FirstName {  get; set; }
-        public string MiddleName { get; set; }
-        public string LastName { get; set; }
+        [Required(ErrorMessage = "Email is required")]
+        public string Email { get; set; } = default!;
+        [Required(ErrorMessage = "Password is required")]
+        public string Password { get; set; } = default!;
+        [Required(ErrorMessage = "FirstName is required")]
+        public string FirstName {  get; set; } = default!;
+        [Required(ErrorMessage = "MiddleName is required")]
+        public string MiddleName { get; set; } = default!;
+        [Required(ErrorMessage = "LastName is required")]
+        public string LastName { get; set; } = default!;
 
     }
 
     public class UserLoginData
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
+        [Required(ErrorMessage = "Email is required")]
+        public string Email { get; set; } = default!;
+        [Required(ErrorMessage = "Password is required")]
+        public string Password { get; set; } = default!;
     }
 
     public class UserUpdateData
@@ -121,13 +129,17 @@ namespace ShopBack.Controllers
 
     public class UserUpdatePassword
     {
-        public string OldPassword { get; set; }
-        public string NewPassword { get; set; }
-        public string Token { get; set; }
+        [Required(ErrorMessage = "OldPassword is required")]
+        public string OldPassword { get; set; } = default!;
+        [Required(ErrorMessage = "NewPassword is required")]
+        public string NewPassword { get; set; } = default!;
+        [Required(ErrorMessage = "Token is required")]
+        public string Token { get; set; } = default!;
     }
 
     public class UserTokenDto
     {
-        public string Token { get; set; }
+        [Required(ErrorMessage = "Token is required")]
+        public string Token { get; set; } = default!;
     }
 }

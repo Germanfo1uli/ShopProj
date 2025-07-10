@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Security;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Reflection.PortableExecutable;
+using System.ComponentModel.DataAnnotations;
 
 namespace ShopBack.Controllers
 {
@@ -61,6 +62,7 @@ namespace ShopBack.Controllers
                 Approved = true 
             };
 
+            await _reviewsService.IfReviewExist(createDto.UserId, createDto.ProductId);
             await _reviewsService.AddAsync(review);
             await _reviewsService.RecalculateRating(review.ProductId);
             return CreatedAtAction(
@@ -90,7 +92,14 @@ namespace ShopBack.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID claim не найдено");
+            }
+
+            var currentUserId = int.Parse(userIdClaim);
 
             bool isAdmin = User.IsInRole("Admin");
 
@@ -131,7 +140,8 @@ namespace ShopBack.Controllers
 
         public int Rating { get; set; }
 
-        public string Header { get; set; }
+        [Required(ErrorMessage = "Header is required")]
+        public string Header { get; set; } = default!;
 
         public string? Comment { get; set; }
     }

@@ -14,12 +14,12 @@ namespace ShopBack.Models
 
         [Required]
         [MaxLength(255)]
-        public string ImageUrl { get; set; }
+        public string ImageUrl { get; set; } = default!;
 
         [Required]
         public bool IsMain { get; set; } = false;
 
         [ForeignKey("ProductId")]
-        public Products Product { get; set; }
+        public Products Product { get; set; } = default!;
     }
 }
