@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { apiRequest } from '../Api/ApiRequest.js';
 import { useAuth } from '../Hooks/UseAuth';
 import styles from '../../CSS/ProfileCSS/OrdersTab.module.css';
+import { Link } from "react-router-dom";
 
 const OrdersTab = () => {
     const [orders, setOrders] = useState([]);
@@ -126,7 +127,6 @@ const OrdersTab = () => {
         <div className={styles.ordersContent}>
             <div className={styles.ordersHeader}>
                 <h2 className={styles.ordersTitle}>Оплаченные заказы</h2>
-                <a href="/orders" className={styles.allOrdersLink}>Все заказы →</a>
             </div>
 
             <div className={styles.ordersList}>
@@ -146,17 +146,20 @@ const OrdersTab = () => {
                                     {order.status === 'Paid' ? 'Оплачен' : order.status}
                                 </span>
                             </div>
-
                             {itemsCount > 0 && (
                                 <div className={styles.orderProducts}>
                                     {order.orderItem.slice(0, 3).map((item, index) => (
-                                        <div key={index} className={styles.productImage}>
+                                        <Link
+                                            to={`/product/${item.product?.id}`}
+                                            key={index}
+                                            className={styles.productImage}
+                                        >
                                             <img
                                                 src={getProductImage(item.product?.id)}
                                                 alt={item.product?.name || 'Товар'}
                                                 title={item.product?.name}
                                             />
-                                        </div>
+                                        </Link>
                                     ))}
                                     {itemsCount > 3 && (
                                         <div className={styles.moreProducts}>+{itemsCount - 3}</div>

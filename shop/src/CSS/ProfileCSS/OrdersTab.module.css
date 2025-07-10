@@ -87,8 +87,8 @@
 }
 
 .productImage {
-    width: 4rem;
-    height: 4rem;
+    width: 4rem!important;
+    height: 6rem!important;
     background-color: var(--image-bg-color, #f3f4f6);
     border-radius: 0.375rem;
     display: flex;
@@ -167,8 +167,8 @@
 }
 
 .moreProducts {
-    width: 60px;
-    height: 60px;
+    width: 4rem!important;
+    height: 6rem!important;
     display: flex;
     align-items: center;
     justify-content: center;
