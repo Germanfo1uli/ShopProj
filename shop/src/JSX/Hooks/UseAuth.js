@@ -19,9 +19,9 @@ const useToken = () => {
         try {
             const decoded = jwtDecode(token);
             return {
-                userId: Number(decoded.userId || decoded.sub || localStorage.getItem('userId') || 0),
-                email: decoded.email || decoded.Email || 'Пользователь',
-                role: Number(decoded.role || decoded.role || 0)
+                userId: Number(decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || decoded.sub || localStorage.getItem('userId') || 0),
+                email: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] || decoded.email || decoded.Email || 'Пользователь',
+                role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || decoded.role || decoded.Role || 'null'
             };
         } catch (error) {
             console.error('Ошибка декодирования токена:', error);

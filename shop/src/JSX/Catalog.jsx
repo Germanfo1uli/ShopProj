@@ -11,6 +11,7 @@ import Footer from "./Components/Footer";
 import { Link } from "react-router-dom";
 import { apiRequest } from './Api/ApiRequest';
 import { useAuth} from './Hooks/UseAuth.js';
+import LoadingSpinner from './Components/LoadingSpinner';
 
 const Catalog = () => {
     const location = useLocation();
@@ -422,11 +423,15 @@ const Catalog = () => {
     };
 
     if (isLoading) {
-        return <div className={styles.loading}>Загрузка...</div>;
+        return <LoadingSpinner message="Загружаем товары..." status="loading" />;
     }
 
     if (error) {
-        return <div className={styles.error}>{error}</div>;
+        return <LoadingSpinner message={error} status="error" />;
+    }
+
+    if (products.length === 0) {
+        return <LoadingSpinner message="Нет доступных товаров" status="empty" />;
     }
     const colors = ['white', 'black', 'blue', 'gray', 'red', 'green', 'yellow', 'purple', 'pink'];
     const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -519,7 +524,7 @@ const Catalog = () => {
                             </div>
                         </div>
 
-                       
+
 
                         <button
                             className={styles.resetFilters}
@@ -661,9 +666,9 @@ const Catalog = () => {
                                     </button>
                                 </div>
                             )}
-                        </div>`
+                        </div>
 
-                        {filteredProducts.length > 0 && (
+                        {/* {filteredProducts.length > 0 && (
                             <div className={styles.pagination}>
                                 <button className={styles.paginationButton}>
                                     <FaChevronLeft />
@@ -677,7 +682,7 @@ const Catalog = () => {
                                     <FaChevronRight />
                                 </button>
                             </div>
-                        )}
+                        )} */}
                     </main>
                 </div>
             </div>

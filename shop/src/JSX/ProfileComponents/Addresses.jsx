@@ -51,7 +51,7 @@ const Addresses = () => {
     return (
         <div className={styles.profileCard}>
             <div className={styles.cardHeader}>
-                <h1 className={styles.cardTitle}>Адреса доставки</h1>
+                <h1 className={styles.cardTitle}>Адреса доставки (Заглушка)</h1>
                 <button
                     className={styles.editButton}
                     onClick={handleAddAddress}

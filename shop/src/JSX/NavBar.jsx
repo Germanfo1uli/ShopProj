@@ -161,7 +161,7 @@ const NavBar = () => {
                     {isMenuOpen ? <FaTimes className={st.burgerIcon} /> : <FaBars className={st.burgerIcon} />}
                 </div>
 
-                <Link to="/home" className={st.logo}><h2>TempName</h2></Link>
+                <Link to="/home" className={st.logo}><h2>WishWhirl</h2></Link>
 
                 <div className={st.searchContainer}>
                     <FaSearch className={st.searchIcon} />
@@ -223,7 +223,7 @@ const NavBar = () => {
                 <div className={st.mobileMenu}>
                     <div className={st.mobileHeader}>
                         <Link to="/home" className={st.mobileLogo} onClick={closeMenu}>
-                            <h2>TempName</h2>
+                            <h2>WishWhirl</h2>
                         </Link>
                         <FaTimes className={st.closeButton} onClick={closeMenu} />
                     </div>

@@ -17,13 +17,13 @@ const History = () => {
         const fetchHistory = async () => {
             try {
                 if (!userId || !isAuthenticated) return;
-                
+
                 setLoading(true);
                 const response = await apiRequest(`/api/productviewshistory/user/${userId}`, {
-                    authenticated: isAuthenticated 
+                    authenticated: isAuthenticated
                 });
                 setHistory(response?.slice(0, 10) || []);
-                
+
                 const images = {};
                 const names = {}; 
                 const itemsToProcess = response?.slice(0, 10) || [];
@@ -34,7 +34,7 @@ const History = () => {
                         names[item.productId] = productResponse.product.name;
                         
                         const imageResponse = await apiRequest(`/api/products/${item.productId}/main`);
-                        images[item.productId] = imageResponse?.imageUrl || 'https://via.placeholder.com/150';
+                        images[item.productId] = imageResponse?.imageUrl || 'https://via.placeholder.com/300';
                     } catch (err) {
                         console.error(`Error fetching data for product ${item.productId}:`, err);
                         names[item.productId] = 'Неизвестный продукт';
@@ -88,11 +88,11 @@ const History = () => {
                         <div key={`${item.productId}-${item.viewedAt}`} className={styles.productCard}>
                             <div className={styles.productImageWrapper}>
                                 <img
-                                    src={productImages[item.productId] || 'https://via.placeholder.com/150'}
+                                    src={productImages[item.productId] || 'https://via.placeholder.com/300'}
                                     alt={item.productName}
                                     className={styles.productImage}
                                     onError={(e) => {
-                                        e.target.src = 'https://via.placeholder.com/150';
+                                        e.target.src = 'https://via.placeholder.com/300';
                                     }}
                                 />
                             </div>
@@ -103,7 +103,7 @@ const History = () => {
                                     className={styles.viewProductButton}
                                 >
                                     <FaSearch className={styles.searchIcon} />
-                                    Перейти
+                                    Перейти к товару
                                 </Link>
                             </div>
                         </div>

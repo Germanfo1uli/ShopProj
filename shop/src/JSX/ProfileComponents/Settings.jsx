@@ -43,7 +43,7 @@ const Settings = () => {
                 </div>
 
                 <div className={styles.settingsSection}>
-                    <h3 className={styles.settingsTitle}>Язык и регион</h3>
+                    <h3 className={styles.settingsTitle}>Язык и регион (Заглушка)</h3>
                     <div className={styles.settingItem}>
                         <div className={styles.settingInfo}>
                             <span className={styles.settingName}>Язык</span>
@@ -63,7 +63,7 @@ const Settings = () => {
                 </div>
 
                 <div className={styles.settingsSection}>
-                    <h3 className={styles.settingsTitle}>Уведомления</h3>
+                    <h3 className={styles.settingsTitle}>Уведомления (Заглушка)</h3>
                     <div className={styles.settingItem}>
                         <div className={styles.settingInfo}>
                             <span className={styles.settingName}>Уведомления</span>
@@ -117,7 +117,7 @@ const Settings = () => {
                 </div>
 
                 <div className={styles.settingsSection}>
-                    <h3 className={styles.settingsTitle}>Конфиденциальность</h3>
+                    <h3 className={styles.settingsTitle}>Конфиденциальность (Заглушка)</h3>
                     <div className={styles.settingItem}>
                         <button className={styles.privacyButton}>
                             Настройки конфиденциальности
@@ -136,11 +136,6 @@ const Settings = () => {
                 </span>
                         </button>
                     </div>
-                </div>
-
-                <div className={styles.settingsActions}>
-                    <button className={styles.saveButton}>Сохранить изменения</button>
-                    <button className={styles.cancelButton}>Отменить</button>
                 </div>
             </div>
         </div>
