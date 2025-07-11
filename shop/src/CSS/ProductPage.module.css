@@ -1,3 +1,4 @@
+/* Existing styles unchanged */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -306,7 +307,7 @@
 
 .additionalStats {
     display: flex;
-    padding-left: 12px ;
+    padding-left: 12px;
     gap: 15px;
     font-size: 0.9rem;
     color: #666;
@@ -500,7 +501,8 @@
     color: var(--price-color, #1e40af);
     margin: 0;
 }
-/* Success Animation Styles - Alternative Version */
+
+/* Success Animation Styles */
 .successAnimation {
     position: fixed;
     top: 50%;
@@ -580,7 +582,7 @@
     background-color: #66BB6A;
 }
 
-/* Стили для уведомления о добавлении в корзину */
+/* Cart Notification */
 .cartNotification {
     position: fixed;
     top: 20px;
@@ -604,24 +606,24 @@
     padding: 16px;
     background-color: #fff;
     color: #333;
-    border-left: 4px solid #2196F3; /* Синий цвет вместо зеленого */
-    background-color: #f0f8ff; /* Очень светлый синий фон */
+    border-left: 4px solid #2196F3;
+    background-color: #f0f8ff;
 }
 
 [data-theme="dark"] .cartNotificationContent {
-    background-color: #1a2a3a; /* Темно-синий фон для темной темы */
+    background-color: #1a2a3a;
     color: #f0f0f0;
-    border-left-color: #64B5F6; /* Светло-синий для темной темы */
+    border-left-color: #64B5F6;
 }
 
 .cartNotificationIcon {
     font-size: 24px;
     margin-right: 16px;
-    color: #2196F3; /* Синий цвет иконки */
+    color: #2196F3;
 }
 
 [data-theme="dark"] .cartNotificationIcon {
-    color: #64B5F6; /* Светло-синий для темной темы */
+    color: #64B5F6;
 }
 
 .cartNotificationText {
@@ -754,8 +756,8 @@
 
     .lineLong {
         top: 34px;
-        right: 14px; /* Сдвинуто влево для мобильной версии */
-        width: 32px; /* Укорочено с 44px */
+        right: 14px;
+        width: 32px;
         height: 5px;
     }
 
@@ -894,6 +896,30 @@
     margin-bottom: 0.75rem;
 }
 
+.reviewActions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.editReviewButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--price-color, #1a56db);
+    font-size: 1rem;
+    padding: 0.25rem;
+    transition: color 0.2s;
+}
+
+.editReviewButton:hover {
+    color: var(--button-hover, #6d28d9);
+}
+
+.editIcon {
+    font-size: 1.2rem;
+}
+
 .reviewAuthor {
     font-weight: 600;
     color: var(--text-color, #1f2937);
@@ -957,6 +983,10 @@
     border: 1px solid var(--card-border, transparent);
 }
 
+.userReview {
+    text-align: center;
+}
+
 .formDescription {
     color: var(--filter-text, #4b5563);
     margin-bottom: 1.5rem;
@@ -987,6 +1017,7 @@
     font-size: 1.5rem;
     transition: color 0.2s;
 }
+
 .starButtonActive {
     color: var(--rating-color, #f59e0b);
 }
@@ -1019,6 +1050,7 @@
     background-color: var(--input-bg, white);
     color: var(--input-text, #111827);
 }
+
 .formInput2 {
     width: 97.5%;
     padding: 0.5rem 0.75rem;
@@ -1050,6 +1082,28 @@
     transition: border-color 0.2s, box-shadow 0.2s;
     background-color: var(--input-bg, white);
     color: var(--input-text, #111827);
+}
+
+.formActions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.cancelButton {
+    background-color: var(--card-bg, white);
+    color: var(--reviews-color, #6b7280);
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--input-border, #d1d5db);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.cancelButton:hover {
+    background-color: var(--tab-bg, #f3f4f6);
+    color: var(--text-color, #1f2937);
 }
 
 .fileUpload {
@@ -1144,10 +1198,6 @@
     font-size: 0.9rem;
 }
 
-.uploadInput {
-    display: none;
-}
-
 /* Modal */
 .modal {
     position: fixed;
@@ -1226,16 +1276,17 @@
         height: 100%;
     }
 }
+
 /* Out of stock styles */
 .outOfStock {
     background-color: #9ca3af !important;
     cursor: not-allowed !important;
 }
+
 /* Empty Reviews State */
 .emptyReviews {
     background-color: var(--card-bg, #ffffff);
     border: 1px solid var(--card-border, #e5e7eb);
-
     border-radius: 1rem;
     padding: 2.5rem;
     text-align: center;
@@ -1243,7 +1294,6 @@
     box-shadow: var(--card-shadow, 0 1px 3px rgba(0, 0, 0, 0.1));
     transition: all 0.3s ease;
 }
-
 
 .emptyReviewsIcon {
     position: relative;
@@ -1286,8 +1336,6 @@
     line-height: 1.5;
 }
 
-
-
 /* Dark theme adjustments */
 [data-theme="dark"] .emptyReviews {
     background-color: var(--card-bg, #1e1e1e);
@@ -1306,7 +1354,6 @@
     background-color: var(--price-color, #3b82f6);
 }
 
-
 .stock.outOfStock {
     color: #ef4444;
 }
@@ -1320,6 +1367,7 @@
 .disabledButton:hover {
     background-color: var(--tab-bg, #f3f4f6) !important;
 }
+
 /* Animation for favorite button */
 @keyframes heartPulse {
     0% {
@@ -1472,98 +1520,4 @@
     color: var(--footer-link, #666);
     text-decoration: none;
     transition: color 0.2s;
-    font-size: 14px;
-}
-
-.footerList a:hover {
-    color: var(--footer-link-hover, #0066cc);
-}
-
-.contactItem {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-    font-size: 14px;
-    color: var(--footer-link, #666);
-}
-
-.contactItem svg {
-    margin-right: 10px;
-    color: var(--footer-icon, #888);
-}
-
-.socialLinks {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 25px;
-}
-
-.socialLinks a {
-    color: var(--footer-link, #666);
-    transition: color 0.2s;
-}
-
-.socialLinks a:hover {
-    color: var(--footer-link-hover, #0066cc);
-}
-
-.footerBottom {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-top: 1px solid var(--footer-bottom-border, #eee);
-    padding: 20px;
-    background-color: var(--footer-bottom-bg, #f9f9f9);
-    text-align: center;
-}
-
-.footerBottomContent {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 0 20px;
-}
-
-.copyright {
-    font-size: 13px;
-    color: var(--footer-copyright, #888);
-    margin-bottom: 10px;
-}
-
-.legalLinks {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 10px;
-}
-
-.legalLinks a {
-    font-size: 13px;
-    color: var(--footer-legal, #666);
-    text-decoration: none;
-}
-
-.legalLinks a:hover {
-    text-decoration: underline;
-    color: var(--footer-link-hover, #0066cc);
-}
-
-.paymentMethods {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-/* Анимации */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
 }

@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import styles from '../CSS/ProductPage.module.css';
-import { FaStar, FaStarHalfAlt, FaHeart, FaShoppingCart, FaMinus, FaPlus, FaBoxOpen, FaShippingFast, FaCheckCircle, FaInfoCircle, FaEye } from 'react-icons/fa';
+import { FaStar, FaStarHalfAlt, FaHeart, FaShoppingCart, FaMinus, FaPlus, FaBoxOpen, FaShippingFast, FaCheckCircle, FaInfoCircle, FaEye, FaEdit } from 'react-icons/fa';
 import Footer from "./Components/Footer";
 import sb from "../CSS/Breadcrumbs.module.css";
 import { apiRequest } from './Api/ApiRequest';
 import { useAuth } from './Hooks/UseAuth';
 import LoadingSpinner from './Components/LoadingSpinner';
-
 
 const ProductPage = () => {
     const { id } = useParams();
@@ -36,6 +35,8 @@ const ProductPage = () => {
     const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
     const [showCartNotification, setShowCartNotification] = useState(false);
     const [priceChanged, setPriceChanged] = useState(false);
+    const [userReview, setUserReview] = useState(null);
+    const [isEditingReview, setIsEditingReview] = useState(false);
 
     const viewTracked = useRef(false);
 
@@ -50,13 +51,11 @@ const ProductPage = () => {
         }).catch(console.error);
     }, [id, userId, isAuthenticated]);
 
-
     useEffect(() => {
         const fetchProduct = async () => {
             try {
                 setIsLoading(true);
                 const response = await apiRequest(`/api/products/${id}`);
-                console.log(response)
                 setProductData(response);
                 const imagesResponse = await apiRequest(`/api/products/${id}/images`);
                 setProductImages(imagesResponse || []);
@@ -72,13 +71,10 @@ const ProductPage = () => {
                     setIsFavorite(favoriteIds.includes(Number(id)));
                 }
                 await fetchSpecifications(id);
-
-            }
-            catch (err) {
+            } catch (err) {
                 console.error('Ошибка загрузки данных товара:', err);
                 setError('Не удалось загрузить данные товара');
-            }
-            finally {
+            } finally {
                 setIsLoading(false);
             }
         };
@@ -101,13 +97,24 @@ const ProductPage = () => {
                     }
                 });
 
+                // Check if the current user has a review
+                const userReview = reviews.find(review => review.userId === userId);
+                setUserReview(userReview || null);
+                if (userReview) {
+                    setReviewForm({
+                        header: userReview.header || '',
+                        comment: userReview.comment || '',
+                        rating: userReview.rating || 0
+                    });
+                    setRating(userReview.rating || 0);
+                }
+
                 setReviewsData({
                     reviews,
                     averageRating,
                     ratingCounts,
                     totalReviews
                 });
-
             } catch (err) {
                 console.error('Ошибка загрузки отзывов:', err);
                 setReviewsData({
@@ -127,8 +134,7 @@ const ProductPage = () => {
 
     const handleQuantityChange = (amount) => {
         const newQuantity = quantity + amount;
-
-        if (newQuantity >= 1 && newQuantity <= product.quantityInStock) {
+        if (newQuantity >= 1 && newQuantity <= productData?.product?.quantityInStock) {
             setQuantity(newQuantity);
             setPriceChanged(true);
             setTimeout(() => setPriceChanged(false), 300);
@@ -143,7 +149,6 @@ const ProductPage = () => {
 
         try {
             setIsFavorite(prev => !prev);
-
             const response = await apiRequest('/api/userfavorites', {
                 method: isFavorite ? 'DELETE' : 'POST',
                 body: {
@@ -258,7 +263,6 @@ const ProductPage = () => {
 
     const calculateTotalPrice = () => {
         if (!productData?.product) return { totalPrice: 0, totalOldPrice: 0 };
-
         const { price, oldPrice } = productData.product;
         return {
             totalPrice: (price * quantity).toFixed(2),
@@ -281,8 +285,10 @@ const ProductPage = () => {
         }
 
         try {
-            const response = await apiRequest('/api/reviews', {
-                method: 'POST',
+            const method = isEditingReview ? 'PUT' : 'POST';
+            const endpoint = isEditingReview ? `/api/reviews/${userReview.id}` : '/api/reviews';
+            const response = await apiRequest(endpoint, {
+                method,
                 body: {
                     productId: Number(id),
                     userId: userId,
@@ -295,13 +301,13 @@ const ProductPage = () => {
 
             if (response) {
                 setShowSuccessAnimation(true);
-
                 setReviewForm({
                     header: '',
                     comment: '',
                     rating: 0
                 });
                 setRating(0);
+                setIsEditingReview(false);
 
                 setTimeout(() => {
                     setShowSuccessAnimation(false);
@@ -322,6 +328,9 @@ const ProductPage = () => {
                     }
                 });
 
+                const updatedUserReview = reviews.find(review => review.userId === userId);
+                setUserReview(updatedUserReview || null);
+
                 setReviewsData({
                     reviews,
                     averageRating,
@@ -335,13 +344,13 @@ const ProductPage = () => {
                     product: {
                         ...prev.product,
                         rating: updatedProduct.product.rating,
-                        reviews: updatedProduct.product.reviews
+                        reviewsNumber: updatedProduct.product.reviewsNumber
                     }
                 }));
             }
         } catch (error) {
-            console.error('Ошибка при отправке отзыва:', error);
-            alert('Не удалось отправить отзыв: ' + error.message);
+            console.error('Ошибка при отправке/обновлении отзыва:', error);
+            alert('Не удалось отправить/обновить отзыв: ' + error.message);
         }
     };
 
@@ -353,6 +362,18 @@ const ProductPage = () => {
         }));
     };
 
+    const handleEditReview = () => {
+        if (userReview) {
+            setReviewForm({
+                header: userReview.header || '',
+                comment: userReview.comment || '',
+                rating: userReview.rating || 0
+            });
+            setRating(userReview.rating || 0);
+            setIsEditingReview(true);
+        }
+    };
+
     if (isLoading) {
         return <LoadingSpinner message="Загружаем товары..." status="loading" />;
     }
@@ -360,7 +381,6 @@ const ProductPage = () => {
     if (error) {
         return <LoadingSpinner message={error} status="error" />;
     }
-
 
     const { product } = productData;
     const reviews = reviewsData?.reviews || [];
@@ -381,7 +401,9 @@ const ProductPage = () => {
                                 <div className={styles.iconFix}></div>
                             </div>
                         </div>
-                        <div className={styles.successText}>Отзыв успешно отправлен!</div>
+                        <div className={styles.successText}>
+                            {isEditingReview ? 'Отзыв успешно обновлен!' : 'Отзыв успешно отправлен!'}
+                        </div>
                     </div>
                 )}
 
@@ -479,10 +501,10 @@ const ProductPage = () => {
                                 <div className={styles.stock}>
                                     <FaBoxOpen className={styles.stockIcon} />
                                     <span>
-                                    {product.quantityInStock > 0
-                                        ? `В наличии ${product.quantityInStock} шт.`
-                                        : 'Нет в наличии :('}
-                                         </span>
+                                        {product.quantityInStock > 0
+                                            ? `В наличии ${product.quantityInStock} шт.`
+                                            : 'Нет в наличии :('}
+                                    </span>
                                 </div>
                             </div>
                             <div className={styles.shipping}>
@@ -545,7 +567,6 @@ const ProductPage = () => {
                         {activeTab === 'description' && (
                             <>
                                 <h2 className={styles.tabTitle}>{product.name}</h2>
-
                                 {product.benefits && (
                                     <>
                                         <h3 className={styles.subtitle}>Основные свойства:</h3>
@@ -556,7 +577,6 @@ const ProductPage = () => {
                                         </ul>
                                     </>
                                 )}
-
                                 {product.tip && (
                                     <div className={styles.tip}>
                                         <FaInfoCircle className={styles.tipIcon} />
@@ -567,7 +587,6 @@ const ProductPage = () => {
                                 )}
                             </>
                         )}
-
                         {activeTab === 'specs' && (
                             <div>
                                 <h3 className={styles.subtitle}>Технические характеристики</h3>
@@ -581,7 +600,6 @@ const ProductPage = () => {
                                 </div>
                             </div>
                         )}
-
                         {activeTab === 'usage' && (
                             <div>
                                 <h3 className={styles.subtitle}>Способы применения</h3>
@@ -600,7 +618,6 @@ const ProductPage = () => {
 
                 <div className={styles.reviewsSection}>
                     <h2 className={styles.sectionTitle}>Отзывы покупателей</h2>
-
                     <div className={styles.overallRating}>
                         <div className={styles.ratingSummary}>
                             <div className={styles.averageRating}>{averageRating.toFixed(1)}</div>
@@ -609,7 +626,6 @@ const ProductPage = () => {
                             </div>
                             <div className={styles.ratingCount}>на основе {totalReviews} отзывов</div>
                         </div>
-
                         <div className={styles.ratingBars}>
                             {[5, 4, 3, 2, 1].map((star) => (
                                 <div key={star} className={styles.ratingBar}>
@@ -651,8 +667,19 @@ const ProductPage = () => {
                                                     })}
                                                 </div>
                                             </div>
-                                            <div className={styles.stars}>
-                                                {renderStars(Math.floor(review.rating), review.rating % 1 !== 0)}
+                                            <div className={styles.reviewActions}>
+                                                <div className={styles.stars}>
+                                                    {renderStars(Math.floor(review.rating), review.rating % 1 !== 0)}
+                                                </div>
+                                                {review.userId === userId && (
+                                                    <button
+                                                        className={styles.editReviewButton}
+                                                        onClick={handleEditReview}
+                                                        title="Редактировать отзыв"
+                                                    >
+                                                        <FaEdit />
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                         <h3 className={styles.reviewTitle}>{review.header || 'Без заголовка'}</h3>
@@ -687,63 +714,153 @@ const ProductPage = () => {
                     )}
                 </div>
 
-                <div className={styles.reviewForm}>
-                    <h2 className={styles.sectionTitle}>Оставить отзыв</h2>
-                    <p className={styles.formDescription}>Расскажите о вашем опыте использования этого товара</p>
-
-                    <form onSubmit={handleReviewSubmit}>
-                        <div className={styles.formGroup}>
-                            <label className={styles.formLabel}>Ваша оценка</label>
-                            <div className={styles.ratingInput}>
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                    <FaStar
-                                        key={star}
-                                        className={`${styles.star} ${star <= (hoverRating || reviewForm.rating) ? styles.starActive : ''}`}
-                                        onClick={() => setReviewForm(prev => ({ ...prev, rating: star }))}
-                                        onMouseEnter={() => setHoverRating(star)}
-                                        onMouseLeave={() => setHoverRating(0)}
-                                        size={24}
-                                    />
-                                ))}
+                {isAuthenticated && !userReview && !isEditingReview ? (
+                    <div className={styles.reviewForm}>
+                        <h2 className={styles.sectionTitle}>Оставить отзыв</h2>
+                        <p className={styles.formDescription}>Расскажите о вашем опыте использования этого товара</p>
+                        <form onSubmit={handleReviewSubmit}>
+                            <div className={styles.formGroup}>
+                                <label className={styles.formLabel}>Ваша оценка</label>
+                                <div className={styles.ratingInput}>
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <FaStar
+                                            key={star}
+                                            className={`${styles.star} ${star <= (hoverRating || reviewForm.rating) ? styles.starActive : ''}`}
+                                            onClick={() => setReviewForm(prev => ({ ...prev, rating: star }))}
+                                            onMouseEnter={() => setHoverRating(star)}
+                                            onMouseLeave={() => setHoverRating(0)}
+                                            size={24}
+                                        />
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="header" className={styles.formLabel}>Заголовок отзыва</label>
-                            <input
-                                type="text"
-                                id="header"
-                                name="header"
-                                className={styles.formInput2}
-                                placeholder="Например: 'Отличное качество'"
-                                value={reviewForm.header}
-                                onChange={handleReviewChange}
-                                required
-                            />
-                        </div>
-
-                        <div className={styles.formGroup}>
-                            <label htmlFor="comment" className={styles.formLabel}>Ваш отзыв</label>
-                            <textarea
-                                id="comment"
-                                name="comment"
-                                rows="5"
-                                className={styles.formTextarea}
-                                placeholder="Расскажите о ваших впечатлениях"
-                                value={reviewForm.comment}
-                                onChange={handleReviewChange}
-                                required
-                            ></textarea>
-                        </div>
-
-                        <button type="submit" className={styles.submitButton}>
-                            Опубликовать отзыв
-                        </button>
-                    </form>
-                </div>
-
+                            <div className={styles.formGroup}>
+                                <label htmlFor="header" className={styles.formLabel}>Заголовок отзыва</label>
+                                <input
+                                    type="text"
+                                    id="header"
+                                    name="header"
+                                    className={styles.formInput2}
+                                    placeholder="Например: 'Отличное качество'"
+                                    value={reviewForm.header}
+                                    onChange={handleReviewChange}
+                                    required
+                                />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label htmlFor="comment" className={styles.formLabel}>Ваш отзыв</label>
+                                <textarea
+                                    id="comment"
+                                    name="comment"
+                                    rows="5"
+                                    className={styles.formTextarea}
+                                    placeholder="Расскажите о ваших впечатлениях"
+                                    value={reviewForm.comment}
+                                    onChange={handleReviewChange}
+                                    required
+                                ></textarea>
+                            </div>
+                            <button type="submit" className={styles.submitButton}>
+                                Опубликовать отзыв
+                            </button>
+                        </form>
+                    </div>
+                ) : isAuthenticated && userReview ? (
+                    <div className={styles.reviewForm}>
+                        <h2 className={styles.sectionTitle}>
+                            {isEditingReview ? 'Редактировать отзыв' : 'Ваш отзыв'}
+                        </h2>
+                        {isEditingReview ? (
+                            <>
+                                <p className={styles.formDescription}>Обновите ваш отзыв о товаре</p>
+                                <form onSubmit={handleReviewSubmit}>
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.formLabel}>Ваша оценка</label>
+                                        <div className={styles.ratingInput}>
+                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                <FaStar
+                                                    key={star}
+                                                    className={`${styles.star} ${star <= (hoverRating || reviewForm.rating) ? styles.starActive : ''}`}
+                                                    onClick={() => setReviewForm(prev => ({ ...prev, rating: star }))}
+                                                    onMouseEnter={() => setHoverRating(star)}
+                                                    onMouseLeave={() => setHoverRating(0)}
+                                                    size={24}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label htmlFor="header" className={styles.formLabel}>Заголовок отзыва</label>
+                                        <input
+                                            type="text"
+                                            id="header"
+                                            name="header"
+                                            className={styles.formInput2}
+                                            placeholder="Например: 'Отличное качество'"
+                                            value={reviewForm.header}
+                                            onChange={handleReviewChange}
+                                            required
+                                        />
+                                    </div>
+                                    <div className={styles.formGroup}>
+                                        <label htmlFor="comment" className={styles.formLabel}>Ваш отзыв</label>
+                                        <textarea
+                                            id="comment"
+                                            name="comment"
+                                            rows="5"
+                                            className={styles.formTextarea}
+                                            placeholder="Расскажите о ваших впечатлениях"
+                                            value={reviewForm.comment}
+                                            onChange={handleReviewChange}
+                                            required
+                                        ></textarea>
+                                    </div>
+                                    <div className={styles.formActions}>
+                                        <button type="submit" className={styles.submitButton}>
+                                            Сохранить изменения
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={styles.cancelButton}
+                                            onClick={() => {
+                                                setIsEditingReview(false);
+                                                setReviewForm({
+                                                    header: userReview.header || '',
+                                                    comment: userReview.comment || '',
+                                                    rating: userReview.rating || 0
+                                                });
+                                                setRating(userReview.rating || 0);
+                                            }}
+                                        >
+                                            Отмена
+                                        </button>
+                                    </div>
+                                </form>
+                            </>
+                        ) : (
+                            <div className={styles.userReview}>
+                                <p className={styles.formDescription}>
+                                    Вы уже оставили отзыв. Хотите его отредактировать?
+                                </p>
+                                <button
+                                    className={styles.editReviewButton}
+                                    onClick={handleEditReview}
+                                >
+                                    <FaEdit className={styles.editIcon} /> Редактировать отзыв
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className={styles.reviewForm}>
+                        <h2 className={styles.sectionTitle}>Оставить отзыв</h2>
+                        <p className={styles.formDescription}>
+                            Войдите в систему, чтобы оставить отзыв о товаре.
+                        </p>
+                    </div>
+                )}
             </div>
-            <Footer/>
+            <Footer />
         </>
     );
 };
