@@ -666,7 +666,7 @@ const Catalog = () => {
                                     </button>
                                 </div>
                             )}
-                        </div>`
+                        </div>
 
                         {filteredProducts.length > 0 && (
                             <div className={styles.pagination}>
