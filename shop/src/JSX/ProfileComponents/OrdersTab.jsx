@@ -120,8 +120,11 @@ const OrdersTab = () => {
         return (
             <div className={styles.ordersContent}>
                 <div className={styles.noOrders}>
-                    <p>У вас нет оплаченных заказов</p>
-                    <a href="/catalog" className={styles.shopLink}>Перейти в каталог</a>
+                    <div className={styles.noOrdersCard}>
+                        <p className={styles.noOrdersTitle}>У вас нет оплаченных заказов</p>
+                        <p className={styles.noOrdersSubtitle}>Начните покупки прямо сейчас!</p>
+                        <Link to="/catalog" className={styles.shopLink}>Перейти в каталог</Link>
+                    </div>
                 </div>
             </div>
         );
