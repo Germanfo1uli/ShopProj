@@ -7,6 +7,7 @@ using System.Security;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Reflection.PortableExecutable;
 using System.ComponentModel.DataAnnotations;
+using Stripe;
 
 namespace ShopBack.Controllers
 {
@@ -128,6 +129,8 @@ namespace ShopBack.Controllers
         public async Task<IActionResult> Reject(int id, [FromBody] ModerateReview moderateDto)
         {
             await _reviewsService.RejectReviewAsync(id, moderateDto.ModeratorId, moderateDto.ModeratorComment);
+            var review = await _reviewsService.GetByIdAsync(id);
+            await _reviewsService.RecalculateRating(review.ProductId);
             return Ok();
         }
     }

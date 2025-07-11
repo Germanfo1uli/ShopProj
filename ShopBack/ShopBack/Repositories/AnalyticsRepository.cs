@@ -56,7 +56,7 @@ namespace ShopBack.Repositories
         public async Task<double> GetAverageProductRatingAsync(int productId)
         {
             return await _context.ProductReviews
-                .Where(r => r.ProductId == productId && r.Rating >= 1 && r.Rating <= 5)
+                .Where(r => r.ProductId == productId && r.Rating >= 1 && r.Rating <= 5 && r.Approved == true)
                 .AsNoTracking()
                 .AverageAsync(r => (double?)r.Rating) ?? 0.0;
         }
@@ -64,7 +64,7 @@ namespace ShopBack.Repositories
         public async Task<int> GetProductReviewCountAsync(int productId)
         {
             return await _context.ProductReviews
-                .Where(r => r.ProductId == productId)
+                .Where(r => r.ProductId == productId && r.Approved == true)
                 .AsNoTracking()
                 .CountAsync();
         }
