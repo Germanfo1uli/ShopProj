@@ -17,7 +17,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
 const Profile = () => {
-    const { isAuthenticated, userId, token, logout, isLoading: authLoading } = useAuth();
+    const { isAuthenticated, userId, role, token, logout, isLoading: authLoading } = useAuth();
 
     const [profileData, setProfileData] = useState({
         firstName: '',
@@ -88,7 +88,7 @@ const Profile = () => {
         };
 
         fetchUserData();
-    }, [isAuthenticated, userId, token, authLoading]);
+    }, [isAuthenticated, userId, role, token, authLoading]);
 
     const navigate = useNavigate();
 
@@ -361,7 +361,7 @@ const Profile = () => {
                                     />
                                 </div>
                                 <div>
-                                    <h2 className={styles.userName}>{profileData.firstName} {profileData.lastName.charAt(0)}</h2>
+                                    <h2 className={styles.userName}>{profileData.firstName} {profileData.lastName.charAt(0)}.</h2>
                                     <p className={styles.userLevel}>Адский покупатель</p>
                                 </div>
                             </div>
@@ -409,13 +409,15 @@ const Profile = () => {
                                     <i className="fas fa-cog"></i>
                                     <span>Настройки</span>
                                 </button>
-                                <button
-                                    className={`${styles.navLink} ${activeMenu === 'admin' ? styles.activeLink : ''}`}
-                                    onClick={() => setActiveMenu('admin')}
-                                >
-                                    <i className="fas fa-user-shield"></i>
-                                    <span>Админ панель</span>
-                                </button>
+                                {role === 'Admin' && (
+                                    <button
+                                        className={`${styles.navLink} ${activeMenu === 'admin' ? styles.activeLink : ''}`}
+                                        onClick={() => setActiveMenu('admin')}
+                                    >
+                                        <i className="fas fa-user-shield"></i>
+                                        <span>Админ панель</span>
+                                    </button>
+                                )}
                                 <button
                                     className={styles.navLink}
                                     onClick={handleLogout}

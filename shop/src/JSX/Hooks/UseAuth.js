@@ -9,7 +9,7 @@ const useToken = () => {
         isAuthenticated: false,
         userId: null,
         email: null,
-        roleId: null,
+        role: null,
         token: null,
         refreshToken: null,
         isLoading: true
@@ -19,9 +19,9 @@ const useToken = () => {
         try {
             const decoded = jwtDecode(token);
             return {
-                userId: Number(decoded.userId || decoded.sub || localStorage.getItem('userId') || 0),
-                email: decoded.email || decoded.Email || 'Пользователь',
-                roleId: Number(decoded.roleId || decoded.role || 0)
+                userId: Number(decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || decoded.sub || localStorage.getItem('userId') || 0),
+                email: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] || decoded.email || decoded.Email || 'Пользователь',
+                role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || decoded.role || decoded.Role || 'null'
             };
         } catch (error) {
             console.error('Ошибка декодирования токена:', error);
@@ -41,7 +41,7 @@ const useToken = () => {
             isAuthenticated: true,
             userId: Number(userId || decoded.userId),
             email: decoded.email,
-            roleId: decoded.roleId,
+            role: decoded.role,
             token,
             refreshToken,
             isLoading: false
@@ -57,7 +57,7 @@ const useToken = () => {
             isAuthenticated: false,
             userId: null,
             email: null,
-            roleId: null,
+            role: null,
             token: null,
             refreshToken: null,
             isLoading: false
@@ -130,7 +130,7 @@ const useToken = () => {
                             isAuthenticated: true,
                             userId: decodedNew.userId,
                             email: decodedNew.email,
-                            roleId: decodedNew.roleId,
+                            role: decodedNew.role,
                             token: newTokens.token,
                             refreshToken: newTokens.refreshToken,
                             isLoading: false
@@ -177,7 +177,7 @@ const useToken = () => {
                     isAuthenticated: true,
                     userId: Number(userId),
                     email: decoded.email,
-                    roleId: decoded.roleId,
+                    role: decoded.role,
                     token,
                     refreshToken,
                     isLoading: false

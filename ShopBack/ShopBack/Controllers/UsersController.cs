@@ -63,10 +63,10 @@ namespace ShopBack.Controllers
         {
             var user = await _userService.GetByIdAsync(userId);
             user.Email = updateDto.Email ?? user.Email;
-            user.FirstName = updateDto.FirstName;
-            user.MiddleName = updateDto.MiddleName;
-            user.LastName = updateDto.LastName;
-            user.PhoneNumber = updateDto.PhoneNumber;
+            user.FirstName = updateDto.FirstName ?? user.FirstName;
+            user.MiddleName = updateDto.MiddleName ?? user.MiddleName;
+            user.LastName = updateDto.LastName ?? user.LastName;
+            user.PhoneNumber = updateDto.PhoneNumber ?? user.PhoneNumber;
             await _userService.UpdateAsync(user);
             return Ok(user);
         }
