@@ -4,12 +4,8 @@ using ShopBack.Models;
 
 namespace ShopBack.Repositories
 {
-    public class ReviewsRepository : Repository<ProductReviews>, IReviewsRepository
+    public class ReviewsRepository(ShopDbContext context) : Repository<ProductReviews>(context), IReviewsRepository
     {
-        public ReviewsRepository(ShopDbContext context) : base(context)
-        {
-        }
-
         public async Task<IEnumerable<ProductReviews>> GetProductReviewsAsync(int productId, bool onlyApproved)
         {
             var result = await _context.ProductReviews
@@ -36,7 +32,7 @@ namespace ShopBack.Repositories
                 .ToListAsync();
         }
 
-        public async Task<ProductReviews> FindAsync(int userId, int productId)
+        public async Task<ProductReviews?> FindAsync(int userId, int productId)
         {
             return await _context.ProductReviews
                 .FirstOrDefaultAsync(pr => pr.UserId == userId && pr.ProductId == productId);

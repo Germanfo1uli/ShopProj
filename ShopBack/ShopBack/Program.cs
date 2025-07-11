@@ -40,11 +40,16 @@ builder.Services.AddCors(options =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var secret = builder.Configuration["Jwt:Secret"];
+        if (string.IsNullOrEmpty(secret))
+        {
+            throw new InvalidOperationException("JWT Secret is not configured");
+        }
+        var key = Encoding.ASCII.GetBytes(secret);
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Secret"])),
+            IssuerSigningKey = new SymmetricSecurityKey(key),
             ValidateIssuer = false,
             ValidateAudience = false,
             ClockSkew = TimeSpan.Zero
@@ -132,7 +137,7 @@ if (app.Environment.IsDevelopment())
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ShopDbContext>();
+    var db = scope.ServiceProvider.GetRequiredService<ShopDbContext>(); // Применение миграций при запуске приложения
     try
     {
         if (!db.Database.CanConnect())
@@ -144,8 +149,9 @@ using (var scope = app.Services.CreateScope())
         {
             Console.WriteLine("Applying migrations...");
             db.Database.Migrate();
+            db.EnsureSequencesAreSynced();
         }
-        if (!db.Roles.Any())
+        if (!db.Roles.Any()) // Создание ролей, если их нету в бд
         {
             Console.WriteLine("Seeding initial roles...");
             db.Roles.AddRange(
@@ -156,7 +162,7 @@ using (var scope = app.Services.CreateScope())
             await db.SaveChangesAsync();
             Console.WriteLine("Initial roles seeded successfully.");
         }
-        if (!db.UserRoles.Any(u => u.RoleId == 1))
+        if (!db.UserRoles.Any(u => u.RoleId == 1)) // Если нету пользователя с ролью админа, создаем нового
         {
             Console.WriteLine("Creating admin user...");
             var adminLogin = "Admin@ya.ru";

@@ -9,14 +9,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ShopBack.Repositories
 {
-    public class TokensRepository : Repository<RefreshTokens>, ITokensRepository
+    public class TokensRepository(ShopDbContext context, IConfiguration configuration) : Repository<RefreshTokens>(context), ITokensRepository
     {
-        private readonly IConfiguration _configuration;
-
-        public TokensRepository(ShopDbContext context, IConfiguration configuration) : base(context)
-        {
-            _configuration = configuration;
-        }
+        private readonly IConfiguration _configuration = configuration;
 
         public async Task<TokenPair> GenerateTokensAsync(Users user, string roleName)
         {
@@ -31,12 +26,17 @@ namespace ShopBack.Repositories
             };
         }
 
-        public async Task<ClaimsPrincipal?> ValidateJwtTokenAsync(string token)
+        public ClaimsPrincipal? ValidateJwtTokenAsync(string token)
         {
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"]);
+                var secret = _configuration["Jwt:Secret"];
+                if (string.IsNullOrEmpty(secret))
+                {
+                    throw new InvalidOperationException("JWT Secret is not configured");
+                }
+                var key = Encoding.ASCII.GetBytes(secret);
 
                 var principal = tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
@@ -117,6 +117,12 @@ namespace ShopBack.Repositories
 
         public string GenerateJwtToken(Users user, string roleName)
         {
+            var secret = _configuration["Jwt:Secret"];
+            if (string.IsNullOrEmpty(secret))
+            {
+                throw new InvalidOperationException("JWT Secret is not configured");
+            }
+            var key = Encoding.ASCII.GetBytes(secret);
 
             var jwtToken = new JwtSecurityToken(
                 claims: new[]
@@ -127,7 +133,8 @@ namespace ShopBack.Repositories
                 },
                 expires: DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("Jwt:ExpireMinutes")),
                 signingCredentials: new SigningCredentials(
-                    new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"])),
+                    new SymmetricSecurityKey(key),
+
                     SecurityAlgorithms.HmacSha256)
             );
 

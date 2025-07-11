@@ -6,7 +6,7 @@ namespace ShopBack.Services
 {
     public class StripePaymentGateway(IConfiguration config, ILogger<StripePaymentGateway> logger, UserService userService, IService<PayMethods> payMethodsService) : IPaymentGateway
     {
-        private readonly StripeClient _stripeClient = new StripeClient(config["Stripe:SecretKey"]);
+        private readonly StripeClient _stripeClient = new(config["Stripe:SecretKey"]);
         private readonly ILogger<StripePaymentGateway> _logger = logger;
         private readonly UserService _userService = userService;
         private readonly IService<PayMethods> _payMethodsService = payMethodsService;

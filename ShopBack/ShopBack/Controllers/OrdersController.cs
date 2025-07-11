@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace ShopBack.Controllers
@@ -24,7 +25,14 @@ namespace ShopBack.Controllers
         [Authorize]
         public async Task<ActionResult<Orders>> GetById(int id)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID claim не найдено");
+            }
+
+            var currentUserId = int.Parse(userIdClaim);
 
             bool isAdmin = User.IsInRole("Admin");
 
@@ -116,7 +124,14 @@ namespace ShopBack.Controllers
         [Authorize]
         public async Task<ActionResult<Payments>> GetOrderPayment(int orderId)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID claim не найдено");
+            }
+
+            var currentUserId = int.Parse(userIdClaim);
 
             bool isAdmin = User.IsInRole("Admin");
 
@@ -135,7 +150,14 @@ namespace ShopBack.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateOrderStatus(int orderId, [FromBody] string status)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID claim не найдено");
+            }
+
+            var currentUserId = int.Parse(userIdClaim);
 
             bool isAdmin = User.IsInRole("Admin");
 
@@ -162,7 +184,8 @@ namespace ShopBack.Controllers
     public class OrdersCreate
     {
         public int UserId { get; set; }
-        public string Status { get; set; }
+        [Required(ErrorMessage = "Status is required")]
+        public string Status { get; set; } = default!;
         public decimal TotalAmount { get; set; }
         public string? ShippingAddress { get; set; }
         public string? ContactPhone { get; set; }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using System.ComponentModel.DataAnnotations;
 
 namespace ShopBack.Controllers
 {
@@ -75,8 +76,10 @@ namespace ShopBack.Controllers
     public class SpecificationCreateDto
     {
         public int ProductId { get; set; }
-        public string Key { get; set; }
-        public string Value { get; set; }
+        [Required(ErrorMessage = "Key is required")]
+        public string Key { get; set; } = default!;
+        [Required(ErrorMessage = "Value is required")]
+        public string Value { get; set; } = default!;
     }
 
     public class SpecificationUpdateDto

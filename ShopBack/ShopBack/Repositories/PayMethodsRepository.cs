@@ -4,12 +4,8 @@ using ShopBack.Models;
 
 namespace ShopBack.Repositories
 {
-    public class PayMethodsRepository : Repository<PayMethods>, IPayMethodsRepository
+    public class PayMethodsRepository(ShopDbContext context) : Repository<PayMethods>(context), IPayMethodsRepository
     {
-        public PayMethodsRepository(ShopDbContext context) : base(context)
-        {
-        }
-
         public async Task<IEnumerable<PayMethods>> GetByUserIdAsync(int userId)
         {
             return await _context.PayMethods

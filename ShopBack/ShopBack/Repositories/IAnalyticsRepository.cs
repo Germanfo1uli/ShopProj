@@ -6,7 +6,7 @@ namespace ShopBack.Repositories
     {
         Task<IEnumerable<ProductViewsHistory>> GetProductViewHistoryAsync(int userId); // История просмотров пользователя
 
-        Task<ProductViewsHistory> GetLastViewAsync(int userId, int productId); // Получить последний просмотр товара
+        Task<ProductViewsHistory?> GetLastViewAsync(int userId, int productId); // Получить последний просмотр товара
 
         Task<IEnumerable<UserFavorites>> GetUserFavoritesAsync(int userId); // Список избранного пользователя
 

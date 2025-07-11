@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShopBack.Models;
 using ShopBack.Services;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace ShopBack.Controllers
@@ -39,7 +40,15 @@ namespace ShopBack.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID claim не найдено");
+            }
+
+            var currentUserId = int.Parse(userIdClaim);
+
             bool isAdmin = User.IsInRole("Admin");
 
             var payMethod = await _payMethodsService.GetByIdAsync(id);
@@ -65,7 +74,15 @@ namespace ShopBack.Controllers
         [Authorize]
         public async Task<ActionResult<PayMethods>> GetById(int id)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID claim не найдено");
+            }
+
+            var currentUserId = int.Parse(userIdClaim);
+
             bool isAdmin = User.IsInRole("Admin");
 
             var payMethod = await _payMethodsService.GetByIdAsync(id);
@@ -94,7 +111,15 @@ namespace ShopBack.Controllers
         [Authorize]
         public async Task<ActionResult<IEnumerable<PayMethods>>> GetByUser(int userId)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID claim не найдено");
+            }
+
+            var currentUserId = int.Parse(userIdClaim);
+
             if (userId != currentUserId && !User.IsInRole("Admin"))
             {
                 return Forbid();
@@ -109,7 +134,15 @@ namespace ShopBack.Controllers
         public async Task<ActionResult> SetDefault(int id)
         {
             var method = await _payMethodsService.GetByIdAsync(id);
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID claim не найдено");
+            }
+
+            var currentUserId = int.Parse(userIdClaim);
 
             if (method.UserId != currentUserId && !User.IsInRole("Admin"))
             {
@@ -125,11 +158,14 @@ namespace ShopBack.Controllers
     public class PMCreate
     {
         public int UserId { get; set; }
-        public string CardLastFourDigits { get; set; }
-        public string CardBrand { get; set; }
+        [Required(ErrorMessage = "CardDigits is required")]
+        public string CardLastFourDigits { get; set; } = default!;
+        [Required(ErrorMessage = "CardBrand is required")] 
+        public string CardBrand { get; set; } = default!;
         public int ExpiryMonth { get; set; }
         public int ExpiryYear { get; set; }
-        public string PaymentProviderToken { get; set; }
+        [Required(ErrorMessage = "PaymentToken is required")]
+        public string PaymentProviderToken { get; set; } = default!;
         public bool IsDefault { get; set; } = false;
     }
 

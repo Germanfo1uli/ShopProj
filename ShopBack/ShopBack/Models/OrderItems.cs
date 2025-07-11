@@ -23,9 +23,9 @@ namespace ShopBack.Models
 
         [ForeignKey("OrderId")]
         [JsonIgnore]
-        public virtual Orders? Order { get; set; }
+        public virtual Orders Order { get; set; } = default!;
 
         [ForeignKey("ProductId")]
-        public virtual Products? Product { get; set; }
+        public virtual Products Product { get; set; } = default!;
     }
 }

@@ -9,8 +9,7 @@ namespace ShopBack.Authorization.Policies
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
                                                            SelfOrAdminRequirement requirement)
         {
-            var httpContext = context.Resource as HttpContext;
-            if (httpContext == null)
+            if (context.Resource is not HttpContext httpContext)
             {
                 context.Fail();
                 return;

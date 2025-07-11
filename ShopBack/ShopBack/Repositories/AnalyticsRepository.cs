@@ -21,7 +21,7 @@ namespace ShopBack.Repositories
                 .ToListAsync();
         }
 
-        public async Task<ProductViewsHistory> GetLastViewAsync(int userId, int productId)
+        public async Task<ProductViewsHistory?> GetLastViewAsync(int userId, int productId)
         {
             return await _context.ProductViewsHistory
                 .Where(v => v.UserId == userId && v.ProductId == productId)

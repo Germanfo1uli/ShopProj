@@ -68,7 +68,7 @@ namespace ShopBack.Controllers
 
             var product = await _productsService.GetByIdAsync(item.ProductId);
             if (product.QuantityInStock < item.Quantity)
-                return BadRequest($"Недостаточно товара {item.Product.Name} на складе. Доступно: {item.Product.QuantityInStock}, требуется: {item.Quantity}");
+                return BadRequest($"Недостаточно товара {product.Name} на складе. Доступно: {product.QuantityInStock}, требуется: {item.Quantity}");
 
             if (updateDto.Quantity.HasValue)
                 item.Quantity = updateDto.Quantity.Value;
@@ -82,7 +82,15 @@ namespace ShopBack.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID claim не найдено");
+            }
+
+            var currentUserId = int.Parse(userIdClaim);
+
             bool isAdmin = User.IsInRole("Admin");
 
             var orderItem = await _orderItemsService.GetByIdAsync(id);
