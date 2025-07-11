@@ -4,6 +4,7 @@ import { FaRegHeart, FaStar, FaRegStar, FaStarHalfAlt } from 'react-icons/fa';
 import { useAuth } from '../Hooks/UseAuth.js';
 import { apiRequest } from '../Api/ApiRequest.js';
 import ProductCard from '../Components/ProductCard';
+import st from "../../CSS/LoadingSpinner.module.css";
 
 const FavoritesTab = () => {
     const [favorites, setFavorites] = useState([]);
@@ -98,9 +99,14 @@ const FavoritesTab = () => {
 
     if (error) {
         return (
-            <div className={styles.profileCard}>
-                <h1 className={styles.cardTitle}>Избранное</h1>
-                <div className={styles.errorState}>{error}</div>
+            <div className={st.error}>
+                {error}
+                <button
+                    onClick={() => window.location.reload()}
+                    className={st.retryButton}
+                >
+                    Попробовать снова
+                </button>
             </div>
         );
     }

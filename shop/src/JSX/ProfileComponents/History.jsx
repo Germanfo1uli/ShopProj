@@ -4,6 +4,7 @@ import { FaClock } from 'react-icons/fa';
 import { useAuth } from '../Hooks/UseAuth.js';
 import { apiRequest } from '../Api/ApiRequest.js';
 import ProductCard from '../Components/HistoryCard';
+import st from "../../CSS/LoadingSpinner.module.css";
 
 const History = () => {
     const [history, setHistory] = useState([]);
@@ -51,19 +52,22 @@ const History = () => {
             <div className={styles.profileCard}>
                 <div className={styles.cardHeader}>
                     <h1 className={styles.cardTitle}>История просмотров</h1>
+                    <div className={styles.loadingState}>Загрузка...</div>
                 </div>
-                <div className={styles.loadingState}>Загрузка...</div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className={styles.profileCard}>
-                <div className={styles.cardHeader}>
-                    <h1 className={styles.cardTitle}>История просмотров</h1>
-                </div>
-                <div className={styles.errorState}>{error}</div>
+            <div className={st.error}>
+                {error}
+                <button
+                    onClick={() => window.location.reload()}
+                    className={st.retryButton}
+                >
+                    Попробовать снова
+                </button>
             </div>
         );
     }

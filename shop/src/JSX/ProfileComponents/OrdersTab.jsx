@@ -3,6 +3,7 @@ import { apiRequest } from '../Api/ApiRequest.js';
 import { useAuth } from '../Hooks/UseAuth';
 import styles from '../../CSS/ProfileCSS/OrdersTab.module.css';
 import { Link } from "react-router-dom";
+import st from  '../../CSS/LoadingSpinner.module.css'
 
 const ORDERS_PER_PAGE = 5; // Количество заказов на странице
 
@@ -99,16 +100,21 @@ const OrdersTab = () => {
     };
 
     if (loading) {
-        return <div className={styles.loading}>Загрузка заказов...</div>;
+        return (
+            <div className={st.loadingContainer}>
+                <div className={st.spinner}></div>
+                <p className={st.loadingText}>Загрузка ваших заказов...</p>
+            </div>
+        );
     }
 
     if (error) {
         return (
-            <div className={styles.error}>
+            <div className={st.error}>
                 {error}
                 <button
                     onClick={() => window.location.reload()}
-                    className={styles.retryButton}
+                    className={st.retryButton}
                 >
                     Попробовать снова
                 </button>
