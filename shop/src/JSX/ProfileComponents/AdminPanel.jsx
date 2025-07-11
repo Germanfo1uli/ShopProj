@@ -1,35 +1,158 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../../CSS/ProfileCSS/AdminPanel.module.css';
+import { apiRequest } from '../Api/ApiRequest';
+import { useAuth } from '../Hooks/UseAuth';
+
 
 const AdminPanel = () => {
+    const { isAuthenticated, role } = useAuth();
     const [activeTab, setActiveTab] = useState('products');
-
-    // Данные пользователей
-    const [users, setUsers] = useState([
-        { id: 1, name: 'Иван Иванов', email: 'ivan@example.com', role: 'user' },
-        { id: 2, name: 'Петр Петров', email: 'petr@example.com', role: 'admin' }
-    ]);
+    const [categories, setCategories] = useState([]);
+    const [productImages, setProductImages] = useState([]);
+    const [mainImageIndex, setMainImageIndex] = useState(0);
+    const [imageUrl, setImageUrl] = useState('');
+    const [isUrlValid, setIsUrlValid] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const [users, setUsers] = useState([]);
     const [editingUser, setEditingUser] = useState(null);
     const [replyingTo, setReplyingTo] = useState(null);
     const [replyText, setReplyText] = useState('');
+    const [reviews, setReviews] = useState([]);
+    
+    const fetchCategories = async () => {
+        try {
+            return await apiRequest('/api/categories');
+        } catch (error) {
+            console.error('Ошибка при загрузке категорий:', error);
+            return [];
+        }
+    };
 
-    // Отзывы
-    const [reviews, setReviews] = useState([
-        { id: 1, product: 'Телефон', user: 'Иван Иванов', rating: 5, text: 'Отличный товар!' },
-        { id: 2, product: 'Ноутбук', user: 'Петр Петров', rating: 3, text: 'Нормально, но могло быть лучше' }
-    ]);
+    const fetchUsers = async () => {
+        try {
+            const data = await apiRequest('/api/users', {
+                method: 'GET',
+                authenticated: true
+            });
+            setUsers(data || []);
+        } catch (error) {
+            console.error('Ошибка при загрузке пользователей:', error);
+            alert('Не удалось загрузить список пользователей');
+        }
+    };
 
+    const fetchReviews = async () => {
+        try {
+            const data = await apiRequest('/api/reviews', {
+                method: 'GET',
+                authenticated: true
+            });
+            setReviews(data || []);
+        } catch (error) {
+            console.error('Ошибка при загрузке отзывов:', error);
+            alert('Не удалось загрузить список отзывов');
+        }
+    };
+
+    const createProduct = async (productData) => {
+        try {
+            return await apiRequest('/api/products', {
+                method: 'POST',
+                body: productData,
+                authenticated: true
+            });
+        } catch (error) {
+            console.error('Ошибка при создании товара:', error);
+            throw error;
+        }
+    };
+
+    const addProductImages = async (productId, images) => {
+        try {
+            const requests = images.map(image =>
+                apiRequest('/api/productimages', {
+                    method: 'POST',
+                    body: {
+                        ProductId: productId,
+                        ImageUrl: image.url,
+                        IsMain: image.isMain
+                    },
+                    authenticated: true
+                })
+            );
+            return await Promise.all(requests);
+        } catch (error) {
+            console.error('Ошибка при добавлении изображений:', error);
+            throw error;
+        }
+    };
 
     const handleReplySubmit = (reviewId) => {
-        // Логика сохранения ответа
         setReplyingTo(null);
         setReplyText('');
     };
 
-    const handleReviewApprove = (reviewId) => {
-        // Логика одобрения/снятия одобрения отзыва
+    const handleReviewApprove = async (reviewId) => {
+        const reviewToUpdate = reviews.find(r => r.id === reviewId);
+        if (!reviewToUpdate) return;
+
+        try {
+            const response = await apiRequest(`/api/reviews/${reviewId}`, {
+                method: 'PUT',
+                body: {
+                    text: reviewToUpdate.text,
+                    reply: reviewToUpdate.reply,
+                    approved: !reviewToUpdate.approved
+                },
+                authenticated: true
+            });
+
+            if (response.ok) {
+                const updatedReviews = reviews.map(r =>
+                    r.id === reviewId ? { ...r, approved: !r.approved } : r
+                );
+                setReviews(updatedReviews);
+            } else {
+                throw new Error('Не удалось изменить статус одобрения');
+            }
+        } catch (error) {
+            alert(`Ошибка изменения статуса отзыва: ${error.message}`);
+            console.error('Ошибка:', error);
+        }
     };
-    // Данные товара
+
+    const handleReviewSave = async (reviewId) => {
+        const reviewToUpdate = reviews.find(r => r.id === reviewId);
+        if (!reviewToUpdate || !replyText.trim()) return;
+
+        try {
+            const response = await apiRequest(`/api/reviews/${reviewId}`, {
+                method: 'PUT',
+                body: {
+                    text: reviewToUpdate.text,
+                    reply: replyText,
+                    approved: reviewToUpdate.approved
+                },
+                authenticated: true
+            });
+
+            if (response.ok) {
+                const updatedReviews = reviews.map(r =>
+                    r.id === reviewId ? { ...r, reply: replyText } : r
+                );
+                setReviews(updatedReviews);
+                setReplyingTo(null);
+                setReplyText('');
+                alert("Ответ успешно отправлен");
+            } else {
+                throw new Error('Не удалось сохранить ответ');
+            }
+        } catch (error) {
+            alert(`Ошибка при отправке ответа: ${error.message}`);
+            console.error('Ошибка:', error);
+        }
+    };
+
     const [newProduct, setNewProduct] = useState({
         name: '',
         description: '',
@@ -41,46 +164,30 @@ const AdminPanel = () => {
         rating: ''
     });
 
-    // Изображения товара
-    const [productImages, setProductImages] = useState([]);
-    const [mainImageIndex, setMainImageIndex] = useState(0);
-    const [imageUrl, setImageUrl] = useState('');
-    const [isUrlValid, setIsUrlValid] = useState(true);
-
-    // Валидация URL изображения
     const validateImageUrl = (url) => {
         const pattern = /^(https?:\/\/).*\.(jpg|jpeg|png|gif|webp)$/i;
         return pattern.test(url);
     };
 
-    // Добавление изображения по ссылке
     const handleAddImageByUrl = () => {
         if (!imageUrl.trim()) return;
-
         const isValid = validateImageUrl(imageUrl);
         setIsUrlValid(isValid);
-
         if (!isValid) return;
-
         const newImage = {
             url: imageUrl,
             isMain: productImages.length === 0
         };
-
         setProductImages(prev => [...prev, newImage]);
-
         if (productImages.length === 0) {
             setMainImageIndex(0);
         }
-
         setImageUrl('');
     };
 
-    // Удаление изображения
     const handleRemoveImage = (index) => {
         const newImages = productImages.filter((_, i) => i !== index);
         setProductImages(newImages);
-
         if (index === mainImageIndex) {
             if (newImages.length > 0) {
                 setMainImageIndex(0);
@@ -93,7 +200,6 @@ const AdminPanel = () => {
         }
     };
 
-    // Установка основного изображения
     const handleSetMainImage = (index) => {
         const newImages = productImages.map((img, i) => ({
             ...img,
@@ -103,70 +209,145 @@ const AdminPanel = () => {
         setMainImageIndex(index);
     };
 
-    // Управление пользователями
     const handleUserEdit = (user) => {
         setEditingUser({ ...user });
     };
 
-    const handleUserSave = () => {
-        setUsers(users.map(u => u.id === editingUser.id ? editingUser : u));
-        setEditingUser(null);
+    const handleUserSave = async () => {
+        if (!editingUser) return;
+
+        try {
+            const response = await apiRequest(`/api/users/${editingUser.id}`, {
+                method: 'PUT',
+                body: {
+                    name: editingUser.name,
+                    email: editingUser.email,
+                    role: editingUser.role
+                },
+                authenticated: true
+            });
+
+            if (response.ok) {
+                setUsers(users.map(u => u.id === editingUser.id ? editingUser : u));
+                setEditingUser(null);
+                alert("Пользователь успешно сохранён!");
+            } else {
+                throw new Error('Не удалось сохранить изменения');
+            }
+        } catch (error) {
+            alert(`Ошибка при сохранении пользователя: ${error.message}`);
+            console.error('Ошибка:', error);
+        }
     };
 
-    const handleUserDelete = (userId) => {
-        setUsers(users.filter(u => u.id !== userId));
+    const handleUserDelete = async (userId) => {
+        if (!window.confirm("Вы уверены, что хотите удалить этого пользователя?")) return;
+
+        try {
+            const response = await apiRequest(`/api/users/${userId}`, {
+                method: 'DELETE',
+                authenticated: true
+            });
+
+            if (response.ok) {
+                setUsers(users.filter(u => u.id !== userId));
+                alert("Пользователь успешно удалён");
+            } else {
+                throw new Error('Не удалось удалить пользователя');
+            }
+        } catch (error) {
+            alert(`Ошибка при удалении пользователя: ${error.message}`);
+            console.error('Ошибка:', error);
+        }
     };
 
-    // Управление отзывами
-    const handleReviewDelete = (reviewId) => {
-        setReviews(reviews.filter(r => r.id !== reviewId));
+    const handleReviewDelete = async (reviewId) => {
+        if (!window.confirm("Вы уверены, что хотите удалить этот отзыв?")) return;
+
+        try {
+            const response = await apiRequest(`/api/reviews/${reviewId}`, {
+                method: 'DELETE',
+                authenticated: true
+            });
+
+            if (response.ok) {
+                setReviews(reviews.filter(r => r.id !== reviewId));
+                alert("Отзыв успешно удалён");
+            } else {
+                throw new Error('Не удалось удалить отзыв');
+            }
+        } catch (error) {
+            alert(`Ошибка при удалении отзыва: ${error.message}`);
+            console.error('Ошибка:', error);
+        }
     };
 
-    // Изменение данных товара
     const handleProductInputChange = (e) => {
         const { name, value } = e.target;
         setNewProduct(prev => ({ ...prev, [name]: value }));
     };
 
-    // Добавление товара
-    const handleAddProduct = () => {
-        const productData = {
-            ...newProduct,
-            price: parseFloat(newProduct.price),
-            oldPrice: parseFloat(newProduct.oldPrice),
-            quantityInStock: parseInt(newProduct.quantityInStock),
-            categoryId: parseInt(newProduct.categoryId),
-            rating: parseFloat(newProduct.rating),
-            createdAt: new Date().toISOString(),
-            images: productImages,
-            mainImageIndex
-        };
-
-        console.log('Добавляемый товар:', productData);
-        alert(`Товар "${newProduct.name}" добавлен!`);
-
-        // Сброс формы
-        setNewProduct({
-            name: '',
-            description: '',
-            price: '',
-            oldPrice: '',
-            quantityInStock: '',
-            categoryId: '',
-            isActive: true,
-            rating: ''
-        });
-        setProductImages([]);
-        setMainImageIndex(0);
-        setImageUrl('');
+    const handleAddProduct = async () => {
+        if (!isAuthenticated) {
+            alert('Недостаточно прав для выполнения этой операции');
+            return;
+        }
+        setIsLoading(true);
+        try {
+            const productData = {
+                name: newProduct.name,
+                description: newProduct.description,
+                price: parseFloat(newProduct.price),
+                oldPrice: newProduct.oldPrice ? parseFloat(newProduct.oldPrice) : null,
+                quantityInStock: parseInt(newProduct.quantityInStock),
+                categoryId: parseInt(newProduct.categoryId),
+                isActive: newProduct.isActive,
+                rating: newProduct.rating ? parseFloat(newProduct.rating) : null
+            };
+            const createdProduct = await createProduct(productData);
+            if (productImages.length > 0) {
+                const imagesWithMainFlag = productImages.map((img, index) => ({
+                    url: img.url,
+                    isMain: index === mainImageIndex
+                }));
+                await addProductImages(createdProduct.id, imagesWithMainFlag);
+            }
+            alert(`Товар "${newProduct.name}" успешно добавлен!`);
+            setNewProduct({
+                name: '',
+                description: '',
+                price: '',
+                oldPrice: '',
+                quantityInStock: '',
+                categoryId: '',
+                isActive: true,
+                rating: ''
+            });
+            setProductImages([]);
+            setMainImageIndex(0);
+            setImageUrl('');
+        } catch (error) {
+            console.error('Ошибка при добавлении товара:', error);
+            alert(`Ошибка при добавлении товара: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
+    useEffect(() => {
+        const loadData = async () => {
+            await fetchCategories();
+            await fetchUsers();
+            await fetchReviews(); 
+        };
+        loadData();
+    }, []);
+    console.log(role)
     return (
         <div className={styles.profileCard}>
             <div className={styles.cardHeader}>
                 <h1 className={styles.cardTitle}>Админ панель</h1>
             </div>
-
             <div className={styles.tabsContainer}>
                 <div className={styles.tabs}>
                     <button
@@ -263,16 +444,22 @@ const AdminPanel = () => {
                                 </div>
 
                                 <div className={styles.formGroup}>
-                                    <label>ID категории*</label>
-                                    <input
-                                        type="number"
+                                    <label>Категория*</label>
+                                    <select
                                         name="categoryId"
                                         value={newProduct.categoryId}
                                         onChange={handleProductInputChange}
                                         className={styles.formInput}
-                                        min="1"
                                         required
-                                    />
+                                        disabled={isLoading}
+                                    >
+                                        <option value="">Выберите категорию</option>
+                                        {categories.map(category => (
+                                            <option key={category.id} value={category.id}>
+                                                {category.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
 
                                 <div className={styles.formGroup}>
@@ -489,15 +676,15 @@ const AdminPanel = () => {
 
                                     {replyingTo === review.id && (
                                         <div className={styles.replyForm}>
-                            <textarea
-                                value={replyText}
-                                onChange={(e) => setReplyText(e.target.value)}
-                                className={styles.replyTextarea}
-                                placeholder="Введите ваш ответ на отзыв"
-                            />
+                                            <textarea
+                                                value={replyText}
+                                                onChange={(e) => setReplyText(e.target.value)}
+                                                className={styles.replyTextarea}
+                                                placeholder="Введите ваш ответ на отзыв"
+                                            />
                                             <div className={styles.replyFormActions}>
                                                 <button
-                                                    onClick={() => handleReplySubmit(review.id)}
+                                                    onClick={() => handleReviewSave(review.id)}
                                                     className={styles.smallButton}
                                                 >
                                                     Отправить ответ

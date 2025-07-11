@@ -9,7 +9,7 @@ const useToken = () => {
         isAuthenticated: false,
         userId: null,
         email: null,
-        roleId: null,
+        role: null,
         token: null,
         refreshToken: null,
         isLoading: true
@@ -21,7 +21,7 @@ const useToken = () => {
             return {
                 userId: Number(decoded.userId || decoded.sub || localStorage.getItem('userId') || 0),
                 email: decoded.email || decoded.Email || 'Пользователь',
-                roleId: Number(decoded.roleId || decoded.role || 0)
+                role: Number(decoded.role || decoded.role || 0)
             };
         } catch (error) {
             console.error('Ошибка декодирования токена:', error);
@@ -41,7 +41,7 @@ const useToken = () => {
             isAuthenticated: true,
             userId: Number(userId || decoded.userId),
             email: decoded.email,
-            roleId: decoded.roleId,
+            role: decoded.role,
             token,
             refreshToken,
             isLoading: false
@@ -57,7 +57,7 @@ const useToken = () => {
             isAuthenticated: false,
             userId: null,
             email: null,
-            roleId: null,
+            role: null,
             token: null,
             refreshToken: null,
             isLoading: false
@@ -130,7 +130,7 @@ const useToken = () => {
                             isAuthenticated: true,
                             userId: decodedNew.userId,
                             email: decodedNew.email,
-                            roleId: decodedNew.roleId,
+                            role: decodedNew.role,
                             token: newTokens.token,
                             refreshToken: newTokens.refreshToken,
                             isLoading: false
@@ -170,14 +170,13 @@ const useToken = () => {
                     return;
                 }
 
-                // Используем userId из localStorage, если в токене его нет
                 const userId = decoded.userId || Number(storedUserId);
                 
                 setAuth({
                     isAuthenticated: true,
                     userId: Number(userId),
                     email: decoded.email,
-                    roleId: decoded.roleId,
+                    role: decoded.role,
                     token,
                     refreshToken,
                     isLoading: false

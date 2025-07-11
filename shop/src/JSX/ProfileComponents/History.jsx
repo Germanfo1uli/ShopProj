@@ -8,6 +8,7 @@ import { apiRequest } from '../Api/ApiRequest.js';
 const History = () => {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [productNames, setProductNames] = useState({});
     const [error, setError] = useState(null);
     const { userId, isAuthenticated } = useAuth();
     const [productImages, setProductImages] = useState({});
@@ -24,17 +25,25 @@ const History = () => {
                 setHistory(response?.slice(0, 10) || []);
                 
                 const images = {};
+                const names = {}; 
                 const itemsToProcess = response?.slice(0, 10) || [];
+                
                 for (const item of itemsToProcess) {
                     try {
+                        const productResponse = await apiRequest(`/api/products/${item.productId}`);
+                        names[item.productId] = productResponse.product.name;
+                        
                         const imageResponse = await apiRequest(`/api/products/${item.productId}/main`);
                         images[item.productId] = imageResponse?.imageUrl || 'https://via.placeholder.com/150';
                     } catch (err) {
-                        console.error(`Error fetching image for product ${item.productId}:`, err);
+                        console.error(`Error fetching data for product ${item.productId}:`, err);
+                        names[item.productId] = 'Неизвестный продукт';
                         images[item.productId] = 'https://via.placeholder.com/150';
                     }
                 }
+                
                 setProductImages(images);
+                setProductNames(names);
             } catch (err) {
                 setError(err.message || 'Failed to fetch view history');
                 console.error('Error fetching view history:', err);
@@ -88,7 +97,7 @@ const History = () => {
                                 />
                             </div>
                             <div className={styles.productDetails}>
-                                <h3 className={styles.productTitle}>{item.productName}</h3>
+                                <h3 className={styles.productTitle}>{productNames[item.productId] || 'Загрузка...'}</h3>
                                 <Link
                                     to={`/product/${item.productId}`}
                                     className={styles.viewProductButton}

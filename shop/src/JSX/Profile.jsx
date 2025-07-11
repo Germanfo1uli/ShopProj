@@ -113,8 +113,8 @@ const Profile = () => {
                     'Content-Type': 'application/json'
                 },
                 body: profileData
+                
             });
-            
             setProfileData(updatedData);
             setIsEditing(false);
         } catch (err) {
