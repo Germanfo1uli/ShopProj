@@ -1,25 +1,25 @@
 import { useState, useEffect } from 'react';
 import styles from '../../CSS/ProfileCSS/FavoritetesTab.module.css';
-import { FaHeart, FaRegHeart, FaStar, FaRegStar, FaStarHalfAlt, FaSearch } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { FaRegHeart, FaStar, FaRegStar, FaStarHalfAlt } from 'react-icons/fa';
 import { useAuth } from '../Hooks/UseAuth.js';
 import { apiRequest } from '../Api/ApiRequest.js';
+import ProductCard from '../Components/ProductCard';
 
 const FavoritesTab = () => {
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { userId, isAuthenticated } = useAuth();
-    const [productImages, setProductImages] = useState({}); 
+    const [productImages, setProductImages] = useState({});
 
     useEffect(() => {
         const fetchFavorites = async () => {
             try {
                 if (!userId || !isAuthenticated) return;
-                
+
                 setLoading(true);
                 const response = await apiRequest(`/api/userfavorites/${userId}`, {
-                    authenticated: isAuthenticated 
+                    authenticated: isAuthenticated
                 });
                 setFavorites(response || []);
                 const images = {};
@@ -47,7 +47,7 @@ const FavoritesTab = () => {
     const removeFromFavorites = async (productId) => {
         try {
             if (!userId || !isAuthenticated) return;
-            
+
             await apiRequest('/api/userfavorites', {
                 method: 'DELETE',
                 body: {
@@ -56,14 +56,14 @@ const FavoritesTab = () => {
                 },
                 authenticated: isAuthenticated
             });
-            
+
             setFavorites(favorites.filter(item => item.id !== productId));
             setProductImages(prev => {
                 const newImages = {...prev};
                 delete newImages[productId];
                 return newImages;
             });
-        } 
+        }
         catch (err) {
             console.error('Error removing favorite:', err);
             alert(err.message || 'Failed to remove favorite');
@@ -111,49 +111,13 @@ const FavoritesTab = () => {
             {favorites.length > 0 ? (
                 <div className={styles.products}>
                     {favorites.map(item => (
-                        <div key={item.id} className={styles.productCard}>
-                            <div
-                                className={styles.productImageWrapper}
-                                style={{ backgroundColor: '#f5f5f5' }}
-                            >
-                                <button
-                                    className={styles.favoriteButton}
-                                    onClick={() => removeFromFavorites(item.id)}
-                                >
-                                    <FaHeart className={styles.favoriteIconActive} />
-                                </button>
-                                <img
-                                    src={productImages[item.id] || 'https://via.placeholder.com/150'}
-                                    alt={item.name}
-                                    className={styles.productImage}
-                                    onError={(e) => {
-                                        e.target.src = 'https://via.placeholder.com/150';
-                                    }}
-                                />
-                            </div>
-                            <div className={styles.productDetails}>
-                                <h3 className={styles.productTitle}>{item.name}</h3>
-                                <div className={styles.priceContainer}>
-                                    <span className={styles.currentPrice}>{item.price?.toLocaleString()} ₽</span>
-                                    {item.oldPrice && (
-                                        <span className={styles.oldPrice}>{item.oldPrice?.toLocaleString()} ₽</span>
-                                    )}
-                                </div>
-                                <div className={styles.ratingContainer}>
-                                    <div className={styles.stars}>
-                                        {renderStars(item.rating || 0)}
-                                    </div>
-                                    <span className={styles.reviewsCount}>({item.reviewsNumber || 0})</span>
-                                </div>
-                                <Link
-                                    to={`/product/${item.id}`}
-                                    className={styles.viewProductButton}
-                                >
-                                    <FaSearch className={styles.searchIcon} />
-                                    Перейти к товару
-                                </Link>
-                            </div>
-                        </div>
+                        <ProductCard
+                            key={item.id}
+                            item={item}
+                            productImages={productImages}
+                            removeFromFavorites={removeFromFavorites}
+                            renderStars={renderStars}
+                        />
                     ))}
                 </div>
             ) : (

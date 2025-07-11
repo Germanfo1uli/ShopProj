@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import styles from '../../CSS/ProfileCSS/History.module.css';
-import { FaSearch, FaClock } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { FaClock } from 'react-icons/fa';
 import { useAuth } from '../Hooks/UseAuth.js';
 import { apiRequest } from '../Api/ApiRequest.js';
+import ProductCard from '../Components/HistoryCard';
 
 const History = () => {
     const [history, setHistory] = useState([]);
@@ -76,31 +76,11 @@ const History = () => {
             {history.length > 0 ? (
                 <div className={styles.products}>
                     {history.map(item => (
-                        <div key={`${item.productId}-${item.viewedAt}`} className={styles.productCard}>
-                            <div className={styles.productImageWrapper}>
-                                <img
-                                    src={productImages[item.productId] || 'https://via.placeholder.com/300'}
-                                    alt={item.productName}
-                                    className={styles.productImage}
-                                    onError={(e) => {
-                                        e.target.src = 'https://via.placeholder.com/300';
-                                    }}
-                                />
-                            </div>
-                            <div className={styles.productDetails}>
-                                <h3 className={styles.productTitle}>{item.productName}</h3>
-                                <div className={styles.viewedAt}>
-                                    Просмотрено: {new Date(item.viewedAt).toLocaleDateString()}
-                                </div>
-                                <Link
-                                    to={`/product/${item.productId}`}
-                                    className={styles.viewProductButton}
-                                >
-                                    <FaSearch className={styles.searchIcon} />
-                                    Перейти к товару
-                                </Link>
-                            </div>
-                        </div>
+                        <ProductCard
+                            key={`${item.productId}-${item.viewedAt}`}
+                            item={item}
+                            productImages={productImages}
+                        />
                     ))}
                 </div>
             ) : (
