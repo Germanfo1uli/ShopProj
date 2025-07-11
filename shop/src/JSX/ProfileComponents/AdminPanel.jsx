@@ -14,11 +14,26 @@ const AdminPanel = () => {
     const [isUrlValid, setIsUrlValid] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [users, setUsers] = useState([]);
+    const [userRoles, setUserRoles] = useState([]); 
+    const [rolesMap] = useState({
+        1: 'Администратор',
+        2: 'Модератор',
+        3: 'Пользователь'
+    });
     const [editingUser, setEditingUser] = useState(null);
-    const [replyingTo, setReplyingTo] = useState(null);
-    const [replyText, setReplyText] = useState('');
     const [reviews, setReviews] = useState([]);
-    
+
+    const [newProduct, setNewProduct] = useState({
+        name: '',
+        description: '',
+        price: '',
+        oldPrice: '',
+        quantityInStock: '',
+        categoryId: '',
+        isActive: true,
+        rating: ''
+    });
+
     const fetchCategories = async () => {
         try {
             return await apiRequest('/api/categories');
@@ -35,9 +50,22 @@ const AdminPanel = () => {
                 authenticated: true
             });
             setUsers(data || []);
+            
         } catch (error) {
             console.error('Ошибка при загрузке пользователей:', error);
-            alert('Не удалось загрузить список пользователей');
+        }
+    };
+
+    const fetchUserRoles = async () => {
+        try {
+            const data = await apiRequest('/api/userroles', {
+                method: 'GET',
+                authenticated: true
+            });
+            setUserRoles(data || []);
+            
+        } catch (error) {
+            console.error('Ошибка при загрузке ролей:', error);
         }
     };
 
@@ -48,6 +76,7 @@ const AdminPanel = () => {
                 authenticated: true
             });
             setReviews(data || []);
+            console.log(data)
         } catch (error) {
             console.error('Ошибка при загрузке отзывов:', error);
             alert('Не удалось загрузить список отзывов');
@@ -87,82 +116,50 @@ const AdminPanel = () => {
         }
     };
 
-    const handleReplySubmit = (reviewId) => {
-        setReplyingTo(null);
-        setReplyText('');
-    };
-
     const handleReviewApprove = async (reviewId) => {
+        const userIdClaim = localStorage.getItem('userId');
+        if (!userIdClaim) {
+            alert('Не удалось идентифицировать модератора');
+            return;
+        }
+
+        const moderatorId = parseInt(userIdClaim);
         const reviewToUpdate = reviews.find(r => r.id === reviewId);
         if (!reviewToUpdate) return;
 
         try {
-            const response = await apiRequest(`/api/reviews/${reviewId}`, {
-                method: 'PUT',
+            const currentApprovedStatus = reviewToUpdate.approved;
+            const endpoint = currentApprovedStatus ? 'reject' : 'approve';
+            
+            const updatedReviews = reviews.map(r =>
+                r.id === reviewId ? { 
+                    ...r, 
+                    approved: !currentApprovedStatus,
+                    moderatorId: moderatorId,
+                    moderatedAt: new Date().toISOString()
+                } : r
+            );
+            setReviews(updatedReviews);
+
+            await apiRequest(`/api/reviews/${reviewId}/${endpoint}`, {
+                method: 'PATCH',
                 body: {
-                    text: reviewToUpdate.text,
-                    reply: reviewToUpdate.reply,
-                    approved: !reviewToUpdate.approved
+                    moderatorId: moderatorId,
+                    moderatorComment: reviewToUpdate.moderatorComment || null
                 },
                 authenticated: true
             });
 
-            if (response.ok) {
-                const updatedReviews = reviews.map(r =>
-                    r.id === reviewId ? { ...r, approved: !r.approved } : r
-                );
-                setReviews(updatedReviews);
-            } else {
-                throw new Error('Не удалось изменить статус одобрения');
-            }
+            alert(`Отзыв успешно ${currentApprovedStatus ? 'отклонён' : 'одобрен'}`);
+            
         } catch (error) {
+            setReviews(reviews);
+            console.error('Ошибка:', error);
             alert(`Ошибка изменения статуса отзыва: ${error.message}`);
-            console.error('Ошибка:', error);
         }
     };
 
-    const handleReviewSave = async (reviewId) => {
-        const reviewToUpdate = reviews.find(r => r.id === reviewId);
-        if (!reviewToUpdate || !replyText.trim()) return;
-
-        try {
-            const response = await apiRequest(`/api/reviews/${reviewId}`, {
-                method: 'PUT',
-                body: {
-                    text: reviewToUpdate.text,
-                    reply: replyText,
-                    approved: reviewToUpdate.approved
-                },
-                authenticated: true
-            });
-
-            if (response.ok) {
-                const updatedReviews = reviews.map(r =>
-                    r.id === reviewId ? { ...r, reply: replyText } : r
-                );
-                setReviews(updatedReviews);
-                setReplyingTo(null);
-                setReplyText('');
-                alert("Ответ успешно отправлен");
-            } else {
-                throw new Error('Не удалось сохранить ответ');
-            }
-        } catch (error) {
-            alert(`Ошибка при отправке ответа: ${error.message}`);
-            console.error('Ошибка:', error);
-        }
-    };
-
-    const [newProduct, setNewProduct] = useState({
-        name: '',
-        description: '',
-        price: '',
-        oldPrice: '',
-        quantityInStock: '',
-        categoryId: '',
-        isActive: true,
-        rating: ''
-    });
+    
 
     const validateImageUrl = (url) => {
         const pattern = /^(https?:\/\/).*\.(jpg|jpeg|png|gif|webp)$/i;
@@ -210,54 +207,86 @@ const AdminPanel = () => {
     };
 
     const handleUserEdit = (user) => {
-        setEditingUser({ ...user });
+        const userRole = userRoles.find(ur => ur.userId === user.id);
+        setEditingUser({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: userRole ? rolesMap[userRole.roleId] : 'Неизвестная роль',
+            roleId: userRole ? userRole.roleId : 3
+        });
     };
 
     const handleUserSave = async () => {
         if (!editingUser) return;
 
+        const userId = editingUser.id;
+        const { name, email, roleId } = editingUser;
+
         try {
-            const response = await apiRequest(`/api/users/${editingUser.id}`, {
+            const userResponse = await apiRequest(`/api/users/${userId}`, {
                 method: 'PUT',
-                body: {
-                    name: editingUser.name,
-                    email: editingUser.email,
-                    role: editingUser.role
+                body: { name, email },
+                authenticated: true
+            });
+            
+            const roleResponse = await apiRequest(`/api/userroles/${userId}`, {
+                method: 'PUT',
+                body: roleId, 
+                headers: {
+                    'Content-Type': 'application/json'
                 },
                 authenticated: true
             });
 
-            if (response.ok) {
-                setUsers(users.map(u => u.id === editingUser.id ? editingUser : u));
+            if (userResponse.ok && roleResponse.ok) {
+                setUsers(users.map(u => u.id === userId ? { ...u, name, email } : u));
+                setUserRoles(userRoles.map(ur => 
+                    ur.userId === userId ? { ...ur, roleId } : ur
+                ));
                 setEditingUser(null);
-                alert("Пользователь успешно сохранён!");
+                alert("Данные и роль пользователя успешно обновлены");
             } else {
-                throw new Error('Не удалось сохранить изменения');
+                throw new Error("Не удалось сохранить изменения");
             }
         } catch (error) {
-            alert(`Ошибка при сохранении пользователя: ${error.message}`);
-            console.error('Ошибка:', error);
+            alert(`Ошибка при сохранении: ${error.message}`);
+            console.error("Ошибка:", error);
         }
     };
+
 
     const handleUserDelete = async (userId) => {
         if (!window.confirm("Вы уверены, что хотите удалить этого пользователя?")) return;
 
         try {
-            const response = await apiRequest(`/api/users/${userId}`, {
+            const roleDeleteResponse = await apiRequest(`/api/userroles/${userId}`, {
                 method: 'DELETE',
                 authenticated: true
             });
 
-            if (response.ok) {
+            if (!roleDeleteResponse.ok) {
+                throw new Error("Не удалось удалить роль пользователя");
+            }
+
+            const userDeleteResponse = await apiRequest(`/api/users/${userId}`, {
+                method: 'DELETE',
+                authenticated: true
+            });
+
+            if (userDeleteResponse.ok) {
                 setUsers(users.filter(u => u.id !== userId));
+                setUserRoles(userRoles.filter(ur => ur.userId !== userId));
                 alert("Пользователь успешно удалён");
             } else {
-                throw new Error('Не удалось удалить пользователя');
+                throw new Error("Не удалось удалить пользователя");
             }
         } catch (error) {
-            alert(`Ошибка при удалении пользователя: ${error.message}`);
-            console.error('Ошибка:', error);
+            console.error("Ошибка при удалении:", error);
+            alert(`Ошибка при удалении: ${error.message}`);
+            
+            await fetchUsers();
+            await fetchUserRoles();
         }
     };
 
@@ -265,21 +294,28 @@ const AdminPanel = () => {
         if (!window.confirm("Вы уверены, что хотите удалить этот отзыв?")) return;
 
         try {
-            const response = await apiRequest(`/api/reviews/${reviewId}`, {
+            const reviewToDelete = reviews.find(r => r.id === reviewId);
+            const updatedReviews = reviews.filter(r => r.id !== reviewId);
+            setReviews(updatedReviews);
+
+            await apiRequest(`/api/reviews/${reviewId}`, {
                 method: 'DELETE',
                 authenticated: true
             });
 
-            if (response.ok) {
-                setReviews(reviews.filter(r => r.id !== reviewId));
-                alert("Отзыв успешно удалён");
-            } else {
-                throw new Error('Не удалось удалить отзыв');
-            }
-        } catch (error) {
+            alert("Отзыв успешно удалён");
+            
+        } 
+        catch (error) {
+            setReviews(reviews);
+            console.error('Ошибка при удалении отзыва:', error);
             alert(`Ошибка при удалении отзыва: ${error.message}`);
-            console.error('Ошибка:', error);
         }
+    };
+
+    const handleRoleChange = (e) => {
+        const selectedRoleId = parseInt(e.target.value);
+        setEditingUser({ ...editingUser, roleId: selectedRoleId });
     };
 
     const handleProductInputChange = (e) => {
@@ -338,12 +374,13 @@ const AdminPanel = () => {
         const loadData = async () => {
             await fetchCategories();
             await fetchUsers();
-            await fetchReviews(); 
+            await fetchReviews();
+            await fetchUserRoles();
         };
         loadData();
     }, []);
-    console.log(role)
-    return (
+    
+    return (    
         <div className={styles.profileCard}>
             <div className={styles.cardHeader}>
                 <h1 className={styles.cardTitle}>Админ панель</h1>
@@ -559,71 +596,77 @@ const AdminPanel = () => {
                         <div className={styles.tableContainer}>
                             <table className={styles.usersTable}>
                                 <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Имя</th>
-                                    <th>Email</th>
-                                    <th>Роль</th>
-                                    <th>Действия</th>
-                                </tr>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Имя</th>
+                                        <th>Email</th>
+                                        <th>Роль</th>
+                                        <th>Действия</th>
+                                    </tr>
                                 </thead>
                                 <tbody>
-                                {users.map(user => (
-                                    <tr key={user.id}>
-                                        <td>{user.id}</td>
-                                        <td>
-                                            {editingUser?.id === user.id ? (
-                                                <input
-                                                    type="text"
-                                                    value={editingUser.name}
-                                                    onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                                                    className={styles.editInput}
-                                                />
-                                            ) : (
-                                                user.name
-                                            )}
-                                        </td>
-                                        <td>
-                                            {editingUser?.id === user.id ? (
-                                                <input
-                                                    type="email"
-                                                    value={editingUser.email}
-                                                    onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                                                    className={styles.editInput}
-                                                />
-                                            ) : (
-                                                user.email
-                                            )}
-                                        </td>
-                                        <td>
-                                            {editingUser?.id === user.id ? (
-                                                <select
-                                                    value={editingUser.role}
-                                                    onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                                                    className={styles.editSelect}
-                                                >
-                                                    <option value="user">Пользователь</option>
-                                                    <option value="admin">Администратор</option>
-                                                </select>
-                                            ) : (
-                                                user.role
-                                            )}
-                                        </td>
-                                        <td>
-                                            {editingUser?.id === user.id ? (
-                                                <>
-                                                    <button onClick={handleUserSave} className={styles.smallButton}>Сохранить</button>
-                                                    <button onClick={() => setEditingUser(null)} className={styles.smallButtonCancel}>Отмена</button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <button onClick={() => handleUserEdit(user)} className={styles.smallButton}>Редактировать</button>
-                                                    <button onClick={() => handleUserDelete(user.id)} className={styles.smallButtonDanger}>Удалить</button>
-                                                </>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
+                                    {users.map(user => {
+                                        const userRole = userRoles.find(ur => ur.userId === user.id);
+                                        const currentRole = userRole ? rolesMap[userRole.roleId] : 'Неизвестная роль';
+                                        
+                                        return (
+                                            <tr key={user.id}>
+                                                <td>{user.id}</td>
+                                                <td>
+                                                    {editingUser?.id === user.id ? (
+                                                        <input
+                                                            type="text"
+                                                            value={editingUser.name}
+                                                            onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                                                            className={styles.editInput}
+                                                        />
+                                                    ) : (
+                                                        user.firstName || user.name || 'Без имени'
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    {editingUser?.id === user.id ? (
+                                                        <input
+                                                            type="email"
+                                                            value={editingUser.email}
+                                                            onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                                                            className={styles.editInput}
+                                                        />
+                                                    ) : (
+                                                        user.email
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    {editingUser?.id === user.id ? (
+                                                        <select
+                                                            value={editingUser.roleId}
+                                                            onChange={handleRoleChange}
+                                                            className={styles.editSelect}
+                                                        >
+                                                            {Object.entries(rolesMap).map(([id, name]) => (
+                                                                <option key={id} value={id}>{name}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : (
+                                                        currentRole
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    {editingUser?.id === user.id ? (
+                                                        <>
+                                                            <button onClick={handleUserSave} className={styles.smallButton}>Сохранить</button>
+                                                            <button onClick={() => setEditingUser(null)} className={styles.smallButtonCancel}>Отмена</button>
+                                                        </>
+                                                    ) : (
+                                                        <>  
+                                                            <button onClick={() => handleUserEdit(user)} className={styles.smallButton}>Редактировать</button>
+                                                            <button onClick={() => handleUserDelete(user.id)} className={styles.smallButtonDanger}>Удалить</button>
+                                                        </>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -635,31 +678,15 @@ const AdminPanel = () => {
                         <h2 className={styles.settingsTitle}>Управление отзывами</h2>
                         <div className={styles.reviewsList}>
                             {reviews.map(review => (
-                                <div key={review.id} className={`${styles.reviewItem} ${review.approved ? styles.approved : ''} ${review.reply ? styles.hasReply : ''}`}>
+                                <div key={review.id} className={`${styles.reviewItem} ${review.approved ? styles.approved : ''}`}>
                                     <div className={styles.reviewHeader}>
-                                        <span className={styles.reviewProduct}>{review.product}</span>
-                                        <span className={styles.reviewUser}>{review.user}</span>
+                                        <span className={styles.reviewHeaderText}>{review.header}</span>
                                         <span className={styles.reviewRating}>Оценка: {review.rating}/5</span>
                                         {review.approved && <span className={styles.approvedBadge}>✓ Одобрен</span>}
                                     </div>
-                                    <div className={styles.reviewText}>{review.text}</div>
-
-                                    {review.reply && (
-                                        <div className={styles.reviewReply}>
-                                            <div className={styles.replyHeader}>Ответ администратора:</div>
-                                            <div className={styles.replyText}>{review.reply}</div>
-                                        </div>
-                                    )}
+                                    <div className={styles.reviewText}>{review.comment}</div>
 
                                     <div className={styles.reviewActions}>
-                                        {!review.reply && (
-                                            <button
-                                                onClick={() => setReplyingTo(review.id)}
-                                                className={styles.smallButtonSecondary}
-                                            >
-                                                Ответить
-                                            </button>
-                                        )}
                                         <button
                                             onClick={() => handleReviewApprove(review.id)}
                                             className={styles.smallButtonPrimary}
@@ -673,34 +700,6 @@ const AdminPanel = () => {
                                             Удалить
                                         </button>
                                     </div>
-
-                                    {replyingTo === review.id && (
-                                        <div className={styles.replyForm}>
-                                            <textarea
-                                                value={replyText}
-                                                onChange={(e) => setReplyText(e.target.value)}
-                                                className={styles.replyTextarea}
-                                                placeholder="Введите ваш ответ на отзыв"
-                                            />
-                                            <div className={styles.replyFormActions}>
-                                                <button
-                                                    onClick={() => handleReviewSave(review.id)}
-                                                    className={styles.smallButton}
-                                                >
-                                                    Отправить ответ
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        setReplyingTo(null);
-                                                        setReplyText('');
-                                                    }}
-                                                    className={styles.smallButtonCancel}
-                                                >
-                                                    Отмена
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             ))}
                         </div>
