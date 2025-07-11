@@ -8,11 +8,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ShopBack.Services
 {
-    public class UserService(IUsersRepository usersRepository, TokenService tokenService, IOrdersRepository ordersRepository) : Service<Users>(usersRepository)
+    public class UserService(IUsersRepository usersRepository,
+                             TokenService tokenService,
+                             IOrdersRepository ordersRepository,
+                             IRepository<UserRoles> userRoleRepository)
+                             : Service<Users>(usersRepository)
     {
         private readonly IUsersRepository _usersRepository = usersRepository;
         private readonly TokenService _tokenService = tokenService;
         private readonly IOrdersRepository _ordersRepository = ordersRepository;
+        private readonly IRepository<UserRoles> _userRoleRepository = userRoleRepository;
 
         public async Task<AuthResult> RegisterAsync(string email, string password, string firstName, string middleName, string lastName)
         {
@@ -105,11 +110,20 @@ namespace ShopBack.Services
 
         public async Task SwitchActivateAccountAsync(int userId)
         {
-            var user = await _usersRepository.GetByIdAsync(userId);
-            if(user == null)
-                throw new KeyNotFoundException("Пользователь с ID {userId} не найден");
+            var user = await _usersRepository.GetByIdAsync(userId) ?? throw new KeyNotFoundException("Пользователь с ID {userId} не найден");
             user.IsActive = !user.IsActive;
             await _usersRepository.UpdateAsync(user);
+        }
+
+        public async Task UpdateRoleAsync(int userId, int roleId)
+        {
+            await _usersRepository.DeleteUserRoleAsync(userId, roleId);
+            var userRole = new UserRoles
+            {
+                UserId = userId,
+                RoleId = roleId
+            };
+            await _userRoleRepository.AddAsync(userRole);
         }
 
         private static string GenerateSalt()

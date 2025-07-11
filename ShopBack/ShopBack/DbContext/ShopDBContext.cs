@@ -164,7 +164,7 @@ namespace ShopBack.Data
                 .HasOne(o => o.User)
                 .WithMany(u => u.Orders) // Добавляем навигацию в Users
                 .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Orders>()
                 .HasIndex(o => o.Status);
