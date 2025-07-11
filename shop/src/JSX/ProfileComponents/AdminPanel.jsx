@@ -36,9 +36,12 @@ const AdminPanel = () => {
 
     const fetchCategories = async () => {
         try {
-            return await apiRequest('/api/categories');
+            const data = await apiRequest('/api/categories');
+            setCategories(data || []);
+            return data;
         } catch (error) {
             console.error('Ошибка при загрузке категорий:', error);
+            setCategories([]);
             return [];
         }
     };
@@ -76,8 +79,8 @@ const AdminPanel = () => {
                 authenticated: true
             });
             setReviews(data || []);
-            console.log(data)
-        } catch (error) {
+        } 
+        catch (error) {
             console.error('Ошибка при загрузке отзывов:', error);
             alert('Не удалось загрузить список отзывов');
         }
@@ -159,18 +162,7 @@ const AdminPanel = () => {
         }
     };
 
-    
-
-    const validateImageUrl = (url) => {
-        const pattern = /^(https?:\/\/).*\.(jpg|jpeg|png|gif|webp)$/i;
-        return pattern.test(url);
-    };
-
     const handleAddImageByUrl = () => {
-        if (!imageUrl.trim()) return;
-        const isValid = validateImageUrl(imageUrl);
-        setIsUrlValid(isValid);
-        if (!isValid) return;
         const newImage = {
             url: imageUrl,
             isMain: productImages.length === 0
@@ -210,7 +202,7 @@ const AdminPanel = () => {
         const userRole = userRoles.find(ur => ur.userId === user.id);
         setEditingUser({
             id: user.id,
-            name: user.name,
+            name: user.firstName || user.name || '', // Используем firstName
             email: user.email,
             role: userRole ? rolesMap[userRole.roleId] : 'Неизвестная роль',
             roleId: userRole ? userRole.roleId : 3
@@ -226,29 +218,40 @@ const AdminPanel = () => {
         try {
             const userResponse = await apiRequest(`/api/users/${userId}`, {
                 method: 'PUT',
-                body: { name, email },
+                body: { 
+                    FirstName: name, 
+                    Email: email 
+                },
                 authenticated: true
             });
             
             const roleResponse = await apiRequest(`/api/userroles/${userId}`, {
                 method: 'PUT',
-                body: roleId, 
+                body: { 
+                    UserId: userId,
+                    RoleId: roleId 
+                },
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 authenticated: true
             });
 
-            if (userResponse.ok && roleResponse.ok) {
-                setUsers(users.map(u => u.id === userId ? { ...u, name, email } : u));
-                setUserRoles(userRoles.map(ur => 
-                    ur.userId === userId ? { ...ur, roleId } : ur
-                ));
-                setEditingUser(null);
-                alert("Данные и роль пользователя успешно обновлены");
-            } else {
-                throw new Error("Не удалось сохранить изменения");
-            }
+            setUsers(users.map(u => 
+                u.id === userId ? { 
+                    ...u, 
+                    firstName: name, 
+                    email: email 
+                } : u
+            ));
+            
+            setUserRoles(userRoles.map(ur => 
+                ur.userId === userId ? { ...ur, roleId } : ur
+            ));
+            
+            setEditingUser(null);
+            alert("Данные и роль пользователя успешно обновлены");
+            
         } catch (error) {
             alert(`Ошибка при сохранении: ${error.message}`);
             console.error("Ошибка:", error);
@@ -260,33 +263,22 @@ const AdminPanel = () => {
         if (!window.confirm("Вы уверены, что хотите удалить этого пользователя?")) return;
 
         try {
-            const roleDeleteResponse = await apiRequest(`/api/userroles/${userId}`, {
+            setUsers(users.filter(u => u.id !== userId));
+            setUserRoles(userRoles.filter(ur => ur.userId !== userId));
+
+            await apiRequest(`/api/users/${userId}`, {
                 method: 'DELETE',
                 authenticated: true
             });
 
-            if (!roleDeleteResponse.ok) {
-                throw new Error("Не удалось удалить роль пользователя");
-            }
-
-            const userDeleteResponse = await apiRequest(`/api/users/${userId}`, {
-                method: 'DELETE',
-                authenticated: true
-            });
-
-            if (userDeleteResponse.ok) {
-                setUsers(users.filter(u => u.id !== userId));
-                setUserRoles(userRoles.filter(ur => ur.userId !== userId));
-                alert("Пользователь успешно удалён");
-            } else {
-                throw new Error("Не удалось удалить пользователя");
-            }
-        } catch (error) {
-            console.error("Ошибка при удалении:", error);
-            alert(`Ошибка при удалении: ${error.message}`);
-            
+            alert("Пользователь успешно удалён");
+        } 
+        catch (error) {
             await fetchUsers();
             await fetchUserRoles();
+            
+            console.error("Ошибка при удалении:", error);
+            alert(`Ошибка при удалении: ${error.message}`);
         }
     };
 
@@ -372,10 +364,16 @@ const AdminPanel = () => {
 
     useEffect(() => {
         const loadData = async () => {
-            await fetchCategories();
-            await fetchUsers();
-            await fetchReviews();
-            await fetchUserRoles();
+            try {
+                await Promise.all([
+                    fetchCategories(),
+                    fetchUsers(),
+                    fetchReviews(),
+                    fetchUserRoles()
+                ]);
+            } catch (error) {
+                console.error('Ошибка при загрузке данных:', error);
+            }
         };
         loadData();
     }, []);
@@ -488,7 +486,7 @@ const AdminPanel = () => {
                                         onChange={handleProductInputChange}
                                         className={styles.formInput}
                                         required
-                                        disabled={isLoading}
+                                        disabled={isLoading || categories.length === 0}
                                     >
                                         <option value="">Выберите категорию</option>
                                         {categories.map(category => (
@@ -497,20 +495,6 @@ const AdminPanel = () => {
                                             </option>
                                         ))}
                                     </select>
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label>Рейтинг</label>
-                                    <input
-                                        type="number"
-                                        name="rating"
-                                        value={newProduct.rating}
-                                        onChange={handleProductInputChange}
-                                        className={styles.formInput}
-                                        min="0"
-                                        max="5"
-                                        step="0.1"
-                                    />
                                 </div>
 
                                 <div className={styles.formGroup}>
@@ -621,7 +605,7 @@ const AdminPanel = () => {
                                                             className={styles.editInput}
                                                         />
                                                     ) : (
-                                                        user.firstName || user.name || 'Без имени'
+                                                        user.firstName || 'Без имени' 
                                                     )}
                                                 </td>
                                                 <td>
