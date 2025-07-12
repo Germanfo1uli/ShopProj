@@ -8,17 +8,75 @@
     --danger-hover: #b91c1c;
     --disabled-color: #d1d5db;
 
+
     /* Фон и текст */
     --bg-color: #ffffff;
     --text-color: #111827;
     --button-text-light: #ffffff;
     --button-text-dark: #111827;
+    --highlight-bg: #f3f4f6;
 
     /* Дополнительные */
     --border-color: #e5e7eb;
     --shadow-color: rgba(0, 0, 0, 0.1);
+    --success-bg: #f0fdf4;
+    --success-border: #4ade80;
+    --success-text: #166534;
+    --error-bg: #fef2f2;
+    --error-border: #f87171;
+    --error-text: #b91c1c;
+    --info-bg: #eff6ff;
+    --info-border: #60a5fa;
+    --info-text: #1e40af;
+}
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 350px;
+    animation: slideIn 0.3s ease-out forwards;
+    border-left: 4px solid transparent;
 }
 
+.notificationContent {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.notificationClose {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-left: 15px;
+    padding: 0;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.notificationClose:hover {
+    opacity: 1;
+}
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
 /* Темная тема */
 [data-theme="dark"] {
     --primary-color: #3b82f6;
@@ -28,12 +86,20 @@
     --danger-color: #ef4444;
     --danger-hover: #dc2626;
     --disabled-color: #4b5563;
-
+    --success-bg: #052e16;
+    --success-border: #16a34a;
+    --success-text: #bbf7d0;
+    --error-bg: #450a0a;
+    --error-border: #dc2626;
+    --error-text: #fecaca;
+    --info-bg: #172554;
+    --info-border: #2563eb;
+    --info-text: #bfdbfe;
     --bg-color: #1e1e1e;
     --text-color: #e5e7eb;
     --button-text-light: #f9fafb;
     --button-text-dark: #e5e7eb;
-
+    --highlight-bg: #2d3748;
     --border-color: #374151;
     --shadow-color: rgba(0, 0, 0, 0.3);
 }
@@ -103,6 +169,113 @@
     right: 0;
     height: 2px;
     background-color: var(--primary-color);
+}
+
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+}
+
+.modal {
+    background-color: var(--bg-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 400px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modalHeader {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modalHeader h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+.modalCloseButton {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--secondary-color);
+    padding: 0;
+    line-height: 1;
+}
+
+.modalCloseButton:hover {
+    color: var(--text-color);
+}
+
+.modalBody {
+    padding: 20px;
+    color: var(--text-color);
+    line-height: 1.5;
+}
+
+.modalFooter {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modalCancelButton {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    background-color: transparent;
+    color: var(--text-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modalCancelButton:hover {
+    background-color: var(--highlight-bg);
+}
+
+.modalConfirmButton {
+    padding: 8px 16px;
+    border: none;
+    background-color: var(--danger-color);
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modalConfirmButton:hover {
+    background-color: var(--danger-hover);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Контент вкладок */

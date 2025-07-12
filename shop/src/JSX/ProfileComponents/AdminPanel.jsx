@@ -3,6 +3,77 @@ import styles from '../../CSS/ProfileCSS/AdminPanel.module.css';
 import { apiRequest } from '../Api/ApiRequest';
 import { useAuth } from '../Hooks/UseAuth';
 
+// Компонент для уведомлений
+const Notification = ({ message, type, onClose }) => {
+    const notificationStyles = {
+        success: {
+            backgroundColor: 'var(--success-bg)',
+            borderColor: 'var(--success-border)',
+            color: 'var(--success-text)'
+        },
+        error: {
+            backgroundColor: 'var(--error-bg)',
+            borderColor: 'var(--error-border)',
+            color: 'var(--error-text)'
+        },
+        info: {
+            backgroundColor: 'var(--info-bg)',
+            borderColor: 'var(--info-border)',
+            color: 'var(--info-text)'
+        }
+    };
+
+    return (
+        <div
+            className={styles.notification}
+            style={notificationStyles[type] || notificationStyles.info}
+        >
+            <div className={styles.notificationContent}>
+                {message}
+                <button onClick={onClose} className={styles.notificationClose}>
+                    &times;
+                </button>
+            </div>
+        </div>
+    );
+};
+
+// Компонент модального окна подтверждения
+const ConfirmationModal = ({
+                               isOpen,
+                               onClose,
+                               onConfirm,
+                               title,
+                               message,
+                               confirmText = "Подтвердить",
+                               cancelText = "Отмена"
+                           }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+                <div className={styles.modalHeader}>
+                    <h3>{title}</h3>
+                    <button onClick={onClose} className={styles.modalCloseButton}>
+                        &times;
+                    </button>
+                </div>
+                <div className={styles.modalBody}>
+                    <p>{message}</p>
+                </div>
+                <div className={styles.modalFooter}>
+                    <button onClick={onClose} className={styles.modalCancelButton}>
+                        {cancelText}
+                    </button>
+                    <button onClick={onConfirm} className={styles.modalConfirmButton}>
+                        {confirmText}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const AdminPanel = () => {
     const { isAuthenticated, role } = useAuth();
@@ -14,7 +85,7 @@ const AdminPanel = () => {
     const [isUrlValid, setIsUrlValid] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [users, setUsers] = useState([]);
-    const [userRoles, setUserRoles] = useState([]); 
+    const [userRoles, setUserRoles] = useState([]);
     const [rolesMap] = useState({
         1: 'Администратор',
         2: 'Модератор',
@@ -22,6 +93,13 @@ const AdminPanel = () => {
     });
     const [editingUser, setEditingUser] = useState(null);
     const [reviews, setReviews] = useState([]);
+    const [notification, setNotification] = useState(null);
+    const [confirmationModal, setConfirmationModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: null
+    });
 
     const [newProduct, setNewProduct] = useState({
         name: '',
@@ -33,6 +111,27 @@ const AdminPanel = () => {
         isActive: true,
         rating: ''
     });
+
+    const showNotification = (message, type = 'info', duration = 5000) => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), duration);
+    };
+
+    const showConfirmation = (title, message, onConfirm) => {
+        setConfirmationModal({
+            isOpen: true,
+            title,
+            message,
+            onConfirm: () => {
+                onConfirm();
+                setConfirmationModal({ ...confirmationModal, isOpen: false });
+            }
+        });
+    };
+
+    const closeConfirmation = () => {
+        setConfirmationModal({ ...confirmationModal, isOpen: false });
+    };
 
     const fetchCategories = async () => {
         try {
@@ -53,9 +152,10 @@ const AdminPanel = () => {
                 authenticated: true
             });
             setUsers(data || []);
-            
+
         } catch (error) {
             console.error('Ошибка при загрузке пользователей:', error);
+            showNotification('Ошибка при загрузке пользователей', 'error');
         }
     };
 
@@ -66,9 +166,10 @@ const AdminPanel = () => {
                 authenticated: true
             });
             setUserRoles(data || []);
-            
+
         } catch (error) {
             console.error('Ошибка при загрузке ролей:', error);
+            showNotification('Ошибка при загрузке ролей пользователей', 'error');
         }
     };
 
@@ -79,10 +180,10 @@ const AdminPanel = () => {
                 authenticated: true
             });
             setReviews(data || []);
-        } 
+        }
         catch (error) {
             console.error('Ошибка при загрузке отзывов:', error);
-            alert('Не удалось загрузить список отзывов');
+            showNotification('Не удалось загрузить список отзывов', 'error');
         }
     };
 
@@ -122,7 +223,7 @@ const AdminPanel = () => {
     const handleReviewApprove = async (reviewId) => {
         const userIdClaim = localStorage.getItem('userId');
         if (!userIdClaim) {
-            alert('Не удалось идентифицировать модератора');
+            showNotification('Не удалось идентифицировать модератора', 'error');
             return;
         }
 
@@ -133,10 +234,10 @@ const AdminPanel = () => {
         try {
             const currentApprovedStatus = reviewToUpdate.approved;
             const endpoint = currentApprovedStatus ? 'reject' : 'approve';
-            
+
             const updatedReviews = reviews.map(r =>
-                r.id === reviewId ? { 
-                    ...r, 
+                r.id === reviewId ? {
+                    ...r,
                     approved: !currentApprovedStatus,
                     moderatorId: moderatorId,
                     moderatedAt: new Date().toISOString()
@@ -153,12 +254,12 @@ const AdminPanel = () => {
                 authenticated: true
             });
 
-            alert(`Отзыв успешно ${currentApprovedStatus ? 'отклонён' : 'одобрен'}`);
-            
+            showNotification(`Отзыв успешно ${currentApprovedStatus ? 'отклонён' : 'одобрен'}`, 'success');
+
         } catch (error) {
             setReviews(reviews);
             console.error('Ошибка:', error);
-            alert(`Ошибка изменения статуса отзыва: ${error.message}`);
+            showNotification(`Ошибка изменения статуса отзыва: ${error.message}`, 'error');
         }
     };
 
@@ -172,6 +273,7 @@ const AdminPanel = () => {
             setMainImageIndex(0);
         }
         setImageUrl('');
+        showNotification('Изображение успешно добавлено', 'success');
     };
 
     const handleRemoveImage = (index) => {
@@ -187,6 +289,7 @@ const AdminPanel = () => {
         } else if (index < mainImageIndex) {
             setMainImageIndex(mainImageIndex - 1);
         }
+        showNotification('Изображение удалено', 'info');
     };
 
     const handleSetMainImage = (index) => {
@@ -196,13 +299,14 @@ const AdminPanel = () => {
         }));
         setProductImages(newImages);
         setMainImageIndex(index);
+        showNotification('Основное изображение изменено', 'success');
     };
 
     const handleUserEdit = (user) => {
         const userRole = userRoles.find(ur => ur.userId === user.id);
         setEditingUser({
             id: user.id,
-            name: user.firstName || user.name || '', // Используем firstName
+            name: user.firstName || user.name || '',
             email: user.email,
             role: userRole ? rolesMap[userRole.roleId] : 'Неизвестная роль',
             roleId: userRole ? userRole.roleId : 3
@@ -218,18 +322,18 @@ const AdminPanel = () => {
         try {
             const userResponse = await apiRequest(`/api/users/${userId}`, {
                 method: 'PUT',
-                body: { 
-                    FirstName: name, 
-                    Email: email 
+                body: {
+                    FirstName: name,
+                    Email: email
                 },
                 authenticated: true
             });
-            
+
             const roleResponse = await apiRequest(`/api/userroles/${userId}`, {
                 method: 'PUT',
-                body: { 
+                body: {
                     UserId: userId,
-                    RoleId: roleId 
+                    RoleId: roleId
                 },
                 headers: {
                     'Content-Type': 'application/json'
@@ -237,72 +341,79 @@ const AdminPanel = () => {
                 authenticated: true
             });
 
-            setUsers(users.map(u => 
-                u.id === userId ? { 
-                    ...u, 
-                    firstName: name, 
-                    email: email 
+            setUsers(users.map(u =>
+                u.id === userId ? {
+                    ...u,
+                    firstName: name,
+                    email: email
                 } : u
             ));
-            
-            setUserRoles(userRoles.map(ur => 
+
+            setUserRoles(userRoles.map(ur =>
                 ur.userId === userId ? { ...ur, roleId } : ur
             ));
-            
+
             setEditingUser(null);
-            alert("Данные и роль пользователя успешно обновлены");
-            
+            showNotification("Данные и роль пользователя успешно обновлены", 'success');
+
         } catch (error) {
-            alert(`Ошибка при сохранении: ${error.message}`);
+            showNotification(`Ошибка при сохранении: ${error.message}`, 'error');
             console.error("Ошибка:", error);
         }
     };
 
-
     const handleUserDelete = async (userId) => {
-        if (!window.confirm("Вы уверены, что хотите удалить этого пользователя?")) return;
+        const userToDelete = users.find(u => u.id === userId);
+        showConfirmation(
+            "Удаление пользователя",
+            `Вы уверены, что хотите удалить пользователя ${userToDelete?.firstName || userToDelete?.email || 'без имени'}?`,
+            async () => {
+                try {
+                    setUsers(users.filter(u => u.id !== userId));
+                    setUserRoles(userRoles.filter(ur => ur.userId !== userId));
 
-        try {
-            setUsers(users.filter(u => u.id !== userId));
-            setUserRoles(userRoles.filter(ur => ur.userId !== userId));
+                    await apiRequest(`/api/users/${userId}`, {
+                        method: 'DELETE',
+                        authenticated: true
+                    });
 
-            await apiRequest(`/api/users/${userId}`, {
-                method: 'DELETE',
-                authenticated: true
-            });
+                    showNotification("Пользователь успешно удалён", 'success');
+                }
+                catch (error) {
+                    await fetchUsers();
+                    await fetchUserRoles();
 
-            alert("Пользователь успешно удалён");
-        } 
-        catch (error) {
-            await fetchUsers();
-            await fetchUserRoles();
-            
-            console.error("Ошибка при удалении:", error);
-            alert(`Ошибка при удалении: ${error.message}`);
-        }
+                    console.error("Ошибка при удалении:", error);
+                    showNotification(`Ошибка при удалении: ${error.message}`, 'error');
+                }
+            }
+        );
     };
 
     const handleReviewDelete = async (reviewId) => {
-        if (!window.confirm("Вы уверены, что хотите удалить этот отзыв?")) return;
+        const reviewToDelete = reviews.find(r => r.id === reviewId);
+        showConfirmation(
+            "Удаление отзыва",
+            `Вы уверены, что хотите удалить отзыв от пользователя с оценкой ${reviewToDelete?.rating}?`,
+            async () => {
+                try {
+                    const updatedReviews = reviews.filter(r => r.id !== reviewId);
+                    setReviews(updatedReviews);
 
-        try {
-            const reviewToDelete = reviews.find(r => r.id === reviewId);
-            const updatedReviews = reviews.filter(r => r.id !== reviewId);
-            setReviews(updatedReviews);
+                    await apiRequest(`/api/reviews/${reviewId}`, {
+                        method: 'DELETE',
+                        authenticated: true
+                    });
 
-            await apiRequest(`/api/reviews/${reviewId}`, {
-                method: 'DELETE',
-                authenticated: true
-            });
-
-            alert("Отзыв успешно удалён");
-            
-        } 
-        catch (error) {
-            setReviews(reviews);
-            console.error('Ошибка при удалении отзыва:', error);
-            alert(`Ошибка при удалении отзыва: ${error.message}`);
-        }
+                    showNotification("Отзыв успешно удалён", 'success');
+                }
+                catch (error) {
+                    setReviews(reviews);
+                    console.error('Ошибка при удалении отзыва:', error);
+                    showNotification(`Ошибка при удалении отзыва: ${error.message}`, 'error');
+                }
+            }
+        );
     };
 
     const handleRoleChange = (e) => {
@@ -317,7 +428,7 @@ const AdminPanel = () => {
 
     const handleAddProduct = async () => {
         if (!isAuthenticated) {
-            alert('Недостаточно прав для выполнения этой операции');
+            showNotification('Недостаточно прав для выполнения этой операции', 'error');
             return;
         }
         setIsLoading(true);
@@ -340,7 +451,7 @@ const AdminPanel = () => {
                 }));
                 await addProductImages(createdProduct.id, imagesWithMainFlag);
             }
-            alert(`Товар "${newProduct.name}" успешно добавлен!`);
+            showNotification(`Товар "${newProduct.name}" успешно добавлен!`, 'success');
             setNewProduct({
                 name: '',
                 description: '',
@@ -356,7 +467,7 @@ const AdminPanel = () => {
             setImageUrl('');
         } catch (error) {
             console.error('Ошибка при добавлении товара:', error);
-            alert(`Ошибка при добавлении товара: ${error.message}`);
+            showNotification(`Ошибка при добавлении товара: ${error.message}`, 'error');
         } finally {
             setIsLoading(false);
         }
@@ -373,13 +484,32 @@ const AdminPanel = () => {
                 ]);
             } catch (error) {
                 console.error('Ошибка при загрузке данных:', error);
+                showNotification('Ошибка при загрузке данных', 'error');
             }
         };
         loadData();
     }, []);
-    
-    return (    
+
+    return (
         <div className={styles.profileCard}>
+            {notification && (
+                <Notification
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={() => setNotification(null)}
+                />
+            )}
+
+            <ConfirmationModal
+                isOpen={confirmationModal.isOpen}
+                onClose={closeConfirmation}
+                onConfirm={confirmationModal.onConfirm}
+                title={confirmationModal.title}
+                message={confirmationModal.message}
+                confirmText="Удалить"
+                cancelText="Отмена"
+            />
+
             <div className={styles.cardHeader}>
                 <h1 className={styles.cardTitle}>Админ панель</h1>
             </div>
@@ -500,7 +630,6 @@ const AdminPanel = () => {
                                 <div className={styles.formGroup}>
                                     <label>Изображения товара</label>
                                     <div className={styles.imageUploadContainer}>
-                                        {/* Форма для добавления по ссылке */}
                                         <div className={styles.addByUrlContainer}>
                                             <input
                                                 type="text"
@@ -525,7 +654,6 @@ const AdminPanel = () => {
                                             )}
                                         </div>
 
-                                        {/* Список добавленных изображений */}
                                         {productImages.length > 0 && (
                                             <div className={styles.imagesGrid}>
                                                 {productImages.map((image, index) => (
@@ -580,77 +708,77 @@ const AdminPanel = () => {
                         <div className={styles.tableContainer}>
                             <table className={styles.usersTable}>
                                 <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Имя</th>
-                                        <th>Email</th>
-                                        <th>Роль</th>
-                                        <th>Действия</th>
-                                    </tr>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Имя</th>
+                                    <th>Email</th>
+                                    <th>Роль</th>
+                                    <th>Действия</th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    {users.map(user => {
-                                        const userRole = userRoles.find(ur => ur.userId === user.id);
-                                        const currentRole = userRole ? rolesMap[userRole.roleId] : 'Неизвестная роль';
-                                        
-                                        return (
-                                            <tr key={user.id}>
-                                                <td>{user.id}</td>
-                                                <td>
-                                                    {editingUser?.id === user.id ? (
-                                                        <input
-                                                            type="text"
-                                                            value={editingUser.name}
-                                                            onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                                                            className={styles.editInput}
-                                                        />
-                                                    ) : (
-                                                        user.firstName || 'Без имени' 
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    {editingUser?.id === user.id ? (
-                                                        <input
-                                                            type="email"
-                                                            value={editingUser.email}
-                                                            onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                                                            className={styles.editInput}
-                                                        />
-                                                    ) : (
-                                                        user.email
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    {editingUser?.id === user.id ? (
-                                                        <select
-                                                            value={editingUser.roleId}
-                                                            onChange={handleRoleChange}
-                                                            className={styles.editSelect}
-                                                        >
-                                                            {Object.entries(rolesMap).map(([id, name]) => (
-                                                                <option key={id} value={id}>{name}</option>
-                                                            ))}
-                                                        </select>
-                                                    ) : (
-                                                        currentRole
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    {editingUser?.id === user.id ? (
-                                                        <>
-                                                            <button onClick={handleUserSave} className={styles.smallButton}>Сохранить</button>
-                                                            <button onClick={() => setEditingUser(null)} className={styles.smallButtonCancel}>Отмена</button>
-                                                        </>
-                                                    ) : (
-                                                        <>  
-                                                            <button onClick={() => handleUserEdit(user)} className={styles.smallButton}>Редактировать</button>
-                                                            <button onClick={() => handleUserDelete(user.id)} className={styles.smallButtonDanger}>Удалить</button>
-                                                        </>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
+                                {users.map(user => {
+                                    const userRole = userRoles.find(ur => ur.userId === user.id);
+                                    const currentRole = userRole ? rolesMap[userRole.roleId] : 'Неизвестная роль';
+
+                                    return (
+                                        <tr key={user.id}>
+                                            <td>{user.id}</td>
+                                            <td>
+                                                {editingUser?.id === user.id ? (
+                                                    <input
+                                                        type="text"
+                                                        value={editingUser.name}
+                                                        onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                                                        className={styles.editInput}
+                                                    />
+                                                ) : (
+                                                    user.firstName || 'Без имени'
+                                                )}
+                                            </td>
+                                            <td>
+                                                {editingUser?.id === user.id ? (
+                                                    <input
+                                                        type="email"
+                                                        value={editingUser.email}
+                                                        onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                                                        className={styles.editInput}
+                                                    />
+                                                ) : (
+                                                    user.email
+                                                )}
+                                            </td>
+                                            <td>
+                                                {editingUser?.id === user.id ? (
+                                                    <select
+                                                        value={editingUser.roleId}
+                                                        onChange={handleRoleChange}
+                                                        className={styles.editSelect}
+                                                    >
+                                                        {Object.entries(rolesMap).map(([id, name]) => (
+                                                            <option key={id} value={id}>{name}</option>
+                                                        ))}
+                                                    </select>
+                                                ) : (
+                                                    currentRole
+                                                )}
+                                            </td>
+                                            <td>
+                                                {editingUser?.id === user.id ? (
+                                                    <>
+                                                        <button onClick={handleUserSave} className={styles.smallButton}>Сохранить</button>
+                                                        <button onClick={() => setEditingUser(null)} className={styles.smallButtonCancel}>Отмена</button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button onClick={() => handleUserEdit(user)} className={styles.smallButton}>Редактировать</button>
+                                                        <button onClick={() => handleUserDelete(user.id)} className={styles.smallButtonDanger}>Удалить</button>
+                                                    </>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                                 </tbody>
                             </table>
                         </div>
