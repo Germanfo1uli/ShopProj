@@ -668,7 +668,7 @@ const Catalog = () => {
                             )}
                         </div>
 
-                        {filteredProducts.length > 0 && (
+                        {/* {filteredProducts.length > 0 && (
                             <div className={styles.pagination}>
                                 <button className={styles.paginationButton}>
                                     <FaChevronLeft />
@@ -682,7 +682,7 @@ const Catalog = () => {
                                     <FaChevronRight />
                                 </button>
                             </div>
-                        )}
+                        )} */}
                     </main>
                 </div>
             </div>

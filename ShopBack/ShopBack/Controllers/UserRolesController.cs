@@ -7,9 +7,10 @@ namespace ShopBack.Controllers
 {
     [Route("api/[controller]")] //api/userroles
     [ApiController]
-    public class UserRolesController(IService<UserRoles> userRoleService) : ControllerBase, IController<UserRoles, UserRolesDate, int>
+    public class UserRolesController(IService<UserRoles> userRoleService, UserService userService) : ControllerBase, IController<UserRoles, UserRolesDate, UserRolesDate>
     {
         private readonly IService<UserRoles> _userRoleService = userRoleService;
+        private readonly UserService _userService = userService;
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
@@ -46,20 +47,17 @@ namespace ShopBack.Controllers
 
         [HttpGet("{userRoleId}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<UserRoles>> GetById(int userRoleId)
+        public Task<ActionResult<UserRoles>> GetById(int userRoleId)
         {
-            var result = await _userRoleService.GetByIdAsync(userRoleId);
-            return Ok(result);
+            throw new NotImplementedException("Этот метод не поддерживается, используйте payments/process");
         }
 
         [HttpPut("{userId}")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<UserRoles>> Update(int userId, [FromBody] int roleId)
+        public async Task<ActionResult<UserRoles>> Update(int userId, [FromBody] UserRolesDate updateDto)
         {
-            var userRole = await _userRoleService.GetByIdAsync(userId);
-            userRole.RoleId = roleId;
-            await _userRoleService.UpdateAsync(userRole);
-            return Ok(userRole);
+            await _userService.UpdateRoleAsync(updateDto.UserId, updateDto.RoleId);
+            return Ok();
         }
     }
 
