@@ -325,6 +325,45 @@
     resize: vertical;
 }
 
+/* Стили для выпадающего списка категорий */
+.formSelect {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236b7280'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    padding-right: 30px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+[data-theme="dark"] .formSelect {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%239ca3af'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+}
+
+.formSelect option {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 8px;
+}
+
+.formSelect:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: var(--highlight-bg);
+}
+
+/* Стили при наведении и фокусе */
+.formSelect:hover:not(:disabled) {
+    border-color: var(--primary-color);
+}
+
+.formSelect:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
 /* Таблица */
 .tableContainer {
     overflow-x: auto;

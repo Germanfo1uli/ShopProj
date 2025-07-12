@@ -614,13 +614,17 @@ const AdminPanel = () => {
                                         name="categoryId"
                                         value={newProduct.categoryId}
                                         onChange={handleProductInputChange}
-                                        className={styles.formInput}
+                                        className={styles.formSelect}
                                         required
                                         disabled={isLoading || categories.length === 0}
                                     >
                                         <option value="">Выберите категорию</option>
                                         {categories.map(category => (
-                                            <option key={category.id} value={category.id}>
+                                            <option
+                                                key={category.id}
+                                                value={category.id}
+                                                className={styles.selectOption}
+                                            >
                                                 {category.name}
                                             </option>
                                         ))}
